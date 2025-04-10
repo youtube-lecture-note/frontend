@@ -15,6 +15,7 @@ function App() {
             <Route path="/video/:videoId" element={<GetVideoPage />} />
             <Route path="/video/:videoId/quiz" element={<QuizPage />} />
             <Route path="/subject" element={<SubjectPage />} />
+            <Route path="/subject/:subjectName" element={<SubjectPage />} />
           </Routes>
         </main>
 
