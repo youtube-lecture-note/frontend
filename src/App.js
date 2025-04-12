@@ -19,7 +19,7 @@ function App() {
           </Routes>
         </main>
 
-        <aside className="w-1/4 border-l border-gray-300">
+        <aside className="h-screen w-1/4 border-l border-gray-300">
           <SideMenu />
         </aside>
       </div>

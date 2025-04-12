@@ -8,10 +8,12 @@ import DisplaySummaryLine from "../components/Summary/DisplaySummaryLine";
 
 export default function GetVideoPage() {
   const [summary, setSummary] = useState("");
-  const [loading, setLoading] = useState(false); // 처음에는 로딩 상태 아님
+  // 로딩, 에러
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { videoId } = useParams();
   const navigate = useNavigate();
+
   // YouTube 플레이어 참조 추가
   const [player, setPlayer] = useState(null);
 
@@ -41,9 +43,7 @@ export default function GetVideoPage() {
 
       try {
         console.log(`영상 ID로 요약 데이터 요청: ${videoId}`);
-        const response = await fetch(
-          `http://localhost:8080/api/summary?videoId=${videoId}`
-        );
+        const response = await fetch(`/api/summary?videoId=${videoId}`);
 
         if (!response.ok) {
           console.error(
@@ -53,7 +53,7 @@ export default function GetVideoPage() {
           setLoading(false);
           return;
         }
-
+        /// zzㅋㅋ 다시하기
         const text = await response.text();
         console.log("API 응답 데이터:", text);
 
@@ -94,22 +94,16 @@ export default function GetVideoPage() {
   function parseSummary(data) {
     if (!data) return [];
 
-    // 1. 빈 배열 생성 - 파싱 결과를 담을 배열
     const result = [];
-    // 2. 입력 데이터를 줄 단위로 분리 (split 메서드 사용)
     const lines = data.split("\n");
-    // 3. 현재 처리 중인 시간과 텍스트를 저장할 변수 선언
     let currentTime = "";
     let currentText = [];
 
-    // 4. 각 줄을 순회하면서:
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      // "<숫자; 텍스트>" 형식인지 확인 (정규식 사용)
       const timeMatch = line.trim().match(/^<(\d+);(.*)>$/);
 
       if (timeMatch) {
-        // 이전 항목이 있으면 저장
         if (currentTime && currentText.length > 0) {
           result.push({
             time:
@@ -119,7 +113,6 @@ export default function GetVideoPage() {
             text: currentText.join("\n"),
           });
         }
-        // 새로운 항목 시작
         currentTime = timeMatch[1];
         currentText = [timeMatch[2].trim()];
       } else {
@@ -141,7 +134,6 @@ export default function GetVideoPage() {
 
   const parse_summary = parseSummary(summary);
 
-  // 데이터 없는경우
   let noData = `<0; 데이터가 없습니다.>
 - 데이터가 없습니다.
 - 데이터가 없습니다.
