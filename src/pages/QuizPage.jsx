@@ -9,6 +9,7 @@ import AnswerStatus from "../components/Quiz/AnswerStatus";
 export default function QuizPage() {
   const [quizzes, setQuizzes] = useState([]);
   const [answers, setAnswers] = useState({});
+  const [wrongAnswer, setWrongAnswer] = useState([]);
   // 로딩, 에러
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -57,6 +58,7 @@ export default function QuizPage() {
   async function handleSubmit(answers) {
     const answersArray = Object.values(answers);
     const token = localStorage.getItem("accessToken");
+    setWrongAnswer([]);
 
     try {
       const response = await fetch("/api/quizzes/submit", {
@@ -75,9 +77,20 @@ export default function QuizPage() {
       }
       const data = await response.json();
       console.log("퀴즈 제출 성공:", data);
+
+      // wrongAnswer 상태를 안전하게 업데이트
+      const receivedWrongAnswers = data.data; // 옵셔널 체이닝 사용
+      if (Array.isArray(receivedWrongAnswers)) {
+        setWrongAnswer(receivedWrongAnswers);
+        console.log("틀린 문제 ID:", receivedWrongAnswers);
+      } else {
+        setWrongAnswer([]); // 유효한 배열이 아니면 빈 배열로 설정
+        console.log("오답 목록 형식이 다르거나 없음");
+      }
     } catch (error) {
       console.error("퀴즈 제출 오류:", error);
       setError("퀴즈 제출에 실패했습니다");
+      setWrongAnswer([]); // 에러 발생 시 빈 배열로 설정
     }
   }
 
@@ -111,12 +124,20 @@ export default function QuizPage() {
           ))}
         </div>
 
-        {/* 우측: 답안 현황 */}
-        <AnswerStatus
-          quizzes={quizzes}
-          answers={answers}
-          onSubmit={handleSubmit}
-        />
+        {/* 우측: 답안 현황 및 틀린 문제 영역 - relative 추가 */}
+        <div className="w-2/5 p-8 overflow-y-auto relative">
+          <AnswerStatus
+            quizzes={quizzes}
+            answers={answers}
+            onSubmit={handleSubmit}
+          />
+          {wrongAnswer.length !== 0 && (
+            <div className="absolute bottom-20 left-8 right-8 p-4 z-10">
+              <h2 className="text-lg font-semibold mb-2">틀린 문제 ID</h2>
+              <p>{wrongAnswer.join(", ")}</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

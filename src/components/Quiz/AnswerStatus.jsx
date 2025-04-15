@@ -2,9 +2,14 @@ import React from "react";
 import Button from "../Button";
 import AnswerStatusItem from "./AnswerStatusItem";
 
-export default function AnswerStatus({ quizzes, answers, onSubmit }) {
+export default function AnswerStatus({
+  quizzes,
+  answers,
+  onSubmit,
+  wrongAnswers,
+}) {
   return (
-    <div className="h-screen border-l border-gray-300 w-2/5 p-8 flex flex-col">
+    <div className="h-screen p-8 flex flex-col">
       <div className="mb-8">
         <h3 className="text-lg font-bold mb-4">답</h3>
         <div className="grid grid-cols-5 gap-1">
@@ -20,6 +25,15 @@ export default function AnswerStatus({ quizzes, answers, onSubmit }) {
       <div className="flex justify-end">
         <Button onClick={() => onSubmit(answers)}>제출</Button>
       </div>
+
+      {wrongAnswers && wrongAnswers.length !== 0 && (
+        <div className="mt-6 p-4 border border-red-300 bg-red-50 rounded">
+          <h2 className="text-lg font-semibold mb-2 text-red-700">
+            틀린 문제 ID
+          </h2>
+          <p className="text-red-600">{wrongAnswers.join(", ")}</p>
+        </div>
+      )}
     </div>
   );
 }

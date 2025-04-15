@@ -36,7 +36,7 @@ export default function MainSearchPage() {
             onChange={(e) => setVideoUrl(e.target.value)}
             placeholder="유튜브 영상 URL을 입력하세요"
           />
-          <Button onClick={handleSubmit}>Input</Button>
+          <Button onClick={handleSubmit}>▶</Button>
         </div>
       </div>
     </div>
