@@ -28,8 +28,8 @@ export default function QuizItem({
             <input
               type="radio"
               name={`question-${id}`}
-              value={option1}
-              checked={selectedAnswer === option1}
+              value="1"
+              checked={selectedAnswer === "1"}
               onChange={(e) => onAnswerSelect(id, quizType, e.target.value)}
               className="mr-3"
             />
@@ -39,8 +39,8 @@ export default function QuizItem({
             <input
               type="radio"
               name={`question-${id}`}
-              value={option2}
-              checked={selectedAnswer === option2}
+              value="2"
+              checked={selectedAnswer === "2"}
               onChange={(e) => onAnswerSelect(id, quizType, e.target.value)}
               className="mr-3"
             />
@@ -50,8 +50,8 @@ export default function QuizItem({
             <input
               type="radio"
               name={`question-${id}`}
-              value={option3}
-              checked={selectedAnswer === option3}
+              value="3"
+              checked={selectedAnswer === "3"}
               onChange={(e) => onAnswerSelect(id, quizType, e.target.value)}
               className="mr-3"
             />
@@ -61,8 +61,8 @@ export default function QuizItem({
             <input
               type="radio"
               name={`question-${id}`}
-              value={option4}
-              checked={selectedAnswer === option4}
+              value="4"
+              checked={selectedAnswer === "4"}
               onChange={(e) => onAnswerSelect(id, quizType, e.target.value)}
               className="mr-3"
             />
