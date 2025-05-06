@@ -1,12 +1,15 @@
 // 영상 링크 입력시 가져오는 화면
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+
 import YouTube from "react-youtube";
 import Button from "../components/Button";
 import TopBar from "../components/TopBar/TopBar";
 import DisplaySummaryLine from "../components/Summary/DisplaySummaryLine";
+import SearchVideo from "../components/Search/SearchVideo";
 
 export default function GetVideoPage() {
+  const inputURLRef = useRef(null);
   const [summary, setSummary] = useState("");
   // 로딩, 에러
   const [loading, setLoading] = useState(false);
@@ -166,7 +169,8 @@ export default function GetVideoPage() {
               onReady={onReady}
             />
           </div>
-          <p className="text-center pt-4">1 Video ID: {videoId}</p>
+
+          <SearchVideo inputURLRef={inputURLRef} />
           <div className="flex justify-center gap-4 mt-4">
             <Button>노트</Button>
             <Button onClick={handleQuizClick}>문제풀기</Button>
