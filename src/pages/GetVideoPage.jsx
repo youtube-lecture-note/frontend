@@ -166,7 +166,7 @@ export default function GetVideoPage() {
               onReady={onReady}
             />
           </div>
-          <p className="text-center pt-4">Video ID: {videoId}</p>
+          <p className="text-center pt-4">1 Video ID: {videoId}</p>
           <div className="flex justify-center gap-4 mt-4">
             <Button>노트</Button>
             <Button onClick={handleQuizClick}>문제풀기</Button>
