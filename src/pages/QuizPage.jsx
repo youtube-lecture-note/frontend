@@ -5,6 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import TopBar from "../components/TopBar/TopBar";
 import QuizItem from "../components/Quiz/QuizItem";
 import AnswerStatus from "../components/Quiz/AnswerStatus";
+import Loading from "../components/Loading";
 
 export default function QuizPage() {
   const [quizzes, setQuizzes] = useState([]);
@@ -139,6 +140,8 @@ export default function QuizPage() {
           )}
         </div>
       </div>
+
+      {loading && <Loading />}
     </div>
   );
 }
