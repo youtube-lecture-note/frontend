@@ -32,7 +32,7 @@ export default function DisplaySummaryLine({ time, text, onTimeClick }) {
   return (
     <div className="flex flex-col mb-1">
       {/* 타임스탬프 */}
-      <div className="mb-1">
+      <div className="timestamp-container mb-1">
         <span
           className="text-blue-600 cursor-pointer text-sm hover:text-blue-300 mr-1 whitespace-nowrap"
           onClick={() => onTimeClick(time)}

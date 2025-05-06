@@ -7,6 +7,7 @@ import Button from "../components/Button";
 import TopBar from "../components/TopBar/TopBar";
 import DisplaySummaryLine from "../components/Summary/DisplaySummaryLine";
 import SearchVideo from "../components/Search/SearchVideo";
+import Loading from "../components/Loading";
 
 export default function GetVideoPage() {
   const inputURLRef = useRef(null);
@@ -150,9 +151,35 @@ export default function GetVideoPage() {
     navigate(`/video/${videoId}/quiz`);
   }
 
-  // 노트 저장 함수 - 아직 안됨
+  // 노트 저장 함수
   function handleSaveNote() {
-    console.log("노트 저장");
+    // 페이지에서 모든 timestamp-container 클래스, textarea 요소 찾기
+    const timestampContainers = document.querySelectorAll(
+      ".timestamp-container"
+    );
+    const textareas = document.querySelectorAll("textarea");
+
+    // 모든 텍스트 수집
+    let noteContent = "";
+
+    for (let i = 0; i < timestampContainers.length; i++) {
+      noteContent += timestampContainers[i].innerText + "\n";
+      noteContent += textareas[i].value + "\n\n";
+    }
+
+    // 텍스트 파일 생성 및 다운로드
+    const blob = new Blob([noteContent], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+
+    const downloadLink = document.createElement("a");
+    downloadLink.href = url;
+    downloadLink.download = `${videoId}.txt`;
+
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+
+    document.body.removeChild(downloadLink);
+    URL.revokeObjectURL(url);
   }
 
   return (
@@ -182,10 +209,7 @@ export default function GetVideoPage() {
           <h2 className="text-xl font-bold mb-4">강의 노트</h2>
           <div className="bg-gray-100 rounded-lg p-4">
             <div className="flex flex-col gap-4 pb-4">
-              {/* 로딩 중일 때 */}
-              {loading ? (
-                <p className="text-center">요약 데이터 로딩 중...</p>
-              ) : error ? (
+              {error ? (
                 <p className="text-red-500">{error}</p>
               ) : (
                 <div className="flex flex-col gap-4">
@@ -200,10 +224,12 @@ export default function GetVideoPage() {
                 </div>
               )}
             </div>
-            <Button>저장하기</Button>
+            <Button onClick={handleSaveNote}>저장하기</Button>
           </div>
         </div>
       </div>
+
+      {loading && <Loading />}
     </div>
   );
 }
