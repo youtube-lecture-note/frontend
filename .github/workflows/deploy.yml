@@ -1,4 +1,5 @@
 name: Deploy Frontend to EC2
+
 on:
   push:
     branches:
@@ -6,20 +7,24 @@ on:
   pull_request:
     branches:
       - main
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: "18"
+
       - name: Install and build frontend
         run: |
           npm install
           npm run build
+
       - name: Deploy to EC2 via SCP
         uses: appleboy/scp-action@v0.1.3
         with:
@@ -29,3 +34,15 @@ jobs:
           port: 3322
           source: build/*
           target: /home/ubuntu/youtube-lecture/frontend/build
+
+      - name: Restart frontend server on EC2
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_KEY }}
+          port: 3322
+          script: |
+            screen -S frontend -X quit || true
+            cd /home/ubuntu/youtube-lecture/frontend
+            screen -dmS frontend npm start
