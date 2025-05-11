@@ -25,14 +25,18 @@ export default function SearchVideo({ inputURLRef }) {
   };
 
   return (
-    <div className="search-container w-full max-w-2xl mx-auto border-2 border-black rounded-lg p-1">
-      <div className="input-group flex gap-2">
-        <Input
-          ref={inputURLRef}
-          defaultValue=""
-          placeholder="유튜브 영상 URL을 입력하세요"
-        />
-        <Button onClick={handleSubmit}>▶</Button>
+    <div className="w-full">
+      <div className="mx-auto border-2 border-gray-600 rounded-lg p-1">
+        <div className="flex gap-2">
+          <Input
+            ref={inputURLRef}
+            defaultValue=""
+            placeholder="유튜브 영상 URL을 입력하세요"
+          />
+          <Button onClick={handleSubmit} variant="SearchVideo">
+            ▶
+          </Button>
+        </div>
       </div>
     </div>
   );
