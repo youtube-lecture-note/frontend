@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Subject from "./Subject";
-
+import Button from "../Button";
 export default function SideMenuBottom() {
   const [subjects, setSubjects] = useState(["미분류", "과학", "자격증"]); // 임시 데이터
 
@@ -13,15 +13,12 @@ export default function SideMenuBottom() {
   };
 
   return (
-    <div className="flex flex-col gap-2 p-4">
+    <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">Subject</h2>
-        <button
-          onClick={handleAddSubject}
-          className="p-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-full"
-        >
+        <Button onClick={handleAddSubject} variant="AddSubject">
           +
-        </button>
+        </Button>
       </div>
       <div className="flex flex-col gap-1">
         {subjects.map((subject, index) => (

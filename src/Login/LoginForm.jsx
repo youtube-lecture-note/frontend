@@ -1,61 +1,79 @@
-import React, { useState } from "react";
-import { useGoogleLogin } from "@react-oauth/google";
+import { useState } from "react";
+import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import Button from "../components/Button";
+import CLIENT_ID from "./ClientId.jsx";
 
-export default function LoginForm() {
+function LoginForm() {
   const [loginStatus, setLoginStatus] = useState(false);
-  const login = useGoogleLogin({
-    flow: "auth-code",
-    onSuccess: (response) => {
-      //console.log("Login Success : ", response);
-      const token = response.code || response.credential;
-      if (token) {
-        localStorage.setItem("accessToken", token);
-        setLoginStatus(true);
-        //console.log("setLoginStatus(true) 직후, loginStatus:", loginStatus);
-      } else {
-        console.log("토큰을 받지 못했습니다.");
+
+  const handleGoogleLogin = async (credentialResponse) => {
+    console.log("로그인 성공:", credentialResponse);
+    const idToken = credentialResponse.credential;
+
+    if (idToken) {
+      try {
+        const response = await fetch("/auth/google/callback", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ idToken }),
+          credentials: "include", // 쿠키를 포함하기 위해 필요
+        });
+
+        if (response.ok) {
+          console.log("백엔드 인증 성공");
+          setLoginStatus(true);
+        } else {
+          console.error("백엔드 인증 실패");
+        }
+      } catch (error) {
+        console.error("백엔드 요청 실패:", error);
       }
-    },
-    onError: (error) => console.log("로그인 실패", error),
-  });
-
-  const logout = () => {
-    setLoginStatus(false);
-
-    localStorage.removeItem("accessToken");
-
-    console.log("Google 로그아웃 완료");
+    } else {
+      console.log("ID 토큰을 받지 못했습니다.");
+    }
   };
 
   return (
-    <div className="flex items-center bg-gray-100">
-      <form className="w-full max-w-md p-1 bg-white ">
+    <GoogleOAuthProvider clientId={CLIENT_ID}>
+      <div className="login-form m-2">
         {!loginStatus ? (
-          <>
-            {/* <p className="mb-1 text-xl font-bold text-center">Login</p> */}
-            <Button
-              onClick={(e) => {
-                e.preventDefault();
-                login();
+          <div className="google-login-button">
+            <GoogleLogin
+              onSuccess={handleGoogleLogin}
+              onError={() => {
+                console.log("로그인 실패");
               }}
-              className="w-full py-1 px-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Login
-            </Button>
-          </>
+              useOneTap
+            />
+          </div>
         ) : (
-          <>
-            {/* <p className="mb-1 text-xl font-bold text-center">Logout</p> */}
+          <div className="login-success">
             <Button
-              onClick={() => logout()}
-              className="w-full py-1 px-1 bg-red-500 text-white rounded hover:bg-red-600"
+              onClick={async () => {
+                try {
+                  const response = await fetch("/auth/logout", {
+                    method: "POST",
+                    credentials: "include",
+                  });
+                  if (response.ok) {
+                    setLoginStatus(false);
+                  }
+                } catch (error) {
+                  console.error("로그아웃 실패:", error);
+                }
+              }}
+              variant="Logout"
             >
-              Logout
+              로그아웃
             </Button>
-          </>
+          </div>
         )}
-      </form>
-    </div>
+      </div>
+    </GoogleOAuthProvider>
   );
 }
+
+export default LoginForm;
+// API 요청할 때 credentials: 'include' 추가하기.
