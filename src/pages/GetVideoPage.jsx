@@ -8,6 +8,7 @@ import TopBar from "../components/TopBar/TopBar";
 import DisplaySummaryLine from "../components/Summary/DisplaySummaryLine";
 import SearchVideo from "../components/Search/SearchVideo";
 import Loading from "../components/Loading";
+import { videoSummaryApi } from "../api/videoSummaryApi";
 
 export default function GetVideoPage() {
   const inputURLRef = useRef(null);
@@ -42,42 +43,16 @@ export default function GetVideoPage() {
   // 비디오 요약 가져오기
   useEffect(() => {
     async function fetchSummary() {
+      if (!videoId) return;
+
       setLoading(true);
       setError("");
 
       try {
-        console.log(`영상 ID로 요약 데이터 요청: ${videoId}`);
-        const response = await fetch(`/api/summary?videoId=${videoId}`);
-
-        if (!response.ok) {
-          console.error(
-            `API 응답 실패: ${response.status} ${response.statusText}`
-          );
-          setError("요약을 가져오는데 실패했습니다");
-          setLoading(false);
-          return;
-        }
-        /// zzㅋㅋ 다시하기
-        const text = await response.text();
-        console.log("API 응답 데이터:", text);
-
-        // 응답이 JSON 형식인지 확인
-        try {
-          const jsonData = JSON.parse(text);
-          console.log("파싱된 JSON:", jsonData);
-          if (jsonData.data) {
-            setSummary(jsonData.data);
-          } else {
-            setSummary(text);
-          }
-        } catch (e) {
-          // JSON이 아니면 그냥 텍스트로 처리
-          console.log("JSON 파싱 실패, 텍스트로 처리");
-          setSummary(text);
-        }
+        const data = await videoSummaryApi(videoId);
+        setSummary(data.data || data);
       } catch (error) {
-        console.error("API 호출 오류:", error);
-        setError("요약 데이터를 가져오는데 실패했습니다");
+        setError(error.message);
       } finally {
         setLoading(false);
       }
