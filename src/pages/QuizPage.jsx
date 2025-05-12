@@ -2,12 +2,23 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
+import { useSelector, useDispatch } from "react-redux";
+import { selectAuth, checkAuth } from "../store/slices/authSlice";
+
 import TopBar from "../components/TopBar/TopBar";
 import QuizItem from "../components/Quiz/QuizItem";
 import AnswerStatus from "../components/Quiz/AnswerStatus";
 import Loading from "../components/Loading";
+import { quizGetApi, quizSubmitApi } from "../api";
 
 export default function QuizPage() {
+  const dispatch = useDispatch();
+  const {
+    isAuthenticated,
+    loading: authLoading,
+    error: authError,
+  } = useSelector(selectAuth);
+  const [quizSetId, setQuizSetId] = useState(null);
   const [quizzes, setQuizzes] = useState([]);
   const [answers, setAnswers] = useState({});
   const [wrongAnswer, setWrongAnswer] = useState([]);
@@ -18,80 +29,39 @@ export default function QuizPage() {
   const { videoId } = useParams();
   const navigate = useNavigate();
 
+  // 퀴즈 요청 이전 설정
+  const difficulty = "2";
+  const numOfQuestions = 2;
+
   // 퀴즈 가져오기
   useEffect(() => {
     async function fetchQuiz() {
-      setLoading(true);
-      setError("");
-      const token = localStorage.getItem("accessToken");
-
       try {
-        console.log(`영상 ID로 퀴즈 데이터 요청: ${videoId}`);
-        const response = await fetch(`/api/quizzes?videoId=${videoId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!response.ok) {
-          console.error(
-            `API 응답 실패: ${response.status} ${response.statusText}`
-          );
-          setError("퀴즈를 가져오는데 실패했습니다");
-          setLoading(false);
-          return;
-        }
-        const quizData = await response.json();
-        setQuizzes(quizData.data);
+        await dispatch(checkAuth()).unwrap();
+        const quizData = await quizGetApi(videoId, difficulty, numOfQuestions);
+        setQuizzes(quizData);
       } catch (error) {
-        console.error("API 호출 오류:", error);
-        setError("퀴즈를 가져오는데 실패했습니다");
+        setError(error.message);
       } finally {
         setLoading(false);
       }
     }
     fetchQuiz();
-  }, [videoId]);
-
-  //console.log("퀴즈 데이터:", quizzes);
+  }, [videoId, dispatch]);
 
   // 퀴즈 제출
   async function handleSubmit(answers) {
-    const answersArray = Object.values(answers);
-    const token = localStorage.getItem("accessToken");
     setWrongAnswer([]);
 
     try {
-      const response = await fetch("/api/quizzes/submit", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(answersArray),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.text();
-        console.error("서버 응답:", errorData);
-        throw new Error("퀴즈 제출 실패");
-      }
-      const data = await response.json();
-      console.log("퀴즈 제출 성공:", data);
-
-      // wrongAnswer 상태를 안전하게 업데이트
-      const receivedWrongAnswers = data.data; // 옵셔널 체이닝 사용
+      const receivedWrongAnswers = await quizSubmitApi(answers);
       if (Array.isArray(receivedWrongAnswers)) {
         setWrongAnswer(receivedWrongAnswers);
-        console.log("틀린 문제 ID:", receivedWrongAnswers);
-      } else {
-        setWrongAnswer([]); // 유효한 배열이 아니면 빈 배열로 설정
-        console.log("오답 목록 형식이 다르거나 없음");
       }
     } catch (error) {
+      setError(error.message);
       console.error("퀴즈 제출 오류:", error);
-      setError("퀴즈 제출에 실패했습니다");
-      setWrongAnswer([]); // 에러 발생 시 빈 배열로 설정
+      setWrongAnswer([]);
     }
   }
 
