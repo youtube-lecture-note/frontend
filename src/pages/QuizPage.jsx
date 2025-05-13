@@ -2,22 +2,12 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
-import { useSelector, useDispatch } from "react-redux";
-import { selectAuth, checkAuth } from "../store/slices/authSlice";
-
 import TopBar from "../components/TopBar/TopBar";
 import QuizItem from "../components/Quiz/QuizItem";
 import AnswerStatus from "../components/Quiz/AnswerStatus";
-import Loading from "../components/Loading";
 import { quizGetApi, quizSubmitApi } from "../api";
 
 export default function QuizPage() {
-  const dispatch = useDispatch();
-  const {
-    isAuthenticated,
-    loading: authLoading,
-    error: authError,
-  } = useSelector(selectAuth);
   const [quizSetId, setQuizSetId] = useState(null);
   const [quizzes, setQuizzes] = useState([]);
   const [answers, setAnswers] = useState({});
@@ -37,7 +27,6 @@ export default function QuizPage() {
   useEffect(() => {
     async function fetchQuiz() {
       try {
-        await dispatch(checkAuth()).unwrap();
         const quizData = await quizGetApi(videoId, difficulty, numOfQuestions);
         setQuizzes(quizData);
       } catch (error) {
@@ -47,7 +36,7 @@ export default function QuizPage() {
       }
     }
     fetchQuiz();
-  }, [videoId, dispatch]);
+  }, [videoId]);
 
   // 퀴즈 제출
   async function handleSubmit(answers) {
@@ -110,8 +99,6 @@ export default function QuizPage() {
           )}
         </div>
       </div>
-
-      {loading && <Loading />}
     </div>
   );
 }
