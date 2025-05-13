@@ -1,9 +1,9 @@
-import { API_CONFIG, API_BASE_URL } from "./config";
+import { API_CONFIG } from "./config";
 
 // 퀴즈 가져오기
 export const quizGetApi = async (videoId, difficulty, count) => {
   const response = await fetch(
-    `${API_BASE_URL}/api/quizzes?videoId=${videoId}&difficulty=${difficulty}&count=${count}`,
+    `/api/quizzes?videoId=${videoId}&difficulty=${difficulty}&count=${count}`,
     {
       ...API_CONFIG,
     }

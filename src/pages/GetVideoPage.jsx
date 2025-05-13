@@ -7,7 +7,6 @@ import Button from "../components/Button";
 import TopBar from "../components/TopBar/TopBar";
 import DisplaySummaryLine from "../components/Summary/DisplaySummaryLine";
 import SearchVideo from "../components/Search/SearchVideo";
-import Loading from "../components/Loading";
 import { videoSummaryApi } from "../api/videoSummaryApi";
 
 export default function GetVideoPage() {
@@ -203,8 +202,6 @@ export default function GetVideoPage() {
           </div>
         </div>
       </div>
-
-      {loading && <Loading />}
     </div>
   );
 }
