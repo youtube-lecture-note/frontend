@@ -9,9 +9,9 @@ import { quizGetApi, quizSubmitApi } from "../api";
 
 export default function QuizPage() {
   const [quizSetId, setQuizSetId] = useState(null);
-  const [quizzes, setQuizzes] = useState([]);
+  const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
-  const [wrongAnswer, setWrongAnswer] = useState([]);
+  const [quizResult, setQuizResult] = useState({});
   // 로딩, 에러
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -21,14 +21,16 @@ export default function QuizPage() {
 
   // 퀴즈 요청 이전 설정
   const difficulty = "2";
-  const numOfQuestions = 2;
+  const numOfQuestions = 5;
 
   // 퀴즈 가져오기
   useEffect(() => {
     async function fetchQuiz() {
       try {
         const quizData = await quizGetApi(videoId, difficulty, numOfQuestions);
-        setQuizzes(quizData);
+        console.log("quizData : ", quizData);
+        setQuizSetId(quizData.data.quizSetId);
+        setQuestions(quizData.data.questions);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -36,37 +38,46 @@ export default function QuizPage() {
       }
     }
     fetchQuiz();
-  }, [videoId]);
+  }, [videoId, difficulty, numOfQuestions]);
 
-  // 퀴즈 제출
-  async function handleSubmit(answers) {
-    setWrongAnswer([]);
-
-    try {
-      const receivedWrongAnswers = await quizSubmitApi(answers);
-      if (Array.isArray(receivedWrongAnswers)) {
-        setWrongAnswer(receivedWrongAnswers);
-      }
-    } catch (error) {
-      setError(error.message);
-      console.error("퀴즈 제출 오류:", error);
-      setWrongAnswer([]);
+  useEffect(() => {
+    const tmpAnswers = {};
+    for (const question of questions) {
+      tmpAnswers[question.quizId] = {
+        quizId: question.quizId,
+        userAnswer: null,
+      };
     }
-  }
+    setAnswers(tmpAnswers);
+  }, [questions]);
 
-  // 정답 저장 - id를 key로 해서 먼저 담고 제출시 value만
-  const handleAnswerSelect = (quizId, quizType, userAnswer) => {
-    console.log("답안 선택:", { quizId, quizType, userAnswer });
+  // 정답 저장
+  const handleAnswerSelect = (quizId, userAnswer) => {
     setAnswers((prev) => ({
       ...prev,
       [quizId]: {
         quizId: Number(quizId),
-        quizType,
-        userAnswer: userAnswer.trim(), // 공백 제거
+        userAnswer: String(userAnswer).trim(),
       },
     }));
   };
-  console.log("selectedAnswer", answers);
+
+  // 퀴즈 제출
+  async function handleSubmit(answers) {
+    console.log("answers : ", answers);
+    setQuizResult({});
+
+    try {
+      const receivedWrongAnswers = await quizSubmitApi(answers);
+      if (Array.isArray(receivedWrongAnswers)) {
+        setQuizResult(receivedWrongAnswers);
+      }
+    } catch (error) {
+      setError(error.message);
+      console.error("퀴즈 제출 오류:", error);
+      setQuizResult({});
+    }
+  }
 
   return (
     <div className="flex flex-col h-screen">
@@ -74,12 +85,12 @@ export default function QuizPage() {
       <div className="flex min-h-screen flex-1">
         {/* 좌측: 문제 영역 */}
         <div className="w-3/5 p-8 border-r border-gray-300 overflow-y-auto">
-          {quizzes.map((quiz, index) => (
+          {questions.map((quiz, index) => (
             <QuizItem
               {...quiz}
               key={quiz.id}
               onAnswerSelect={handleAnswerSelect}
-              selectedAnswer={answers[quiz.id]?.userAnswer}
+              selectedAnswer={answers[quiz.quizId]?.userAnswer || null}
             />
           ))}
         </div>
@@ -87,14 +98,14 @@ export default function QuizPage() {
         {/* 우측: 답안 현황 및 틀린 문제 영역 - relative 추가 */}
         <div className="w-2/5 p-8 overflow-y-auto relative">
           <AnswerStatus
-            quizzes={quizzes}
+            questions={questions}
             answers={answers}
             onSubmit={handleSubmit}
           />
-          {wrongAnswer.length !== 0 && (
+          {Object.keys(quizResult).length !== 0 && (
             <div className="absolute bottom-20 left-8 right-8 p-4 z-10">
               <h2 className="text-lg font-semibold mb-2">틀린 문제 ID</h2>
-              <p>{wrongAnswer.join(", ")}</p>
+              <p>{Object.keys(quizResult).join(", ")}</p>
             </div>
           )}
         </div>
