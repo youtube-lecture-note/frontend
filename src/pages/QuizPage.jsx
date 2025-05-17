@@ -6,15 +6,20 @@ import TopBar from "../components/TopBar/TopBar";
 import QuizItem from "../components/Quiz/QuizItem";
 import AnswerStatus from "../components/Quiz/AnswerStatus";
 import { quizGetApi, quizSubmitApi } from "../api";
+import Modal from "../components/Modal";
+import QuizResultItem from "../components/Quiz/QuizResultItem";
 
 export default function QuizPage() {
   const [quizSetId, setQuizSetId] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
-  const [quizResult, setQuizResult] = useState({});
+  const [quizResults, setQuizResults] = useState({});
   // 로딩, 에러
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // 결과 창 컨트롤
+  const [isOpen, setIsOpen] = useState(false);
 
   const { videoId } = useParams();
   const navigate = useNavigate();
@@ -63,53 +68,54 @@ export default function QuizPage() {
   };
 
   // 퀴즈 제출
-  async function handleSubmit(answers) {
+  async function handleSubmit(answers, quizSetId) {
     console.log("answers : ", answers);
-    setQuizResult({});
+    let tmpAnswers = Object.values(answers);
+    console.log("tmpAnswers : ", tmpAnswers);
+    setQuizResults({});
 
-    try {
-      const receivedWrongAnswers = await quizSubmitApi(answers);
-      if (Array.isArray(receivedWrongAnswers)) {
-        setQuizResult(receivedWrongAnswers);
-      }
-    } catch (error) {
-      setError(error.message);
-      console.error("퀴즈 제출 오류:", error);
-      setQuizResult({});
-    }
+    const tmpQuizResult = await quizSubmitApi(tmpAnswers, quizSetId);
+    setQuizResults(tmpQuizResult.data);
+    console.log("tmpQuizResult : ", tmpQuizResult);
+    modalControl();
   }
 
-  return (
-    <div className="flex flex-col h-screen">
-      <TopBar />
-      <div className="flex min-h-screen flex-1">
-        {/* 좌측: 문제 영역 */}
-        <div className="w-3/5 p-8 border-r border-gray-300 overflow-y-auto">
-          {questions.map((quiz, index) => (
-            <QuizItem
-              {...quiz}
-              key={quiz.id}
-              onAnswerSelect={handleAnswerSelect}
-              selectedAnswer={answers[quiz.quizId]?.userAnswer || null}
-            />
-          ))}
-        </div>
+  // 결과 모달창 컨트롤
+  const modalControl = () => {
+    setIsOpen(!isOpen);
+  };
 
-        {/* 우측: 답안 현황 및 틀린 문제 영역 - relative 추가 */}
-        <div className="w-2/5 p-8 overflow-y-auto relative">
-          <AnswerStatus
-            questions={questions}
-            answers={answers}
-            onSubmit={handleSubmit}
+  return (
+    <div className="flex flex-col h-screen relative">
+      <TopBar />
+      {/* 문제 영역: 화면 대부분 차지 */}
+      <div className="flex-1 p-8 overflow-y-auto">
+        {questions.map((quiz, index) => (
+          <QuizItem
+            {...quiz}
+            index={index}
+            key={quiz.quizId}
+            onAnswerSelect={handleAnswerSelect}
+            selectedAnswer={answers[quiz.quizId]?.userAnswer || null}
           />
-          {Object.keys(quizResult).length !== 0 && (
-            <div className="absolute bottom-20 left-8 right-8 p-4 z-10">
-              <h2 className="text-lg font-semibold mb-2">틀린 문제 ID</h2>
-              <p>{Object.keys(quizResult).join(", ")}</p>
-            </div>
-          )}
-        </div>
+        ))}
       </div>
+      {/* 우측 하단: 답안 현황 + 제출 버튼 (작게, 고정) */}
+      <div className="fixed bottom-12 right-12 h-1/5 w-350px bg-white border border-gray-300 rounded-lg shadow-lg p-4 z-50">
+        <AnswerStatus
+          questions={questions}
+          answers={answers}
+          onSubmit={() => handleSubmit(answers, quizSetId)}
+        />
+      </div>
+      <Modal isOpen={isOpen} onClose={modalControl} title="결과">
+        {quizResults.length > 0 &&
+          quizResults.map((quizResult, index) => (
+            <div key={quizResult.attemptId}>
+              <QuizResultItem quizResult={quizResult} index={index} />
+            </div>
+          ))}
+      </Modal>
     </div>
   );
 }

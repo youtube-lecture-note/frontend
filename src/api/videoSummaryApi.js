@@ -3,6 +3,7 @@ import { handleForceLogout } from "./login";
 
 // 영상 요약 가져오기
 export const videoSummaryApi = async (videoId) => {
+  console.log("API_BASE_URL:", API_BASE_URL);
   const response = await fetch(
     `${API_BASE_URL}/api/summary?videoId=${videoId}`,
     {

@@ -9,7 +9,7 @@ export default function MultipleChoice({
   return (
     <div>
       {options.map((option, idx) => (
-        <div className="space-y-2" key={idx}>
+        <div className="space-y-2" key={quizId + "-" + idx}>
           <Input
             type="radio"
             name={`question-${quizId}`}
