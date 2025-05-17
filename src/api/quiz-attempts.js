@@ -1,4 +1,4 @@
-// 퀴즈 풀이기록
+// 퀴즈 풀이기록 전체
 //GET /api/users/me/quiz-attempts
 
 // 영상별 풀이기록

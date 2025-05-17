@@ -8,6 +8,7 @@ const Input = forwardRef(
 
     if (variant === "ShortAnswer") {
       className = "border-2 border-gray-300 rounded-md p-2";
+      value = value || "";
     } else if (variant === "MultipleChoiceComponent") {
       className = "mr-3";
       type = "radio";
