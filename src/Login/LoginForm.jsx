@@ -3,21 +3,37 @@ import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import Button from "../components/Button";
 import CLIENT_ID from "./ClientId.jsx";
 
-import {
-  checkAuthStatus,
-  handleGoogleLogin,
-  handleLogout,
-} from "../api/login.js";
+import { handleGoogleLogin, handleLogout } from "../api/login.js";
 
 export default function LoginForm() {
-  const [isLogin, setIsLogin] = useState(false);
+  // 로컬스토리지에서 상태 읽기
+  const [isLogin, setIsLogin] = useState(() => {
+    return localStorage.getItem("isLogin") === "true";
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // 페이지 로드시 로그인 상태 확인
-  useEffect(() => {
-    checkAuthStatus();
-  }, []);
+  // 로그인 함수
+  const handleLogin = (credentialResponse) => {
+    setLoading(true);
+    handleGoogleLogin(credentialResponse, (success) => {
+      if (success) {
+        localStorage.setItem("isLogin", "true");
+      }
+      setIsLogin(success);
+      setLoading(false);
+    });
+  };
+
+  // 로그아웃 함수
+  const handleUserLogout = () => {
+    setLoading(true);
+    handleLogout(() => {
+      localStorage.removeItem("isLogin");
+      setIsLogin(false);
+      setLoading(false);
+    });
+  };
 
   return (
     <GoogleOAuthProvider clientId={CLIENT_ID}>
@@ -25,7 +41,7 @@ export default function LoginForm() {
         {!isLogin ? (
           <div className="google-login-button">
             <GoogleLogin
-              onSuccess={handleGoogleLogin}
+              onSuccess={handleLogin}
               onError={(err) => {
                 console.error("Google Login Error:", err);
                 setError("구글 로그인 과정에서 오류가 발생했습니다");
@@ -37,7 +53,11 @@ export default function LoginForm() {
           </div>
         ) : (
           <div className="login-success">
-            <Button onClick={handleLogout} variant="Logout" disabled={loading}>
+            <Button
+              onClick={handleUserLogout}
+              variant="Logout"
+              disabled={loading}
+            >
               {loading ? "처리 중..." : "로그아웃"}
             </Button>
           </div>

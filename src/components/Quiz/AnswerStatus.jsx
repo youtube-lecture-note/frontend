@@ -13,13 +13,13 @@ export default function AnswerStatus({
       <div className="mb-8">
         <h3 className="text-lg font-bold mb-4">답</h3>
         <div className="grid grid-cols-5 gap-1">
-          {quizzes.map((_, index) => (
+          {/*quizzes.map((_, index) => (
             <AnswerStatusItem
               key={index + 1}
               index={index + 1}
               answer={answers[index + 1]?.userAnswer}
             />
-          ))}
+          ))*/}
         </div>
       </div>
       <div className="flex justify-end">

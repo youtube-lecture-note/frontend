@@ -1,81 +1,43 @@
-import React from "react";
+import MultipleChoice from "./MultipleChoice";
+import Input from "../Input";
 
 export default function QuizItem({
-  id,
   question,
-  quizType,
-  option1,
-  option2,
-  option3,
-  option4,
-  correctAnswer,
-  timestamp,
-  comment,
+  options,
+  quizId,
   onAnswerSelect,
   selectedAnswer,
 }) {
   // id에 문제번호, 그다음 question에 문제
   // 주관식은 선택지 보이고 객관식은 input 하도록
   // 나중에 해설때는 여기서 정답표시하고 comment 보여주면 될듯
+
+  let quizType;
+  if (options.length === 0) {
+    quizType = "SHORT_ANSWER";
+  } else {
+    quizType = "MULTIPLE_CHOICE";
+  }
+
   return (
     <div className="mb-8">
       <h2 className="text-l font-bold mb-2">
-        Q{id}. {question}
+        Q{quizId}. {question}
       </h2>
       {quizType === "MULTIPLE_CHOICE" && (
-        <div>
-          <div className="space-y-2">
-            <input
-              type="radio"
-              name={`question-${id}`}
-              value="1"
-              checked={selectedAnswer === "1"}
-              onChange={(e) => onAnswerSelect(id, quizType, e.target.value)}
-              className="mr-3"
-            />
-            {option1}
-          </div>
-          <div className="space-y-2">
-            <input
-              type="radio"
-              name={`question-${id}`}
-              value="2"
-              checked={selectedAnswer === "2"}
-              onChange={(e) => onAnswerSelect(id, quizType, e.target.value)}
-              className="mr-3"
-            />
-            {option2}
-          </div>
-          <div className="space-y-2">
-            <input
-              type="radio"
-              name={`question-${id}`}
-              value="3"
-              checked={selectedAnswer === "3"}
-              onChange={(e) => onAnswerSelect(id, quizType, e.target.value)}
-              className="mr-3"
-            />
-            {option3}
-          </div>
-          <div className="space-y-2">
-            <input
-              type="radio"
-              name={`question-${id}`}
-              value="4"
-              checked={selectedAnswer === "4"}
-              onChange={(e) => onAnswerSelect(id, quizType, e.target.value)}
-              className="mr-3"
-            />
-            {option4}
-          </div>
-        </div>
+        <MultipleChoice
+          id={quizId}
+          quizId={quizId}
+          options={options}
+          selectedAnswer={selectedAnswer}
+          onAnswerSelect={onAnswerSelect}
+        />
       )}
       {quizType === "SHORT_ANSWER" && (
-        <input
-          className="border-2 border-gray-300 rounded-md p-2"
-          type="text"
+        <Input
+          variant="ShortAnswer"
           value={selectedAnswer}
-          onChange={(e) => onAnswerSelect(id, quizType, e.target.value)}
+          onChange={(e) => onAnswerSelect(quizId, e.target.value)}
         />
       )}
     </div>

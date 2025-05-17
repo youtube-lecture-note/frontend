@@ -1,16 +1,24 @@
 import { forwardRef } from "react";
 
 const Input = forwardRef(
-  ({ value, onChange, placeholder, defaultValue, ...props }, ref) => {
-    // value와 onChange가 있으면 제어 컴포넌트로 동작
-    // defaultValue만 있으면 비제어 컴포넌트로 동작
+  ({ value, onChange, placeholder, defaultValue, variant, ...props }, ref) => {
+    let className =
+      "w-full px-4 py-2 bg-gray-200 rounded-sm border-1 border-gray-400 placeholder-gray-500";
+    let type = "text";
+
+    if (variant === "ShortAnswer") {
+      className = "border-2 border-gray-300 rounded-md p-2";
+    } else if (variant === "MultipleChoiceComponent") {
+      className = "mr-3";
+      type = "radio";
+    }
 
     return (
       <input
         ref={ref}
-        className="w-full px-4 py-2 bg-gray-200 rounded-sm border-1 border-gray-400 placeholder-gray-500"
-        type="text"
+        className={className}
         value={value}
+        type={type}
         onChange={onChange}
         defaultValue={defaultValue}
         placeholder={placeholder}

@@ -1,58 +1,72 @@
 import { API_CONFIG, API_BASE_URL } from "./config";
 
-export const handleGoogleLogin = async (credentialResponse, isLogin) => {
-  // 인증된 상태라면 중복 요청 방지
-  if (isLogin) return;
+export const handleGoogleLogin = async (credentialResponse, setIsLogin) => {
+  try {
+    const idToken = credentialResponse.credential;
+    const requestUrl = `${API_BASE_URL}/auth/google/callback`;
 
-  const idToken = credentialResponse.credential;
-  if (idToken) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/auth/google/callback`, {
-        method: "POST",
-        ...API_CONFIG,
-        body: JSON.stringify({ idToken }),
-      });
+    console.log("로그인 요청 URL:", requestUrl);
+    console.log("구글 토큰 정보:", {
+      토큰길이: idToken ? idToken.length : 0,
+      토큰전체: idToken ? `${idToken}` : "없음",
+    });
 
-      if (response.ok) {
-        isLogin(true);
-      } else {
-        const errorText = await response.text();
-        console.error("로그인 실패:", errorText);
-      }
-    } catch (error) {
-      console.error("로그인 실패:", error);
+    const response = await fetch(requestUrl, {
+      method: "POST",
+      ...API_CONFIG,
+      body: JSON.stringify({ idToken }),
+    });
+
+    console.log("로그인 응답 상태:", response.status);
+
+    if (response.ok) {
+      setIsLogin(true);
+      console.log("로그인 성공");
+    } else {
+      const errorText = await response.text();
+      console.error(
+        `로그인 실패 (${response.status}):`,
+        errorText || "응답 내용 없음"
+      );
     }
+  } catch (error) {
+    console.error("로그인 요청 오류:", error.message);
   }
 };
 
-export const handleLogout = async (isLogin) => {
-  // 인증되지 않은 상태라면 중복 요청 방지
-  if (!isLogin) return;
-
+export const handleLogout = async (setIsLogin) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+    const requestUrl = `${API_BASE_URL}/auth/logout`;
+    console.log("로그아웃 요청 URL:", requestUrl);
+
+    const response = await fetch(requestUrl, {
       method: "POST",
       ...API_CONFIG,
     });
 
+    console.log("로그아웃 응답 상태:", response.status);
+
     if (response.ok) {
-      isLogin(false);
+      setIsLogin(false);
+      console.log("로그아웃 성공");
     } else {
       const errorText = await response.text();
-      console.error("로그아웃 실패:", errorText);
+      console.error(
+        `로그아웃 실패 (${response.status}):`,
+        errorText || "응답 내용 없음"
+      );
     }
   } catch (error) {
-    console.error("로그아웃 실패:", error);
+    console.error("로그아웃 요청 오류:", error.message);
   }
 };
 
-export const checkAuthStatus = async (isLogin) => {
+export const checkAuthStatus = async (setIsLogin) => {
   try {
     const requestUrl = `${API_BASE_URL}/auth/check`;
-    console.log("요청 URL:", requestUrl);
-    console.log("인증 상태 확인 요청 시작...");
+    console.log("인증 상태 확인 요청 URL:", requestUrl);
+    console.log("API_CONFIG:", API_CONFIG);
 
-    // 직접 백엔드 서버로 요청 보내기
     const response = await fetch(requestUrl, {
       ...API_CONFIG,
     });
@@ -60,15 +74,21 @@ export const checkAuthStatus = async (isLogin) => {
     console.log("인증 상태 확인 응답:", response.status);
 
     if (response.ok) {
-      isLogin(true);
+      setIsLogin(true);
+      console.log("인증됨: 로그인 상태");
     } else if (response.status === 401) {
-      // 401은 예상된 결과이므로 조용히 처리
-      isLogin(false);
+      setIsLogin(false);
+      console.log("인증 안됨: 로그아웃 상태 (401)");
     } else {
-      console.error("인증 확인 실패:", response.status);
+      setIsLogin(false);
+      console.error(`인증 확인 실패 (${response.status})`);
     }
   } catch (error) {
-    // 네트워크 오류만 콘솔에 기록
-    console.error("인증 확인 중 네트워크 오류:", error);
+    setIsLogin(false);
+    console.error("인증 확인 요청 오류:", error.message);
   }
+};
+
+export const handleForceLogout = () => {
+  localStorage.setItem("isLoggedIn", "false");
 };
