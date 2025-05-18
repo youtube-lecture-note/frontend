@@ -12,6 +12,9 @@ const Input = forwardRef(
     } else if (variant === "MultipleChoiceComponent") {
       className = "mr-3";
       type = "radio";
+    } else if (variant === "AddSubject") {
+      className =
+        "w-full px-4 py-2 bg-gray-200 rounded-sm border-1 border-gray-400 placeholder-gray-500";
     }
 
     return (
