@@ -77,13 +77,8 @@ export default function QuizPage() {
     const tmpQuizResult = await quizSubmitApi(tmpAnswers, quizSetId);
     setQuizResults(tmpQuizResult.data);
     console.log("tmpQuizResult : ", tmpQuizResult);
-    modalControl();
+    setIsOpen(true);
   }
-
-  // 결과 모달창 컨트롤
-  const modalControl = () => {
-    setIsOpen(!isOpen);
-  };
 
   return (
     <div className="flex flex-col h-screen relative">
@@ -108,7 +103,7 @@ export default function QuizPage() {
           onSubmit={() => handleSubmit(answers, quizSetId)}
         />
       </div>
-      <Modal isOpen={isOpen} onClose={modalControl} title="결과">
+      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="결과">
         {quizResults.length > 0 &&
           quizResults.map((quizResult, index) => (
             <div key={quizResult.attemptId}>

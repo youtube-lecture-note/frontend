@@ -21,6 +21,9 @@ export default function Button({ children, onClick, variant, ...props }) {
     // 로그아웃
     className =
       "w-full py-1 px-1 bg-red-500 text-white rounded hover:bg-red-600";
+  } else if (variant === "Close") {
+    // 닫기
+    className = "text-bold text-xl text-black hover:text-gray-500 mb-4 ml-6";
   }
 
   return (

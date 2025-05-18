@@ -5,7 +5,7 @@ export default function DisplaySummaryLine({ time, text, onTimeClick }) {
   const textareaRef = useRef(null);
 
   useEffect(() => {
-    console.log("DisplaySummaryLine props 변경:", { time, text });
+    //console.log("DisplaySummaryLine props 변경:", { time, text });
 
     if (!text) {
       console.log("텍스트가 없습니다");
@@ -24,7 +24,7 @@ export default function DisplaySummaryLine({ time, text, onTimeClick }) {
       }
     }
 
-    console.log("포맷팅된 텍스트:", formatted);
+    //console.log("포맷팅된 텍스트:", formatted);
     setFormattedText(formatted);
   }, [text]);
 
@@ -37,10 +37,10 @@ export default function DisplaySummaryLine({ time, text, onTimeClick }) {
   }, [formattedText]);
 
   return (
-    <div className="flex flex-col mb-4 p-2 bg-white rounded shadow-sm">
-      <div className="timestamp-container mb-2">
+    <div className="flex flex-col p-2 bg-white rounded shadow-sm">
+      <div className="timestamp-container">
         <span
-          className="text-blue-600 cursor-pointer text-sm font-medium hover:text-blue-800 mr-2 whitespace-nowrap"
+          className="text-blue-500 cursor-pointer text-sm font-medium hover:text-blue-800 mr-2 whitespace-nowrap"
           onClick={() => onTimeClick(time)}
         >
           [{time}]
@@ -49,11 +49,14 @@ export default function DisplaySummaryLine({ time, text, onTimeClick }) {
 
       <textarea
         ref={textareaRef}
-        value={formattedText}
+        defaultValue={formattedText}
         className="w-full bg-transparent text-sm outline-none resize-none border-none overflow-hidden p-2"
         onClick={(e) => e.target.select()}
+        onInput={(e) => {
+          e.target.style.height = "auto";
+          e.target.style.height = e.target.scrollHeight + "px";
+        }}
         rows="1"
-        readOnly
       />
     </div>
   );

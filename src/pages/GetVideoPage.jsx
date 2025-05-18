@@ -181,7 +181,7 @@ export default function GetVideoPage() {
         {/* 오른쪽 영역: 강의 노트 */}
         <div className="w-2/5 p-4 overflow-y-auto">
           <h2 className="text-xl font-bold mb-4">강의 노트</h2>
-          <div className="bg-gray-100 rounded-lg p-4">
+          <div className=" rounded-lg p-4">
             <div className="flex flex-col gap-4 pb-4">
               {error ? (
                 <p className="text-red-500">{error}</p>

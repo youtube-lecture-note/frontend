@@ -1,10 +1,14 @@
 import Input from "../Input";
 import Button from "../Button";
+import Modal from "../Modal";
 
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 
 export default function SearchVideo({ inputURLRef }) {
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isError, setIsError] = useState("");
 
   // 영상 입력시 ID부분만 추출하기
   const extractVideoId = (url) => {
@@ -20,13 +24,14 @@ export default function SearchVideo({ inputURLRef }) {
     if (vidID) {
       navigate(`/video/${vidID}`);
     } else {
-      alert("올바른 유튜브 URL을 입력해주세요.");
+      setIsError("올바른 유튜브 URL을 입력해주세요.");
+      setIsOpen(true);
     }
   };
 
   return (
     <div className="w-full">
-      <div className="mx-auto border-2 border-gray-600 rounded-lg p-1">
+      <div className="mx-auto border-2 border-gray-400 rounded-lg p-1">
         <div className="flex gap-2">
           <Input
             ref={inputURLRef}
@@ -38,6 +43,12 @@ export default function SearchVideo({ inputURLRef }) {
           </Button>
         </div>
       </div>
+      <Modal
+        isOpen={isOpen}
+        onClose={() => setIsOpen(false)}
+        title={isError}
+        variant="NeedYoutubeURL"
+      ></Modal>
     </div>
   );
 }
