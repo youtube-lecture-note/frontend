@@ -1,16 +1,12 @@
-import { API_CONFIG, API_BASE_URL } from "./config";
+import { API_CONFIG, API_URL } from "./config";
 import { handleForceLogout } from "./login";
 
 // 영상 요약 가져오기
 export const videoSummaryApi = async (videoId) => {
-  console.log("API_BASE_URL:", API_BASE_URL);
-  const response = await fetch(
-    `${API_BASE_URL}/api/summary?videoId=${videoId}`,
-    {
-      method: "GET",
-      ...API_CONFIG,
-    }
-  );
+  const response = await fetch(`${API_URL}/api/summary?videoId=${videoId}`, {
+    method: "GET",
+    ...API_CONFIG,
+  });
   if (response.status === 403) {
     handleForceLogout(); // 403일때 로그아웃 처리
     throw new Error(

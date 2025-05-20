@@ -5,7 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import TopBar from "../components/TopBar/TopBar";
 import QuizItem from "../components/Quiz/QuizItem";
 import AnswerStatus from "../components/Quiz/AnswerStatus";
-import { quizGetApi, quizSubmitApi } from "../api";
+import { quizGetApi, quizSubmitApi } from "../api/index.js";
 import Modal from "../components/Modal";
 import QuizResultItem from "../components/Quiz/QuizResultItem";
 
