@@ -1,9 +1,8 @@
-import { API_CONFIG, API_BASE_URL } from "./config";
+import { API_CONFIG, API_URL } from "./config";
 
 // 카테고리 제작
 export const addCategory = async (category) => {
-  console.log("API_BASE_URL:", API_BASE_URL);
-  const response = await fetch(`${API_BASE_URL}/api/categories`, {
+  const response = await fetch(`${API_URL}/api/categories`, {
     ...API_CONFIG,
     method: "POST",
     body: JSON.stringify(category),
@@ -16,8 +15,7 @@ export const addCategory = async (category) => {
 
 // 카테고리 조회
 export const getCategory = async () => {
-  console.log("API_BASE_URL:", API_BASE_URL);
-  const response = await fetch(`${API_BASE_URL}/api/categories`, {
+  const response = await fetch(`${API_URL}/api/categories`, {
     ...API_CONFIG,
     method: "GET",
   });

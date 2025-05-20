@@ -4,6 +4,7 @@ import GetVideoPage from "./pages/GetVideoPage";
 import QuizPage from "./pages/QuizPage";
 import SideMenu from "./components/SideMenu/SideMenu";
 import SubjectPage from "./pages/SubjectPage";
+import TestPage from "./pages/TestPage";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
             <Route path="/video/:videoId" element={<GetVideoPage />} />
             <Route path="/video/:videoId/quiz" element={<QuizPage />} />
             <Route path="/subject/:subjectName" element={<SubjectPage />} />
+            <Route path="/test" element={<TestPage />} />
           </Routes>
         </main>
 

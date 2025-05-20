@@ -1,4 +1,4 @@
-export const API_BASE_URL = process.env.REACT_APP_API_URL || "";
+export const API_URL = "https://cpyt.sytes.net:444";
 
 // API 기본 설정
 export const API_CONFIG = {

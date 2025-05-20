@@ -3,7 +3,7 @@ import { GoogleLogin, GoogleOAuthProvider } from "@react-oauth/google";
 import Button from "../components/Button";
 import CLIENT_ID from "./ClientId.jsx";
 
-import { handleGoogleLogin, handleLogout } from "../api/login.js";
+import { handleGoogleLogin, handleLogout } from "../api/index.js";
 
 export default function LoginForm() {
   // 로컬스토리지에서 상태 읽기

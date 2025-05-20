@@ -1,9 +1,9 @@
-import { API_CONFIG, API_BASE_URL } from "./config";
+import { API_CONFIG, API_URL } from "./config";
 
 export const handleGoogleLogin = async (credentialResponse, setIsLogin) => {
   try {
     const idToken = credentialResponse.credential;
-    const requestUrl = `${API_BASE_URL}/auth/google/callback`;
+    const requestUrl = `${API_URL}/auth/google/callback`;
 
     console.log("로그인 요청 URL:", requestUrl);
     console.log("구글 토큰 정보:", {
@@ -36,7 +36,7 @@ export const handleGoogleLogin = async (credentialResponse, setIsLogin) => {
 
 export const handleLogout = async (setIsLogin) => {
   try {
-    const requestUrl = `${API_BASE_URL}/auth/logout`;
+    const requestUrl = `${API_URL}/auth/logout`;
     console.log("로그아웃 요청 URL:", requestUrl);
 
     const response = await fetch(requestUrl, {
@@ -63,7 +63,7 @@ export const handleLogout = async (setIsLogin) => {
 
 export const checkAuthStatus = async (setIsLogin) => {
   try {
-    const requestUrl = `${API_BASE_URL}/auth/check`;
+    const requestUrl = `/auth/check`;
     console.log("인증 상태 확인 요청 URL:", requestUrl);
     console.log("API_CONFIG:", API_CONFIG);
 

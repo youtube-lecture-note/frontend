@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useRef } from "react";
-
+import { useNavigate } from "react-router-dom";
 import Button from "../Button";
 import Modal from "../Modal";
 import Input from "../Input";
 
 export default function SideMenuBottom() {
+  const navigate = useNavigate();
   const [subjects, setSubjects] = useState(["미분류", "과학", "자격증"]); // 임시 데이터
   const [isOpen, setIsOpen] = useState(false);
   const inputRef = useRef(null);
@@ -31,6 +32,10 @@ export default function SideMenuBottom() {
         </Button>
       </div>
       <div className="flex flex-col gap-1">
+        {/* 임시 버튼 */}
+        <Button variant="DefaultBlack" onClick={() => navigate("/test")}>
+          test
+        </Button>
         {subjects.map((subject, index) => (
           <Button
             key={index}

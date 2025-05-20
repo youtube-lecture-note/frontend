@@ -24,6 +24,10 @@ export default function Button({ children, onClick, variant, ...props }) {
   } else if (variant === "Close") {
     // 닫기
     className = "text-bold text-xl text-black hover:text-gray-500 mb-4 ml-6";
+  } else if (variant === "DefaultBlack") {
+    // 기본 블랙
+    className =
+      "w-full p-2 text-left bg-gray-800 text-white hover:bg-gray-900 rounded-md";
   }
 
   return (

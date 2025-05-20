@@ -7,7 +7,7 @@ import Button from "../components/Button";
 import TopBar from "../components/TopBar/TopBar";
 import DisplaySummaryLine from "../components/Summary/DisplaySummaryLine";
 import SearchVideo from "../components/Search/SearchVideo";
-import { videoSummaryApi } from "../api/videoSummaryApi";
+import { videoSummaryApi } from "../api/index.js";
 
 export default function GetVideoPage() {
   const inputURLRef = useRef(null);
