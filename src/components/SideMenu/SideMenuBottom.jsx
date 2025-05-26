@@ -32,7 +32,7 @@ export default function SideMenuBottom() {
         name: node[0].name || "default",
         id: node[0].id,
         parentId: null,
-        children: node[0].children.map((subject) => ({
+        children: (node[0].children || []).map((subject) => ({
           id: subject.id,
           name: subject.name,
         })),
@@ -143,14 +143,20 @@ export default function SideMenuBottom() {
   }
 
   const handleSubjectClick = (parentId) => {
+    if (parentId === null || parentId === undefined) {
+      handleChildSubjectClick(1); // 최상위 경우만 예외
+      return;
+    }
     // 선택한 주제에 해당하는 페이지로 이동
     const tmpSubjectData = traverseSubjectsById(parentId);
     if (tmpSubjectData) {
       const parsedSubject = NodeObjectParser(tmpSubjectData);
       console.log("선택된 주제 데이터:", parsedSubject);
       setSelectedSubject(parsedSubject);
+      navigate(`/subject/${parentId}`, {
+        state: { Subjectinfo: parsedSubject },
+      });
     }
-    navigate(`/subject/${parentId}`);
   };
 
   const handleChildSubjectClick = (subjectId) => {
@@ -163,7 +169,9 @@ export default function SideMenuBottom() {
       setSelectedSubject(parsedSubject);
 
       // 선택한 주제에 해당하는 페이지로 이동
-      navigate(`/subject/${subjectId}`);
+      navigate(`/subject/${subjectId}`, {
+        state: { Subjectinfo: parsedSubject },
+      });
     } else {
       console.error("선택한 주제를 찾을 수 없습니다. ID:", subjectId);
     }
