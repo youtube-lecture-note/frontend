@@ -1,16 +1,41 @@
 import { API_CONFIG, API_URL } from "./config";
 
 // 카테고리 제작
+//parentID는 선택
+// const response = await fetch(`${API_URL}/api/categories`, {
+//   ...API_CONFIG,
+//   method: "POST",
+//   body: JSON.stringify(name),
+// });
+// if (!response.ok) {
+//   throw new Error("카테고리 제작 실패");
+// }
+// return response.json();
 export const addCategory = async (category) => {
-  const response = await fetch(`${API_URL}/api/categories`, {
-    ...API_CONFIG,
-    method: "POST",
-    body: JSON.stringify(category),
-  });
-  if (!response.ok) {
-    throw new Error("카테고리 제작 실패");
+  try {
+    console.log("요청 데이터:", category);
+
+    const response = await fetch(`${API_URL}/api/categories`, {
+      ...API_CONFIG,
+      method: "POST",
+      body: JSON.stringify(category),
+    });
+
+    console.log("응답 상태:", response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("응답 에러 메시지:", errorText);
+      throw new Error("카테고리 제작 실패");
+    }
+
+    const data = await response.json();
+    console.log("응답 데이터:", data);
+    return data;
+  } catch (error) {
+    console.error("카테고리 제작 중 오류 발생:", error);
+    throw error;
   }
-  return response.json();
 };
 
 // 카테고리 조회

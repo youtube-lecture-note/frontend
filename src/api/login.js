@@ -63,7 +63,7 @@ export const handleLogout = async (setIsLogin) => {
 
 export const checkAuthStatus = async (setIsLogin) => {
   try {
-    const requestUrl = `/auth/check`;
+    const requestUrl = `${API_URL}/auth/check`;
     console.log("인증 상태 확인 요청 URL:", requestUrl);
     console.log("API_CONFIG:", API_CONFIG);
 
