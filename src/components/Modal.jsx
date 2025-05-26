@@ -17,14 +17,13 @@ export default function Modal({
     isOpen && (
       <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50">
         <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
-          <div className="flex flex-row justify-between w-full pb-6">
+          <div className="flex flex-row justify-between w-full pb-6 text-left">
             <h2 className="text-2xl font-bold mb-2">{title}</h2>
             <Button onClick={onClose} variant="Close">
               X
             </Button>
           </div>
-
-          {children}
+          <div className="w-full">{children}</div>
         </div>
       </div>
     )

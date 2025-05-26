@@ -8,6 +8,7 @@ module.exports = function (app) {
       target: "https://cpyt.sytes.net:444",
       changeOrigin: true,
       secure: false,
+      ws: true,
       onProxyRes(proxyRes) {
         const loc = proxyRes.headers["location"];
         if (loc) {
