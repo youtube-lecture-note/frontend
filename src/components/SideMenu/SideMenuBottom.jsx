@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { getCategory, addCategory } from "../../api/index.js";
+import { FaFolderTree } from "react-icons/fa6";
+import { RiFolderAddLine } from "react-icons/ri";
+import { VscNewFolder } from "react-icons/vsc";
+
 import Button from "../Button";
 import Modal from "../Modal";
 import Input from "../Input";
@@ -177,34 +180,49 @@ export default function SideMenuBottom() {
     }
   };
 
+  const handleFolderTreeClick = () => {
+    // 폴더 트리 페이지로 이동
+    navigate("/subjecttree", {
+      state: { Subjects: subjects },
+    });
+  };
+
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">Subject</h2>
-        <Button onClick={() => setIsOpen(true)} variant="AddSubject">
-          +
+        <Button onClick={() => setIsOpen(true)} variant="SubjectOther">
+          <VscNewFolder />
         </Button>
       </div>
       <div className="flex flex-col gap-1">
-        {/* 임시 버튼 */}
-        <Button variant="DefaultBlack" onClick={() => navigate("/test")}>
-          test
-        </Button>
-        {/* 현재 선택된 주제 버튼*/}
-        <Button
-          variant="DefaultBlack"
-          onClick={() => {
-            handleSubjectClick(SelectedSubject.parentId);
-          }}
-        >
-          {SelectedSubject.name}
-        </Button>
+        {/* 현재 선택된 주제  */}
+        <div className="flex items-center gap-1">
+          <div className="flex-grow">
+            <Button
+              variant="SubjectSelected"
+              onClick={() => {
+                handleSubjectClick(SelectedSubject.parentId);
+              }}
+            >
+              {SelectedSubject.name}
+            </Button>
+          </div>
+          {/* 폴더 아이콘 버튼 */}
+          <Button
+            variant="SubjectOther"
+            onClick={handleFolderTreeClick}
+            style={{ width: "auto", padding: "0.5rem" }}
+          >
+            <FaFolderTree />
+          </Button>
+        </div>
         {/*자식 버튼*/}
         {SelectedSubject.children &&
           SelectedSubject.children.map((childSubject, index) => (
             <Button
               key={childSubject.id}
-              variant="Subject"
+              variant="SubjectDefault"
               onClick={() => handleChildSubjectClick(childSubject.id)}
             >
               {childSubject.name}
@@ -225,7 +243,7 @@ export default function SideMenuBottom() {
               handleAddSubject(SelectedSubject.id, inputRef.current.value)
             }
           >
-            +
+            <VscNewFolder />
           </Button>
         </div>
       </Modal>

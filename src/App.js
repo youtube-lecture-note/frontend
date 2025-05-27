@@ -4,7 +4,8 @@ import GetVideoPage from "./pages/GetVideoPage";
 import QuizPage from "./pages/QuizPage";
 import SideMenu from "./components/SideMenu/SideMenu";
 import SubjectPage from "./pages/SubjectPage";
-import TestPage from "./pages/TestPage";
+import SubjectTreePage from "./pages/SubjectTreePage";
+import AttemptsPage from "./pages/AttemptsPage";
 
 function App() {
   return (
@@ -16,11 +17,12 @@ function App() {
             <Route path="/video/:videoId" element={<GetVideoPage />} />
             <Route path="/video/:videoId/quiz" element={<QuizPage />} />
             <Route path="/subject/:subjectName" element={<SubjectPage />} />
-            <Route path="/test" element={<TestPage />} />
+            <Route path="/subjecttree" element={<SubjectTreePage />} />
+            <Route path="/attempts" element={<AttemptsPage />} />
           </Routes>
         </main>
 
-        <aside className="h-screen w-1/4 border-l border-gray-300 p-2">
+        <aside className="h-screen w-1/4 border-l border-gray-300 p-2 bg-[#f3f6fb]">
           <SideMenu />
         </aside>
       </div>
