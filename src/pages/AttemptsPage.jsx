@@ -14,6 +14,8 @@ import TopBar from "../components/TopBar/TopBar.jsx";
 export default function AttemptsPage() {
   const inputURLRef = useRef(null);
   const [quizAttempts, setQuizAttempts] = useState([]);
+  // 유튜브 url 입력여부에 따라서 전체를 보여주거나 해당 영상만 보여줌
+  const [quizIdInput, setQuizIdInput] = useState(false);
 
   useEffect(() => {
     // 페이지가 로드될 때, 이전 퀴즈 기록을 불러오는 API 호출
@@ -52,6 +54,7 @@ export default function AttemptsPage() {
         quizAttempts={quizAttempts}
         quizAttemptsByVideoIdApi={quizAttemptsByVideoIdApi}
         quizAttemptsByQuizSetIdApi={quizAttemptsByQuizSetIdApi}
+        quizIdInput={quizIdInput}
       />
     </div>
   );
