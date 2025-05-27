@@ -1,11 +1,34 @@
 // 개별 시도기록 1개
+import Button from "../Button";
+import { useNavigate } from "react-router-dom";
 
-export default function Attempts() {
+export default function Attempts({ attempt }) {
+  const navigate = useNavigate();
+  const handleViewDetails = (quizSetId) => {
+    navigate(`/attempts/${quizSetId}`);
+  };
+
   return (
-    <div className="flex flex-col items-center justify-center h-screen">
-      <h1 className="text-2xl font-bold mb-4">퀴즈 기록</h1>
-      <p className="text-lg">이 페이지는 사용자의 퀴즈 기록을 보여줍니다.</p>
-      {/* 추가적인 내용은 여기에 추가할 수 있습니다 */}
+    <div
+      key={attempt.quizSetId}
+      className="p-3 bg-gray-100 rounded-md shadow flex justify-between"
+    >
+      <div>
+        <p className="font-semibold text-gray-700">{attempt.userVideoName}</p>
+        <p className="text-sm text-gray-500">
+          {new Date(attempt.date).toLocaleString()}{" "}
+        </p>
+        <p className="text-sm text-gray-500">
+          {attempt.totalQuizzes - attempt.wrongCount} / {attempt.totalQuizzes}
+        </p>
+      </div>
+
+      <Button
+        variant="link"
+        onClick={() => handleViewDetails(attempt.quizSetId)}
+      >
+        기록보기
+      </Button>
     </div>
   );
 }

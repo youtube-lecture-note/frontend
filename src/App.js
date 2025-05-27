@@ -6,6 +6,7 @@ import SideMenu from "./components/SideMenu/SideMenu";
 import SubjectPage from "./pages/SubjectPage";
 import SubjectTreePage from "./pages/SubjectTreePage";
 import AttemptsPage from "./pages/AttemptsPage";
+import QuizAttmptsByID from "./pages/QuizAttmptsByID";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
             <Route path="/subject/:subjectName" element={<SubjectPage />} />
             <Route path="/subjecttree" element={<SubjectTreePage />} />
             <Route path="/attempts" element={<AttemptsPage />} />
+            <Route path="/attempts/:quizSetId" element={<QuizAttmptsByID />} />
           </Routes>
         </main>
 
