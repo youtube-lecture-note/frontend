@@ -1,6 +1,8 @@
 // 퀴즈 기록 페이지
 import { useEffect, useState, useRef } from "react";
 
+import QuizAttemptHistory from "../components/Quiz/QuizAttemptHistory.jsx";
+
 import {
   quizAttemptsApi,
   quizAttemptsByVideoIdApi,
@@ -18,8 +20,9 @@ export default function AttemptsPage() {
     const fetchQuizAttempts = async () => {
       try {
         const response = await quizAttemptsApi();
-        if (response && Array.isArray(response.data)) {
-          setQuizAttempts(response.data);
+        // response가 직접 배열인지 확인
+        if (response && Array.isArray(response)) {
+          setQuizAttempts(response); // response 자체를 상태로 설정
         } else {
           console.error(
             "API 응답 형식이 올바르지 않거나 데이터가 없습니다.",
@@ -41,16 +44,15 @@ export default function AttemptsPage() {
   return (
     <div className="flex flex-col h-screen">
       <TopBar />
-      <h1 className="text-2xl font-bold mb-4">이전 퀴즈 기록</h1>
-      <SearchVideo inputURLRef={inputURLRef} variant={"SearchVideo"} />
-      <div>
-        {/* quizAttempts가 항상 배열임을 보장하므로 .length 접근이 안전해짐 */}
-        {quizAttempts.length === 0
-          ? "아직 퀴즈 기록이 없습니다."
-          : quizAttempts.map((attempt) => (
-              <div key={attempt.id}>{attempt.title}</div>
-            ))}
+      <h1 className="text-2xl font-bold mb-4 p-4">이전 퀴즈 기록</h1>
+      <div className="px-4">
+        <SearchVideo inputURLRef={inputURLRef} variant={"SearchVideo"} />
       </div>
+      <QuizAttemptHistory
+        quizAttempts={quizAttempts}
+        quizAttemptsByVideoIdApi={quizAttemptsByVideoIdApi}
+        quizAttemptsByQuizSetIdApi={quizAttemptsByQuizSetIdApi}
+      />
     </div>
   );
 }
