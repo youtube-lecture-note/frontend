@@ -39,6 +39,14 @@ export default function GetVideoPage() {
     player.seekTo(timeInSeconds);
   };
 
+  const opts = {
+    height: "500",
+    width: "100%",
+    playerVars: {
+      autoplay: 0,
+    },
+  };
+
   // 비디오 요약 가져오기
   useEffect(() => {
     async function fetchSummary() {
@@ -59,14 +67,6 @@ export default function GetVideoPage() {
 
     fetchSummary();
   }, [videoId]);
-
-  const opts = {
-    height: "500",
-    width: "100%",
-    playerVars: {
-      autoplay: 0,
-    },
-  };
 
   // 데이터 파싱 함수
   function parseSummary(data) {
