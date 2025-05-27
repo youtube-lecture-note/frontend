@@ -8,6 +8,7 @@ import AnswerStatus from "../components/Quiz/AnswerStatus";
 import { quizGetApi, quizSubmitApi } from "../api/index.js";
 import Modal from "../components/Modal";
 import QuizResultItem from "../components/Quiz/QuizResultItem";
+import Button from "../components/Button";
 
 export default function QuizPage() {
   const [quizSetId, setQuizSetId] = useState(null);
@@ -110,6 +111,24 @@ export default function QuizPage() {
               <QuizResultItem quizResult={quizResult} index={index} />
             </div>
           ))}
+        <div className="flex justify-end mt-4 gap-2">
+          <Button
+            onClick={() => {
+              setIsOpen(false);
+              navigate(`/video/${videoId}`);
+            }}
+          >
+            동영상으로 돌아가기
+          </Button>
+          <Button
+            onClick={() => {
+              setIsOpen(false);
+              navigate(`/`);
+            }}
+          >
+            처음으로
+          </Button>
+        </div>
       </Modal>
     </div>
   );
