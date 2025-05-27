@@ -3,7 +3,6 @@ import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { getCategory, addCategory } from "../../api/index.js";
 import { FaFolderTree } from "react-icons/fa6";
-import { RiFolderAddLine } from "react-icons/ri";
 import { VscNewFolder } from "react-icons/vsc";
 
 import Button from "../Button";
@@ -14,7 +13,6 @@ export default function SideMenuBottom() {
   const [subjects, setSubjects] = useState([]);
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-
   // 목록에서 현재 보여지는 주제
   // 주제를 선택하면, 주제명이 보이고, 그 아래 children 주제가 보이고, 클릭시 videos 목록이 보여짐
   // 현재 선택된 주제 목록
@@ -26,63 +24,6 @@ export default function SideMenuBottom() {
     videos: [],
   });
   const inputRef = useRef(null);
-
-  // 노드 객체에서 필요부분만 상태로 저장하도록함
-  const NodeObjectParser = (node) => {
-    // 루트 노드인 경우
-    if (Array.isArray(node) && node.length > 0 && node[0].id === 1) {
-      return {
-        name: node[0].name || "default",
-        id: node[0].id,
-        parentId: null,
-        children: (node[0].children || []).map((subject) => ({
-          id: subject.id,
-          name: subject.name,
-        })),
-        videos: node[0].videos || [],
-      };
-    }
-    // 일반 노드인 경우
-    else {
-      return {
-        name: node.name || "default",
-        id: node.id || 1,
-        parentId: node.parentId || null,
-        children: (node.children || []).map((subject) => ({
-          id: subject.id,
-          name: subject.name,
-        })),
-        videos: node.videos || [],
-      };
-    }
-  };
-
-  const traverseSubjectsById = (subjectId) => {
-    const findSubject = (node) => {
-      if (!node) return null;
-      if (node.id === subjectId) return node;
-      if (node.children && node.children.length > 0) {
-        for (const child of node.children) {
-          const result = findSubject(child);
-          if (result) {
-            return result;
-          }
-        }
-      }
-      return null;
-    };
-
-    // subjects가 배열인지 확인
-    if (!Array.isArray(subjects) || subjects.length === 0) return null;
-
-    for (const node of subjects) {
-      const result = findSubject(node);
-      if (result) {
-        return result;
-      }
-    }
-    return null;
-  };
 
   useEffect(() => {
     const fetchSubjects = async () => {
@@ -115,6 +56,65 @@ export default function SideMenuBottom() {
   }, [subjects]); // subjects가 변경될 때마다 실행
   // parent id는 단계를 말함
 
+  // 노드 객체에서 필요부분만 상태로 저장하도록함
+  const NodeObjectParser = (node) => {
+    // 루트 노드인 경우
+    if (Array.isArray(node) && node.length > 0 && node[0].id === 1) {
+      return {
+        name: node[0].name || "default",
+        id: node[0].id,
+        parentId: null,
+        children: (node[0].children || []).map((subject) => ({
+          id: subject.id,
+          name: subject.name,
+        })),
+        videos: node[0].videos || [],
+      };
+    }
+    // 일반 노드인 경우
+    else {
+      return {
+        name: node.name || "default",
+        id: node.id || 1,
+        parentId: node.parentId || null,
+        children: (node.children || []).map((subject) => ({
+          id: subject.id,
+          name: subject.name,
+        })),
+        videos: node.videos || [],
+      };
+    }
+  };
+
+  // traverseSubjectsById 함수 수정: currentSubjects 매개변수 추가
+  const traverseSubjectsById = (subjectId, currentSubjects = subjects) => {
+    const findSubject = (node) => {
+      if (!node) return null;
+      if (node.id === subjectId) return node;
+      if (node.children && node.children.length > 0) {
+        for (const child of node.children) {
+          const result = findSubject(child);
+          if (result) {
+            return result;
+          }
+        }
+      }
+      return null;
+    };
+
+    // currentSubjects가 배열인지 확인
+    if (!Array.isArray(currentSubjects) || currentSubjects.length === 0)
+      return null;
+
+    for (const node of currentSubjects) {
+      const result = findSubject(node);
+      if (result) {
+        return result;
+      }
+    }
+    return null;
+  };
+
   async function handleAddSubject(parentId, name) {
     if (!name || name.trim() === "") {
       console.log("주제명을 입력해주세요.");
@@ -122,17 +122,37 @@ export default function SideMenuBottom() {
     }
 
     try {
-      const data = await addCategory({ name: name.trim(), parentId: parentId });
-      console.log("새 주제 추가 결과:", data);
+      const newSubjectData = await addCategory({
+        name: name.trim(),
+        parentId: parentId,
+      });
+      console.log("새 주제 추가 결과:", newSubjectData);
 
       // 주제 추가 후 카테고리 다시 불러오기
       const updatedData = await getCategory();
       setSubjects(updatedData);
 
-      // 현재 선택된 주제 갱신
-      const currentSubject = traverseSubjectsById(SelectedSubject.id);
-      if (currentSubject) {
-        setSelectedSubject(NodeObjectParser(currentSubject));
+      // 현재 선택된 주제(parentId)의 최신 정보를 updatedData에서 가져와서 SelectedSubject 상태를 갱신
+      // 새 주제가 현재 선택된 주제의 자식으로 추가되므로, 현재 선택된 주제를 다시 로드해야 함.
+      const idOfSubjectToReselect = parentId; // 새 주제의 부모 ID가 현재 선택된 주제 ID임
+      const reloadedSelectedSubjectNode = traverseSubjectsById(
+        idOfSubjectToReselect,
+        updatedData
+      );
+
+      if (reloadedSelectedSubjectNode) {
+        setSelectedSubject(NodeObjectParser(reloadedSelectedSubjectNode));
+      } else {
+        // 만약 이전에 선택했던 주제를 찾을 수 없다면 (예: 동시에 삭제된 경우), 루트를 선택하도록 처리
+        console.warn(
+          `주제 추가 후 ID ${idOfSubjectToReselect}를 가진 부모 주제를 찾을 수 없습니다. 루트를 선택합니다.`
+        );
+        if (updatedData && updatedData.length > 0) {
+          const rootNode = traverseSubjectsById(1, updatedData); // 루트 ID가 1이라고 가정
+          if (rootNode) {
+            setSelectedSubject(NodeObjectParser(rootNode));
+          }
+        }
       }
 
       setIsOpen(false);
@@ -182,9 +202,7 @@ export default function SideMenuBottom() {
 
   const handleFolderTreeClick = () => {
     // 폴더 트리 페이지로 이동
-    navigate("/subjecttree", {
-      state: { Subjects: subjects },
-    });
+    navigate("/subjecttree");
   };
 
   return (

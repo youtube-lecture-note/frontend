@@ -8,6 +8,16 @@ export default function Attempts({ attempt }) {
     navigate(`/attempts/${quizSetId}`);
   };
 
+  let resultstyle = "text-md font-semibold ";
+  const colorfactor = attempt.wrongCount / attempt.totalQuizzes;
+  if (colorfactor < 0.2) {
+    resultstyle += "text-green-500";
+  } else if (colorfactor < 0.5) {
+    resultstyle += "text-yellow-500";
+  } else {
+    resultstyle += "text-red-500";
+  }
+
   return (
     <div
       key={attempt.quizSetId}
@@ -18,7 +28,7 @@ export default function Attempts({ attempt }) {
         <p className="text-sm text-gray-500">
           {new Date(attempt.date).toLocaleString()}{" "}
         </p>
-        <p className="text-sm text-gray-500">
+        <p className={resultstyle}>
           {attempt.totalQuizzes - attempt.wrongCount} / {attempt.totalQuizzes}
         </p>
       </div>

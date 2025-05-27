@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { PiPlayFill } from "react-icons/pi";
 
-export default function SearchVideo({ inputURLRef, variant }) {
+export default function SearchVideo({ inputURLRef, variant, onChange }) {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isError, setIsError] = useState("");
@@ -18,8 +18,9 @@ export default function SearchVideo({ inputURLRef, variant }) {
     if (vidID) {
       if (variant === "SearchVideo") {
         navigate(`/video/${vidID}`);
-      } else if (variant === "QuizAttempt") {
-        //navigate(`/addvideo/${vidID}`);
+      } else if (variant === "SearchQuiz") {
+        // AttemptsPage의 handleQuizIdInputChange(vidID)
+        onChange(vidID);
       }
     } else {
       setIsError("올바른 유튜브 URL을 입력해주세요.");

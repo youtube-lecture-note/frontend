@@ -49,3 +49,30 @@ export const getCategory = async () => {
   }
   return response.json();
 };
+
+// 카테고리 삭제
+export const deleteCategory = async (categoryID) => {
+  const response = await fetch(`${API_URL}/api/categories/${categoryID}`, {
+    ...API_CONFIG,
+    method: "DELETE",
+  });
+  if (!response.ok) {
+    throw new Error("카테고리 삭제 실패");
+  }
+  return response.json();
+};
+
+// 카테고리내 영상 삭제
+export const deleteCategoryVideo = async (categoryID, videoID) => {
+  const response = await fetch(
+    `${API_URL}/api/categories/${categoryID}/videos/${videoID}`,
+    {
+      ...API_CONFIG,
+      method: "DELETE",
+    }
+  );
+  if (!response.ok) {
+    throw new Error("카테고리 내 영상 삭제 실패");
+  }
+  return response.json();
+};
