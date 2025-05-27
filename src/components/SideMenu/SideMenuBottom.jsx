@@ -191,9 +191,6 @@ export default function SideMenuBottom() {
     <div className="flex flex-col gap-2">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold">Subject</h2>
-        <Button onClick={() => setIsOpen(true)} variant="SubjectOther">
-          <VscNewFolder />
-        </Button>
       </div>
       <div className="flex flex-col gap-1">
         {/* 현재 선택된 주제  */}
@@ -215,6 +212,13 @@ export default function SideMenuBottom() {
             style={{ width: "auto", padding: "0.5rem" }}
           >
             <FaFolderTree />
+          </Button>
+          <Button
+            onClick={() => setIsOpen(true)}
+            style={{ width: "auto", padding: "0.5rem" }}
+            variant="SubjectOther"
+          >
+            <VscNewFolder />
           </Button>
         </div>
         {/*자식 버튼*/}
