@@ -174,8 +174,6 @@ export default function TreeModal({
     // 카테고리 데이터 새로고침 (사이드바 상태 업데이트)
     fetchCategories();
 
-    navigate("/");
-
     // 원래의 onClose 호출
     onClose();
   };
@@ -183,19 +181,19 @@ export default function TreeModal({
   return (
     isOpen && (
       <>
-        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 z-50 border-2 border-gray-300">
-          <div className="bg-[#f3f6fb] p-6 rounded-lg shadow-lg flex flex-col w-11/12 max-w-2xl h-5/6 md:h-4/5 lg:h-3/4">
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-30 z-50 border-2 border-gray-200">
+          <div className="bg-white p-6 rounded-lg shadow-md flex flex-col w-11/12 max-w-2xl h-5/6 md:h-4/5 lg:h-3/4 text-gray-800">
             <div className="flex flex-row justify-between w-full pb-4 text-left">
-              <h2 className="text-2xl font-bold">{title}</h2>
-              {/* 단순화된 handleClose 사용 */}
+              <h2 className="text-xl font-bold bg-blue-100 text-blue-800 px-4 py-2 rounded-full">
+                {title}
+              </h2>
               <Button onClick={handleClose} variant="Close">
-                <AiOutlineCloseCircle />
+                <AiOutlineCloseCircle className="text-gray-600 hover:text-gray-800" />
               </Button>
             </div>
-            <div className="overflow-y-auto flex-grow w-full border border-gray-300 rounded-lg p-4">
-              {/* 삭제 에러 메시지 표시 영역 추가 */}
+            <div className="overflow-y-auto flex-grow w-full border border-gray-300 rounded-lg p-4 bg-gray-50 text-gray-800">
               {deleteErrorMessage && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                <div className="bg-red-100 border border-red-300 text-red-800 px-4 py-3 rounded mb-4">
                   <p className="font-semibold">{deleteErrorMessage}</p>
                 </div>
               )}
@@ -225,7 +223,7 @@ export default function TreeModal({
           isOpen={isAddModalOpen}
           onClose={() => {
             setIsAddModalOpen(false);
-            setErrorMessage(""); // 모달 닫을 때 에러 메시지 초기화
+            setErrorMessage("");
           }}
           title="하위 주제 추가"
           variant="AddSubject"
@@ -241,9 +239,8 @@ export default function TreeModal({
                 <VscNewFolder />
               </Button>
             </div>
-            {/* 에러 메시지 표시 영역 추가 */}
             {errorMessage && (
-              <p className="text-red-500 text-sm mt-1">{errorMessage}</p>
+              <p className="text-red-600 text-sm mt-1">{errorMessage}</p>
             )}
           </div>
         </Modal>

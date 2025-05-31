@@ -1,6 +1,7 @@
 // 개별 시도기록 1개
 import Button from "../Button";
 import { useNavigate } from "react-router-dom";
+import { FaChevronRight } from "react-icons/fa";
 
 export default function Attempts({ attempt }) {
   const navigate = useNavigate();
@@ -8,37 +9,50 @@ export default function Attempts({ attempt }) {
     navigate(`/attempts/${quizSetId}`);
   };
 
-  let resultstyle = "text-md font-semibold ";
-  const colorfactor = attempt.wrongCount / attempt.totalQuizzes;
-  if (colorfactor < 0.2) {
-    resultstyle += "text-green-500";
-  } else if (colorfactor < 0.5) {
-    resultstyle += "text-yellow-500";
-  } else {
-    resultstyle += "text-red-500";
+  // 정확도 계산
+  const correctCount = attempt.totalQuizzes - attempt.wrongCount;
+  const accuracy = Math.round((correctCount / attempt.totalQuizzes) * 100);
+
+  // 정확도에 따른 색상 설정
+  let badgeColor = "bg-green-500";
+  if (accuracy < 50) {
+    badgeColor = "bg-red-500";
+  } else if (accuracy < 80) {
+    badgeColor = "bg-yellow-500";
   }
 
   return (
     <div
       key={attempt.quizSetId}
-      className="p-3 bg-gray-100 rounded-md shadow flex justify-between"
+      className="p-3 bg-white rounded-md shadow-md hover:shadow-lg transition-shadow border border-gray-200 flex justify-between items-center"
     >
-      <div>
-        <p className="font-semibold text-gray-700">{attempt.userVideoName}</p>
+      <div className="flex-grow">
+        <p className="font-semibold text-gray-800">{attempt.userVideoName}</p>
         <p className="text-sm text-gray-500">
-          {new Date(attempt.date).toLocaleString()}{" "}
-        </p>
-        <p className={resultstyle}>
-          {attempt.totalQuizzes - attempt.wrongCount} / {attempt.totalQuizzes}
+          {new Date(attempt.date).toLocaleString()}
         </p>
       </div>
 
-      <Button
-        variant="link"
-        onClick={() => handleViewDetails(attempt.quizSetId)}
-      >
-        기록보기
-      </Button>
+      <div className="flex items-center gap-4">
+        <div className="flex flex-col items-center justify-center">
+          <div
+            className={`w-12 h-12 rounded-full ${badgeColor} flex items-center justify-center text-white font-bold`}
+          >
+            {accuracy}%
+          </div>
+          <p className="text-xs text-gray-500 mt-1">
+            {correctCount}/{attempt.totalQuizzes}
+          </p>
+        </div>
+
+        <Button
+          onClick={() => handleViewDetails(attempt.quizSetId)}
+          variant="link"
+        >
+          <span>기록보기</span>
+          <FaChevronRight className="text-xs" />
+        </Button>
+      </div>
     </div>
   );
 }

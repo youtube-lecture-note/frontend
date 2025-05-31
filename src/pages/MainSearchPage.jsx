@@ -14,11 +14,6 @@ export default function MainSearchPage() {
     <div className="main-container flex flex-col justify-center items-center h-full max-w-5xl w-full mx-auto">
       <img src={Logo} alt="logo" className="main-logo w-40 h-40 mb-40" />
       <SearchVideo inputURLRef={inputURLRef} variant={"SearchVideo"} />
-      <div className="text-center mt-4 text-gray-600">
-        <Button onClick={() => navigate("/Attempts")} variant="Pink">
-          퀴즈 기록
-        </Button>
-      </div>
     </div>
   );
 }
