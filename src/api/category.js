@@ -59,7 +59,19 @@ export const deleteCategory = async (categoryID) => {
   if (!response.ok) {
     throw new Error("카테고리 삭제 실패");
   }
-  return response.json();
+
+  // 응답 내용이 있는지 확인
+  const text = await response.text();
+  if (!text) {
+    return {}; // 빈 응답인 경우 빈 객체 반환
+  }
+
+  try {
+    return JSON.parse(text); // 텍스트를 JSON으로 파싱
+  } catch (error) {
+    console.error("JSON 파싱 오류:", error);
+    return {}; // 파싱 실패 시 빈 객체 반환
+  }
 };
 
 // 카테고리내 영상 삭제
@@ -74,5 +86,17 @@ export const deleteCategoryVideo = async (categoryID, videoID) => {
   if (!response.ok) {
     throw new Error("카테고리 내 영상 삭제 실패");
   }
-  return response.json();
+
+  // 응답 내용이 있는지 확인
+  const text = await response.text();
+  if (!text) {
+    return {}; // 빈 응답인 경우 빈 객체 반환
+  }
+
+  try {
+    return JSON.parse(text); // 텍스트를 JSON으로 파싱
+  } catch (error) {
+    console.error("JSON 파싱 오류:", error);
+    return {}; // 파싱 실패 시 빈 객체 반환
+  }
 };
