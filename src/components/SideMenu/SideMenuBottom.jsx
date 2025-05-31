@@ -1,208 +1,114 @@
 import { useState, useEffect } from "react";
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getCategory, addCategory } from "../../api/index.js";
 import { FaFolderTree } from "react-icons/fa6";
 import { VscNewFolder } from "react-icons/vsc";
+import { TiChevronRightOutline } from "react-icons/ti";
+import { HiFolder } from "react-icons/hi";
 
 import Button from "../Button";
 import Modal from "../Modal";
 import Input from "../Input";
+import TreeModal from "../TreeModal";
+import useCategoryStore from "../../store/categoryStore";
 
 export default function SideMenuBottom() {
-  const [subjects, setSubjects] = useState([]);
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
-  // 목록에서 현재 보여지는 주제
-  // 주제를 선택하면, 주제명이 보이고, 그 아래 children 주제가 보이고, 클릭시 videos 목록이 보여짐
-  // 현재 선택된 주제 목록
-  const [SelectedSubject, setSelectedSubject] = useState({
-    name: "default",
-    id: 1,
-    parentId: null,
-    children: [],
-    videos: [],
-  });
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isTreeModalOpen, setIsTreeModalOpen] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  // Zustand 스토어에서 상태와 액션 가져오기 (lastUpdated 추가)
+  const {
+    categories,
+    selectedCategory,
+    fetchCategories,
+    addCategory: addCategoryAction,
+    selectCategory,
+    findCategoryById,
+    lastUpdated, // 타임스탬프 추가
+  } = useCategoryStore();
+
   const inputRef = useRef(null);
 
+  // 카테고리 데이터 로드 및 기본 카테고리 선택
   useEffect(() => {
-    const fetchSubjects = async () => {
-      try {
-        const data = await getCategory();
-        if (data && data.length > 0) {
-          setSubjects(data);
-          console.log("data - fetchSubjects : ", data);
-
-          const tmpSubject = NodeObjectParser(data);
-          setSelectedSubject(tmpSubject);
-        }
-      } catch (error) {
-        console.error("카테고리 데이터를 가져오는 중 오류 발생:", error);
+    const loadData = async () => {
+      await fetchCategories();
+      if (!selectedCategory) {
+        selectCategory(1);
       }
     };
-    fetchSubjects();
-  }, []);
 
+    loadData();
+  }, [fetchCategories, selectCategory, selectedCategory, lastUpdated]); // lastUpdated를 의존성에 추가
+
+  // 선택된 카테고리 존재 여부 확인
   useEffect(() => {
-    // subjects가 로드된 경우에만 실행
-    if (subjects && subjects.length > 0) {
-      const rootSubject = traverseSubjectsById(1);
-      console.log("루트 주제 데이터:", rootSubject);
-      if (rootSubject) {
-        const parsedSubject = NodeObjectParser(rootSubject);
-        console.log("파싱된 주제 데이터:", parsedSubject);
+    if (selectedCategory?.id) {
+      const stillExists = findCategoryById(selectedCategory.id);
+      if (!stillExists) {
+        selectCategory(1);
       }
     }
-  }, [subjects]); // subjects가 변경될 때마다 실행
-  // parent id는 단계를 말함
+  }, [categories, selectedCategory, findCategoryById, selectCategory]);
 
-  // 노드 객체에서 필요부분만 상태로 저장하도록함
-  const NodeObjectParser = (node) => {
-    // 루트 노드인 경우
-    if (Array.isArray(node) && node.length > 0 && node[0].id === 1) {
-      return {
-        name: node[0].name || "default",
-        id: node[0].id,
-        parentId: null,
-        children: (node[0].children || []).map((subject) => ({
-          id: subject.id,
-          name: subject.name,
-        })),
-        videos: node[0].videos || [],
-      };
-    }
-    // 일반 노드인 경우
-    else {
-      return {
-        name: node.name || "default",
-        id: node.id || 1,
-        parentId: node.parentId || null,
-        children: (node.children || []).map((subject) => ({
-          id: subject.id,
-          name: subject.name,
-        })),
-        videos: node.videos || [],
-      };
-    }
-  };
-
-  // traverseSubjectsById 함수 수정: currentSubjects 매개변수 추가
-  const traverseSubjectsById = (subjectId, currentSubjects = subjects) => {
-    const findSubject = (node) => {
-      if (!node) return null;
-      if (node.id === subjectId) return node;
-      if (node.children && node.children.length > 0) {
-        for (const child of node.children) {
-          const result = findSubject(child);
-          if (result) {
-            return result;
-          }
-        }
-      }
-      return null;
-    };
-
-    // currentSubjects가 배열인지 확인
-    if (!Array.isArray(currentSubjects) || currentSubjects.length === 0)
-      return null;
-
-    for (const node of currentSubjects) {
-      const result = findSubject(node);
-      if (result) {
-        return result;
-      }
-    }
-    return null;
-  };
-
+  // 주제 추가 핸들러
   async function handleAddSubject(parentId, name) {
     if (!name || name.trim() === "") {
-      console.log("주제명을 입력해주세요.");
+      setErrorMessage("주제명을 입력해주세요.");
       return;
     }
 
     try {
-      const newSubjectData = await addCategory({
+      await addCategoryAction({
         name: name.trim(),
         parentId: parentId,
       });
-      console.log("새 주제 추가 결과:", newSubjectData);
 
-      // 주제 추가 후 카테고리 다시 불러오기
-      const updatedData = await getCategory();
-      setSubjects(updatedData);
+      // 방금 추가한 주제의 부모 카테고리를 다시 선택하여 UI 업데이트
+      selectCategory(parentId);
 
-      // 현재 선택된 주제(parentId)의 최신 정보를 updatedData에서 가져와서 SelectedSubject 상태를 갱신
-      // 새 주제가 현재 선택된 주제의 자식으로 추가되므로, 현재 선택된 주제를 다시 로드해야 함.
-      const idOfSubjectToReselect = parentId; // 새 주제의 부모 ID가 현재 선택된 주제 ID임
-      const reloadedSelectedSubjectNode = traverseSubjectsById(
-        idOfSubjectToReselect,
-        updatedData
-      );
-
-      if (reloadedSelectedSubjectNode) {
-        setSelectedSubject(NodeObjectParser(reloadedSelectedSubjectNode));
-      } else {
-        // 만약 이전에 선택했던 주제를 찾을 수 없다면 (예: 동시에 삭제된 경우), 루트를 선택하도록 처리
-        console.warn(
-          `주제 추가 후 ID ${idOfSubjectToReselect}를 가진 부모 주제를 찾을 수 없습니다. 루트를 선택합니다.`
-        );
-        if (updatedData && updatedData.length > 0) {
-          const rootNode = traverseSubjectsById(1, updatedData); // 루트 ID가 1이라고 가정
-          if (rootNode) {
-            setSelectedSubject(NodeObjectParser(rootNode));
-          }
-        }
-      }
-
-      setIsOpen(false);
+      setErrorMessage(""); // 성공 시 에러 메시지 초기화
+      setIsAddModalOpen(false); // 이름 변경
       // 입력 필드 초기화
       if (inputRef.current) {
         inputRef.current.value = "";
       }
     } catch (error) {
-      console.error("주제 추가 중 오류 발생:", error);
+      // alert 대신 상태에 에러 메시지 저장
+      if (error.message.includes("이미 존재하는 주제 이름입니다")) {
+        setErrorMessage(error.message);
+      } else {
+        setErrorMessage("주제 추가 중 오류가 발생했습니다.");
+        console.error("주제 추가 중 오류 발생:", error);
+      }
     }
   }
 
-  const handleSubjectClick = (parentId) => {
-    if (parentId === null || parentId === undefined) {
+  // 주제 클릭 핸들러
+  const handleSubjectClick = (categoryId) => {
+    if (categoryId === null || categoryId === undefined) {
       handleChildSubjectClick(1); // 최상위 경우만 예외
       return;
     }
-    // 선택한 주제에 해당하는 페이지로 이동
-    const tmpSubjectData = traverseSubjectsById(parentId);
-    if (tmpSubjectData) {
-      const parsedSubject = NodeObjectParser(tmpSubjectData);
-      console.log("선택된 주제 데이터:", parsedSubject);
-      setSelectedSubject(parsedSubject);
-      navigate(`/subject/${parentId}`, {
-        state: { Subjectinfo: parsedSubject },
-      });
-    }
+    handleChildSubjectClick(categoryId);
   };
 
-  const handleChildSubjectClick = (subjectId) => {
-    console.log("handleChildSubjectClick - 선택한 주제 ID:", subjectId);
+  const handleChildSubjectClick = (categoryId) => {
+    console.log("handleChildSubjectClick - 선택한 주제 ID:", categoryId);
 
-    const tmpSubjectData = traverseSubjectsById(subjectId);
-    if (tmpSubjectData) {
-      const parsedSubject = NodeObjectParser(tmpSubjectData);
-      console.log("선택된 주제 데이터:", parsedSubject);
-      setSelectedSubject(parsedSubject);
+    // 카테고리 선택하여 상태 업데이트
+    selectCategory(categoryId);
 
-      // 선택한 주제에 해당하는 페이지로 이동
-      navigate(`/subject/${subjectId}`, {
-        state: { Subjectinfo: parsedSubject },
+    const selectedCat = findCategoryById(categoryId);
+    if (selectedCat) {
+      navigate(`/subject/${categoryId}`, {
+        state: { Subjectinfo: selectedCat },
       });
     } else {
-      console.error("선택한 주제를 찾을 수 없습니다. ID:", subjectId);
+      console.error("선택한 주제를 찾을 수 없습니다. ID:", categoryId);
     }
-  };
-
-  const handleFolderTreeClick = () => {
-    // 폴더 트리 페이지로 이동
-    navigate("/subjecttree");
   };
 
   return (
@@ -211,64 +117,97 @@ export default function SideMenuBottom() {
         <h2 className="text-lg font-semibold">Subject</h2>
       </div>
       <div className="flex flex-col gap-1">
-        {/* 현재 선택된 주제  */}
+        {/* 현재 선택된 주제 */}
         <div className="flex items-center gap-1">
           <div className="flex-grow">
             <Button
-              variant="SubjectSelected"
+              variant="SubjectDefault"
               onClick={() => {
-                handleSubjectClick(SelectedSubject.parentId);
+                handleSubjectClick(selectedCategory?.parentId);
               }}
             >
-              {SelectedSubject.name}
+              <div className="flex items-center">
+                <HiFolder className="inline-block mr-1" />
+                {selectedCategory?.name || "Default"}
+                {selectedCategory?.videos &&
+                  selectedCategory.videos.length > 0 && (
+                    <span className="ml-1 text-blue-500 text-sm">
+                      ({selectedCategory.videos.length})
+                    </span>
+                  )}
+              </div>
             </Button>
           </div>
           {/* 폴더 아이콘 버튼 */}
           <Button
             variant="SubjectOther"
-            onClick={handleFolderTreeClick}
+            onClick={() => setIsTreeModalOpen(true)} // 변경
             style={{ width: "auto", padding: "0.5rem" }}
           >
             <FaFolderTree />
           </Button>
           <Button
-            onClick={() => setIsOpen(true)}
+            onClick={() => setIsAddModalOpen(true)} // 변경
             style={{ width: "auto", padding: "0.5rem" }}
             variant="SubjectOther"
           >
             <VscNewFolder />
           </Button>
         </div>
-        {/*자식 버튼*/}
-        {SelectedSubject.children &&
-          SelectedSubject.children.map((childSubject, index) => (
-            <Button
-              key={childSubject.id}
-              variant="SubjectDefault"
-              onClick={() => handleChildSubjectClick(childSubject.id)}
-            >
-              {childSubject.name}
-            </Button>
+        {/* 자식 버튼 */}
+        {selectedCategory?.children &&
+          selectedCategory.children.map((childSubject) => (
+            <div key={childSubject.id} className="flex items-center">
+              <TiChevronRightOutline className="inline-block mr-1" />
+              <Button
+                variant="SubjectDefault"
+                onClick={() => handleChildSubjectClick(childSubject.id)}
+              >
+                <div className="flex items-center">
+                  <HiFolder className="inline-block mr-1" />
+                  {childSubject.name}
+                  {childSubject.videos && childSubject.videos.length > 0 && (
+                    <span className="ml-1 text-blue-500 text-sm">
+                      ({childSubject.videos.length})
+                    </span>
+                  )}
+                </div>
+              </Button>
+            </div>
           ))}
       </div>
       <Modal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
+        isOpen={isAddModalOpen}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setErrorMessage(""); // 모달 닫을 때 에러 메시지 초기화
+        }}
         title="주제 추가"
         variant="AddSubject"
         inputRef={inputRef}
       >
-        <div className="flex flex-row gap-2">
-          <Input ref={inputRef} variant="AddSubject" />
-          <Button
-            onClick={() =>
-              handleAddSubject(SelectedSubject.id, inputRef.current.value)
-            }
-          >
-            <VscNewFolder />
-          </Button>
+        <div className="flex flex-col gap-2">
+          <div className="flex flex-row gap-2">
+            <Input ref={inputRef} variant="AddSubject" />
+            <Button
+              onClick={() =>
+                handleAddSubject(selectedCategory?.id, inputRef.current.value)
+              }
+            >
+              <VscNewFolder />
+            </Button>
+          </div>
+          {/* 에러 메시지 표시 영역 추가 */}
+          {errorMessage && (
+            <p className="text-red-500 text-sm mt-1">{errorMessage}</p>
+          )}
         </div>
       </Modal>
+      <TreeModal
+        isOpen={isTreeModalOpen} // 변경
+        onClose={() => setIsTreeModalOpen(false)} // 변경
+        title="주제 폴더"
+      ></TreeModal>
     </div>
   );
 }
