@@ -1,8 +1,8 @@
 // 퀴즈 기록 페이지
 import { useEffect, useState, useRef } from "react";
+
 import YouTube from "react-youtube";
 import QuizAttemptHistory from "../components/Attempt/QuizAttemptHistory.jsx";
-import { extractVideoId } from "../components/func.js";
 
 import {
   quizAttemptsApi,
@@ -95,36 +95,37 @@ export default function AttemptsPage() {
   console.log("퀴즈 기록:", quizAttempts);
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen bg-gray-50">
       <TopBar />
       <div className="flex justify-between items-center px-4 mb-4">
-        <h1 className="text-2xl font-bold mb-4 p-4">퀴즈 기록</h1>
-        <Button
-          variant="link"
-          onClick={() => {
-            setQuizIdInput(false);
-            setCurrentVideoId(null); // 전체 보기 시 현재 비디오 ID 초기화
-            // '전체 보기' 클릭 시 전체 목록 다시 불러오기
-            const fetchAll = async () => {
-              try {
-                const response = await quizAttemptsApi();
-                if (response && Array.isArray(response)) {
-                  setQuizAttempts(response);
-                } else {
+        <h1 className="text-2xl font-bold mb-4 p-4 text-gray-800">퀴즈 기록</h1>
+        {quizIdInput && (
+          <Button
+            variant="link"
+            onClick={() => {
+              setQuizIdInput(false);
+              setCurrentVideoId(null);
+              // '전체 보기' 클릭 시 전체 목록 다시 불러오기
+              const fetchAll = async () => {
+                try {
+                  const response = await quizAttemptsApi();
+                  if (response && Array.isArray(response)) {
+                    setQuizAttempts(response);
+                  } else {
+                    setQuizAttempts([]);
+                  }
+                } catch (error) {
                   setQuizAttempts([]);
                 }
-              } catch (error) {
-                setQuizAttempts([]);
-              }
-            };
-            fetchAll();
-          }}
-        >
-          전체 보기
-        </Button>
+              };
+              fetchAll();
+            }}
+          >
+            전체 보기
+          </Button>
+        )}
       </div>
       <div className="px-4 mb-4">
-        {/* variant를 "SearchQuiz"로 변경 */}
         <SearchVideo
           inputURLRef={inputURLRef}
           variant="SearchQuiz"
@@ -132,7 +133,7 @@ export default function AttemptsPage() {
         />
       </div>
       {quizIdInput && currentVideoId && (
-        <div className="border-r border-gray-300 p-4 flex flex-col justify-between ">
+        <div className="border-r border-gray-200 p-4 flex flex-col justify-between bg-white shadow-sm rounded-lg mb-4">
           <div className="w-full">
             <YouTube
               videoId={currentVideoId}
@@ -143,12 +144,14 @@ export default function AttemptsPage() {
           </div>
         </div>
       )}
-      <QuizAttemptHistory
-        quizAttempts={quizAttempts}
-        quizAttemptsByVideoIdApi={quizAttemptsByVideoIdApi}
-        quizAttemptsByQuizSetIdApi={quizAttemptsByQuizSetIdApi}
-        quizIdInput={quizIdInput}
-      />
+      <div className="flex-1 overflow-y-auto">
+        <QuizAttemptHistory
+          quizAttempts={quizAttempts}
+          quizAttemptsByVideoIdApi={quizAttemptsByVideoIdApi}
+          quizAttemptsByQuizSetIdApi={quizAttemptsByQuizSetIdApi}
+          quizIdInput={quizIdInput}
+        />
+      </div>
     </div>
   );
 }

@@ -37,10 +37,10 @@ export default function DisplaySummaryLine({ time, text, onTimeClick }) {
   }, [formattedText]);
 
   return (
-    <div className="flex flex-col p-2 bg-white rounded shadow-sm">
+    <div className="flex flex-col p-2 mb-3 bg-white rounded shadow-md border border-gray-200 w-full break-words">
       <div className="timestamp-container">
         <span
-          className="text-blue-500 cursor-pointer text-sm font-medium hover:text-blue-800 mr-2 whitespace-nowrap"
+          className="text-blue-600 cursor-pointer text-sm font-medium hover:text-blue-800 mr-2 whitespace-nowrap"
           onClick={() => onTimeClick(time)}
         >
           [{time}]
@@ -50,11 +50,11 @@ export default function DisplaySummaryLine({ time, text, onTimeClick }) {
       <textarea
         ref={textareaRef}
         defaultValue={formattedText}
-        className="w-full bg-transparent text-sm outline-none resize-none border-none overflow-hidden p-2"
+        className="w-full bg-transparent text-gray-800 text-sm outline-none resize-none border-none overflow-visible p-2 min-h-[20px]"
         onClick={(e) => e.target.select()}
         onInput={(e) => {
           e.target.style.height = "auto";
-          e.target.style.height = e.target.scrollHeight + "px";
+          e.target.style.height = Math.max(e.target.scrollHeight, 20) + "px";
         }}
         rows="1"
       />

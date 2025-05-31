@@ -1,5 +1,5 @@
 // 퀴즈 진행 화면
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import TopBar from "../components/TopBar/TopBar";
@@ -36,7 +36,12 @@ export default function QuizPage() {
         const quizData = await quizGetApi(videoId, difficulty, numOfQuestions);
         console.log("quizData : ", quizData);
         setQuizSetId(quizData.data.quizSetId);
-        setQuestions(quizData.data.questions);
+
+        // 받아온 문제를 quizId 기준으로 정렬하여 저장
+        const sortedQuestions = [...quizData.data.questions].sort(
+          (a, b) => a.quizId - b.quizId
+        );
+        setQuestions(sortedQuestions);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -45,6 +50,11 @@ export default function QuizPage() {
     }
     fetchQuiz();
   }, [videoId, difficulty, numOfQuestions]);
+
+  // useMemo를 사용하여 정렬된 문제 배열 생성 (추가 정렬 로직이 필요할 경우)
+  const sortedQuestions = useMemo(() => {
+    return [...questions].sort((a, b) => a.quizId - b.quizId);
+  }, [questions]);
 
   useEffect(() => {
     const tmpAnswers = {};
@@ -76,58 +86,82 @@ export default function QuizPage() {
     setQuizResults({});
 
     const tmpQuizResult = await quizSubmitApi(tmpAnswers, quizSetId);
-    setQuizResults(tmpQuizResult.data);
+    // quizId 기준으로 결과 정렬
+    const sortedResults = [...tmpQuizResult.data].sort(
+      (a, b) => a.quizId - b.quizId
+    );
+    setQuizResults(sortedResults);
     console.log("tmpQuizResult : ", tmpQuizResult);
     setIsOpen(true);
   }
 
+  // 퀴즈 아이템 렌더링 컴포넌트
+  const renderQuizItems = () => {
+    return sortedQuestions.map((quiz, index) => (
+      <QuizItem
+        key={quiz.quizId}
+        {...quiz}
+        index={index}
+        onAnswerSelect={handleAnswerSelect}
+        selectedAnswer={answers[quiz.quizId]?.userAnswer || null}
+      />
+    ));
+  };
+
   return (
-    <div className="flex flex-col h-screen relative">
+    <div className="flex flex-col h-screen relative bg-gray-50">
       <TopBar />
-      {/* 문제 영역: 화면 대부분 차지 */}
-      <div className="flex-1 p-8 overflow-y-auto">
-        {questions.map((quiz, index) => (
-          <QuizItem
-            {...quiz}
-            index={index}
-            key={quiz.quizId}
-            onAnswerSelect={handleAnswerSelect}
-            selectedAnswer={answers[quiz.quizId]?.userAnswer || null}
-          />
-        ))}
-      </div>
-      {/* 우측 하단: 답안 현황 + 제출 버튼 (작게, 고정) */}
-      <div className="fixed bottom-12 right-12 h-1/5 w-350px bg-white border border-gray-300 rounded-lg shadow-lg p-4 z-50">
+      <div className="flex-1 p-8 overflow-y-auto">{renderQuizItems()}</div>
+      <div className="fixed bottom-12 right-12 h-1/5 w-350px bg-white border border-gray-200 rounded-lg shadow-md p-4 z-50">
         <AnswerStatus
-          questions={questions}
+          questions={sortedQuestions}
           answers={answers}
           onSubmit={() => handleSubmit(answers, quizSetId)}
         />
       </div>
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="결과">
-        {quizResults.length > 0 &&
-          quizResults.map((quizResult, index) => (
-            <div key={quizResult.attemptId}>
-              <QuizResultItem quizResult={quizResult} index={index} />
-            </div>
-          ))}
-        <div className="flex justify-end mt-4 gap-2">
-          <Button
-            onClick={() => {
-              setIsOpen(false);
-              navigate(`/video/${videoId}`);
-            }}
-          >
-            동영상으로 돌아가기
-          </Button>
-          <Button
-            onClick={() => {
-              setIsOpen(false);
-              navigate(`/`);
-            }}
-          >
-            처음으로
-          </Button>
+        <div className="flex flex-col">
+          <div className="space-y-4 mb-6">
+            {quizResults.length > 0 &&
+              quizResults.map((quizResult, index) => (
+                <div key={quizResult.attemptId || quizResult.quizId}>
+                  <QuizResultItem
+                    quizResult={quizResult}
+                    index={index}
+                    originalIndex={sortedQuestions.findIndex(
+                      (q) => q.quizId === quizResult.quizId
+                    )}
+                  />
+                </div>
+              ))}
+          </div>
+          <div className="flex justify-end mt-4 gap-2 pt-4 border-t border-gray-200">
+            <Button
+              variant="primary"
+              onClick={() => {
+                setIsOpen(false);
+                navigate(`/attempts/${quizSetId}`);
+              }}
+            >
+              풀이 보기
+            </Button>
+            <Button
+              onClick={() => {
+                setIsOpen(false);
+                navigate(`/video/${videoId}`);
+              }}
+            >
+              동영상으로 돌아가기
+            </Button>
+            <Button
+              onClick={() => {
+                setIsOpen(false);
+                navigate(`/`);
+              }}
+            >
+              처음으로
+            </Button>
+          </div>
         </div>
       </Modal>
     </div>

@@ -1,6 +1,5 @@
 import Input from "../Input";
 import Button from "../Button";
-import Modal from "../Modal";
 
 import { extractVideoId } from "../func.js";
 import { useNavigate } from "react-router-dom";
@@ -9,13 +8,13 @@ import { PiPlayFill } from "react-icons/pi";
 
 export default function SearchVideo({ inputURLRef, variant, onChange }) {
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = useState(false);
-  const [isError, setIsError] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = () => {
     const vidID = extractVideoId(inputURLRef.current.value || "");
 
     if (vidID) {
+      setErrorMessage(""); // 성공 시 에러 메시지 제거
       if (variant === "SearchVideo") {
         navigate(`/video/${vidID}`);
       } else if (variant === "SearchQuiz") {
@@ -23,8 +22,7 @@ export default function SearchVideo({ inputURLRef, variant, onChange }) {
         onChange(vidID);
       }
     } else {
-      setIsError("올바른 유튜브 URL을 입력해주세요.");
-      setIsOpen(true);
+      setErrorMessage("올바른 유튜브 URL을 입력해주세요.");
     }
   };
 
@@ -42,12 +40,9 @@ export default function SearchVideo({ inputURLRef, variant, onChange }) {
           </Button>
         </div>
       </div>
-      <Modal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        title={isError}
-        variant="NeedYoutubeURL"
-      ></Modal>
+      {errorMessage && (
+        <p className="text-red-500 text-sm mt-1 ml-2">{errorMessage}</p>
+      )}
     </div>
   );
 }

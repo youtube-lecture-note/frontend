@@ -38,11 +38,8 @@ export default function SubjectNode({
 
   return (
     <div className="mb-1">
-      {/* 주제 이름과 비디오 개수 표시 */}
       <div className="flex items-center py-1">
-        {/* 단계마다 탭 들여쓰기 */}
         {indent}
-        {/* flex-grow 제거하고 버튼과 삭제 버튼 사이 여백 추가 */}
         <div className="flex items-center">
           <Button
             variant="SubjectDefault"
@@ -53,20 +50,20 @@ export default function SubjectNode({
             }
           >
             <div className="flex items-center">
-              <HiFolder />
+              <HiFolder className="text-blue-600" />
               <span className="font-medium text-gray-800 ml-1">
                 {subject.name}
               </span>
               {videoCount > 0 && (
-                <span className="ml-1 text-blue-500 text-sm">({videoCount})</span>
+                <span className="ml-1 text-blue-600 text-sm">
+                  ({videoCount})
+                </span>
               )}
             </div>
           </Button>
         </div>
-        {/* 여백 추가 */}
         <div className="flex-grow"></div>
         <div className="flex items-center space-x-2">
-          {/* 주제 추가 버튼 */}
           {handleAddButtonClick && (
             <Button
               onClick={() => handleAddButtonClick(subject.id)}
@@ -95,9 +92,9 @@ export default function SubjectNode({
               key={childSubject.id}
               subject={childSubject}
               level={level + 1} // 다음 레벨로 재귀 호출
-              handleDeleteSubject={handleDeleteSubject} // handleDeleteSubject prop 전달
-              handleSubjectClick={handleSubjectClick} // handleSubjectClick prop 전달
-              handleAddButtonClick={handleAddButtonClick} // handleAddButtonClick prop 전달
+              handleDeleteSubject={handleDeleteSubject}
+              handleSubjectClick={handleSubjectClick}
+              handleAddButtonClick={handleAddButtonClick}
             />
           ))}
         </div>

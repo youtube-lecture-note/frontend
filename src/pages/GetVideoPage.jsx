@@ -117,8 +117,16 @@ export default function GetVideoPage() {
 - 데이터가 없습니다.
 - 데이터가 없습니다.`;
 
-  const displaySummary =
-    parse_summary.length === 0 ? parseSummary(noData) : parse_summary;
+  // 시간 형식(분:초)을 초로 변환하는 함수
+  const timeToSeconds = (timeStr) => {
+    const [minutes, seconds] = timeStr.split(":").map(Number);
+    return minutes * 60 + seconds;
+  };
+
+  // 정렬된 요약 데이터 생성
+  const displaySummary = (
+    parse_summary.length === 0 ? parseSummary(noData) : parse_summary
+  ).sort((a, b) => timeToSeconds(a.time) - timeToSeconds(b.time));
 
   // 문제풀이 버튼
   function handleQuizClick() {
@@ -157,11 +165,11 @@ export default function GetVideoPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen bg-gray-50">
       <TopBar />
       <div className="flex flex-1 overflow-hidden">
         {/* 왼쪽 영역: 비디오 플레이어 */}
-        <div className="w-3/5 border-r border-gray-300 p-4 flex flex-col justify-between overflow-y-auto">
+        <div className="w-3/5 border-r border-gray-200 p-4 flex flex-col justify-between overflow-y-auto">
           <div className="w-full">
             <YouTube
               videoId={videoId}
@@ -179,12 +187,12 @@ export default function GetVideoPage() {
         </div>
 
         {/* 오른쪽 영역: 강의 노트 */}
-        <div className="w-2/5 p-4 overflow-y-auto">
-          <h2 className="text-xl font-bold mb-4">강의 노트</h2>
-          <div className=" rounded-lg p-4">
+        <div className="w-2/5 p-4 overflow-y-auto bg-white">
+          <h2 className="text-xl font-bold mb-4 text-gray-800">강의 노트</h2>
+          <div className="rounded-lg p-4">
             <div className="flex flex-col gap-4 pb-4">
               {error ? (
-                <p className="text-red-500">{error}</p>
+                <p className="text-red-600">{error}</p>
               ) : (
                 <div className="flex flex-col gap-4">
                   {displaySummary.map((item) => (

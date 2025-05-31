@@ -100,3 +100,35 @@ export const deleteCategoryVideo = async (categoryID, videoID) => {
     return {}; // 파싱 실패 시 빈 객체 반환
   }
 };
+
+//카테고리간 비디오 이동
+export const moveCategoryVideo = async (
+  fromCategoryId,
+  videoID,
+  toCategoryId
+) => {
+  const response = await fetch(
+    `${API_URL}/api/categories/${fromCategoryId}/videos/${videoID}/move/${toCategoryId}`,
+    {
+      ...API_CONFIG,
+      method: "PUT",
+      body: JSON.stringify({ targetCategoryID: toCategoryId }),
+    }
+  );
+  if (!response.ok) {
+    throw new Error("카테고리간 비디오 이동 실패");
+  }
+
+  // 응답 내용이 있는지 확인
+  const text = await response.text();
+  if (!text) {
+    return {}; // 빈 응답인 경우 빈 객체 반환
+  }
+
+  try {
+    return JSON.parse(text); // 텍스트를 JSON으로 파싱
+  } catch (error) {
+    console.error("JSON 파싱 오류:", error);
+    return {}; // 파싱 실패 시 빈 객체 반환
+  }
+};
