@@ -26,31 +26,104 @@ export default function SideMenuBottom() {
     fetchCategories,
     selectedCategory,
     selectCategory,
+    findCategoryByName, // 이 함수 사용
   } = useCategoryStore();
 
-  // 컴포넌트 마운트 시 카테고리 데이터 로드
+  // 컴포넌트 마운트 시 카테고리 데이터 로드 및 적절한 카테고리 선택
   useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+    const initializeCategories = async () => {
+      try {
+        // 카테고리 데이터 로드
+        const data = await fetchCategories();
+        console.log("카테고리 데이터 로드됨:", data);
 
-  // 주제 클릭 핸들러
+        // 데이터가 있는지 확인
+        if (!data || data.length === 0) {
+          console.warn("로드된 카테고리 없음");
+          return;
+        }
+
+        // "Default" 카테고리를 찾거나 첫 번째 루트 카테고리 사용
+        const defaultCategory =
+          findCategoryByName("Default") ||
+          data.find((cat) => cat.parentId === null) ||
+          data[0];
+
+        console.log("Default 카테고리 선택:", defaultCategory);
+
+        // 현재 경로에 따라 적절한 카테고리 선택
+        const isHomePage = window.location.pathname === "/";
+        if (isHomePage) {
+          selectCategory(defaultCategory.id);
+        } else {
+          // URL에서 subject ID 추출 시도
+          const match = window.location.pathname.match(/\/subject\/(\d+)/);
+          if (match && match[1]) {
+            selectCategory(parseInt(match[1]));
+          } else {
+            selectCategory(defaultCategory.id);
+          }
+        }
+      } catch (error) {
+        console.error("카테고리 초기화 실패:", error);
+      }
+    };
+
+    initializeCategories();
+  }, [fetchCategories, selectCategory, findCategoryByName]);
+
+  // 선택된 카테고리 변경 감지 및 디버깅
+  useEffect(() => {
+    if (selectedCategory) {
+      console.log(
+        "현재 선택된 카테고리:",
+        selectedCategory.id,
+        selectedCategory.name
+      );
+    } else {
+      console.log("선택된 카테고리 없음");
+    }
+  }, [selectedCategory]);
+
+  // 주제 클릭 핸들러 - 상위 카테고리로 이동
   const handleSubjectClick = (categoryId) => {
-    if (!categoryId) {
-      // 선택된 카테고리의 부모 ID가 없을 경우
-      selectCategory(1); // 기본 홈으로 이동
-      navigate("/");
+    // 상위 카테고리 ID가 없거나 유효하지 않은 경우 루트로 이동
+    if (!categoryId || categoryId < 1) {
+      console.log("루트 카테고리로 이동");
+      selectCategory(1); // 루트 카테고리 ID (보통 1)
+      navigate(`/subject/1`);
       return;
     }
 
-    const category = useCategoryStore
-      .getState()
-      .categories.find((cat) => cat.id === categoryId);
+    // 카테고리 객체 찾기 (findCategoryById 사용)
+    const findCategoryById = (
+      id,
+      categories = useCategoryStore.getState().categories
+    ) => {
+      // 재귀적으로 카테고리 찾기
+      const findInCategories = (cats) => {
+        for (const cat of cats) {
+          if (cat.id === id) return cat;
+          if (cat.children?.length > 0) {
+            const found = findInCategories(cat.children);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+      return findInCategories(categories);
+    };
+
+    const category = findCategoryById(categoryId);
+    console.log("선택한 상위 카테고리:", category);
 
     if (category) {
       selectCategory(categoryId);
       navigate(`/subject/${categoryId}`, {
         state: { Subjectinfo: category },
       });
+    } else {
+      console.error("카테고리를 찾을 수 없음:", categoryId);
     }
   };
 

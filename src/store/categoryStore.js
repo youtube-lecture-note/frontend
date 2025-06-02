@@ -19,6 +19,14 @@ const useCategoryStore = create((set, get) => ({
     try {
       const data = await getCategory();
       set({ categories: data || [], isLoading: false });
+
+      // 카테고리 로드 후 selectedCategory가 없으면 첫 번째 카테고리 선택
+      if (data && data.length > 0 && !get().selectedCategory) {
+        const rootCategory = data[0]; // 첫 번째 항목을 루트 카테고리로 가정
+        set({ selectedCategory: rootCategory });
+        console.log("자동으로 루트 카테고리 선택됨:", rootCategory);
+      }
+
       return data;
     } catch (error) {
       console.error("카테고리를 불러오는데 실패했습니다:", error);
@@ -79,8 +87,32 @@ const useCategoryStore = create((set, get) => ({
 
   // 카테고리 선택 상태 관리
   selectCategory: (categoryId) => {
+    if (!categoryId) {
+      console.warn("유효하지 않은 카테고리 ID:", categoryId);
+      return;
+    }
+
+    console.log("카테고리 선택 시도:", categoryId);
     const category = get().findCategoryById(categoryId);
-    set({ selectedCategory: category });
+
+    if (category) {
+      console.log("카테고리 선택 성공:", category.id, category.name);
+      set({ selectedCategory: category });
+    } else {
+      console.warn("선택할 카테고리를 찾을 수 없음:", categoryId);
+      // 카테고리를 찾을 수 없을 때 루트 카테고리를 찾아 선택
+      const categories = get().categories;
+      if (categories && categories.length > 0) {
+        const rootCategory =
+          categories.find((cat) => cat.id === 1) || categories[0];
+        console.log(
+          "대체 루트 카테고리 선택:",
+          rootCategory.id,
+          rootCategory.name
+        );
+        set({ selectedCategory: rootCategory });
+      }
+    }
   },
 
   // 유틸리티 함수
