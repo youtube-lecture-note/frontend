@@ -107,15 +107,23 @@ export const moveCategoryVideo = async (
   videoID,
   toCategoryId
 ) => {
+  console.log(
+    `API 호출: ${fromCategoryId}에서 ${toCategoryId}로 비디오 ${videoID} 이동`
+  );
+
   const response = await fetch(
     `${API_URL}/api/categories/${fromCategoryId}/videos/${videoID}/move/${toCategoryId}`,
     {
       ...API_CONFIG,
       method: "PUT",
-      body: JSON.stringify({ targetCategoryID: toCategoryId }),
+      // 백엔드가 기대하는 형식에 맞게 body 수정
+      // 실제 API 스펙에 따라 필요한 경우 아래 형식 조정
+      body: JSON.stringify({ targetCategoryId: toCategoryId }),
     }
   );
   if (!response.ok) {
+    const errorText = await response.text();
+    console.error("비디오 이동 API 오류:", errorText);
     throw new Error("카테고리간 비디오 이동 실패");
   }
 

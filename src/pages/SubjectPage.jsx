@@ -39,21 +39,6 @@ export default function SubjectPage() {
     }
   };
 
-  // 비디오 업데이트 처리 핸들러
-  const handleVideoUpdate = () => {
-    setRefreshKey((prev) => prev + 1);
-    fetchCategories().then(() => {
-      // 현재 주제 정보 업데이트
-      if (subjectId) {
-        const updatedCategory = findCategoryById(parseInt(subjectId));
-        navigate(`/subject/${subjectId}`, {
-          state: { Subjectinfo: updatedCategory },
-          replace: true,
-        });
-      }
-    });
-  };
-
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       <TopBar />
@@ -91,7 +76,6 @@ export default function SubjectPage() {
                 name={video.userVideoName || "제목 없음"}
                 videoId={video.videoId}
                 onClick={() => handleVideoClick(video.videoId)}
-                onVideoUpdate={handleVideoUpdate}
               />
             ))}
           </div>

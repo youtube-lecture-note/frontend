@@ -11,6 +11,7 @@ import Input from "../Input";
 import Button from "../Button";
 import useCategoryStore from "../../store/categoryStore";
 import { moveCategoryVideo, deleteCategoryVideo } from "../../api/category";
+import { useParams } from "react-router-dom";
 
 export default function SubjectVideoIcon({
   name,
@@ -19,6 +20,9 @@ export default function SubjectVideoIcon({
   video,
   onVideoUpdate,
 }) {
+  // useParams를 올바르게 호출하여 URL 파라미터 가져오기
+  const { subjectId } = useParams();
+
   const [menuOpen, setMenuOpen] = useState(false);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [categoryName, setCategoryName] = useState("");
@@ -79,14 +83,25 @@ export default function SubjectVideoIcon({
     console.log("영상 삭제 요청:", videoId);
   };
 
-  // 비디오 이동 처리 - 카테고리 이름으로 검색하여 ID를 찾음
+  // 비디오 이동 처리 - URL에서 현재 카테고리 ID 직접 사용
   const handleMoveVideo = async () => {
+    // 기본 검증
     if (!categoryName) {
       setError("이동할 주제 이름을 입력해주세요.");
       return;
     }
 
-    // 이름으로 카테고리 검색
+    if (!videoId) {
+      setError("비디오 ID 정보가 없습니다.");
+      return;
+    }
+
+    if (!subjectId) {
+      setError("현재 주제 ID를 찾을 수 없습니다.");
+      return;
+    }
+
+    // 이름으로 대상 카테고리 검색
     const targetCategory = findCategoryByName(categoryName);
 
     if (!targetCategory) {
@@ -94,20 +109,31 @@ export default function SubjectVideoIcon({
       return;
     }
 
-    const categoryId = targetCategory.id;
+    const targetCategoryId = targetCategory.id;
+    const currentCategoryId = parseInt(subjectId);
 
-    // 같은 카테고리로 이동하려는 경우
-    if (categoryId === video.categoryId) {
+    // 같은 카테고리로 이동하려는 경우 체크
+    if (currentCategoryId === targetCategoryId) {
       setError("이미 해당 주제에 있는 영상입니다.");
       return;
     }
+
+    // 디버깅 정보 출력
+    console.log("=== 비디오 이동 디버깅 정보 ===");
+    console.log("현재 카테고리 ID:", currentCategoryId);
+    console.log("비디오 ID:", videoId);
+    console.log("이동할 카테고리 ID:", targetCategoryId);
+    console.log("이동할 카테고리명:", categoryName);
 
     setIsLoading(true);
     setError("");
 
     try {
-      // API 호출로 비디오 이동
-      await moveCategoryVideo(video.categoryId, videoId, categoryId);
+      // API 호출 - 명확한 파라미터 이름으로 수정
+      await moveCategoryVideo(currentCategoryId, videoId, targetCategoryId);
+
+      // 성공 메시지와 상태 업데이트
+      console.log(`영상이 "${targetCategory.name}" 주제로 성공적으로 이동됨`);
 
       // 카테고리 목록 새로고침
       await fetchCategories();
@@ -115,11 +141,6 @@ export default function SubjectVideoIcon({
       // 모달 닫기
       setIsMoveModalOpen(false);
       setCategoryName("");
-
-      // 성공 메시지
-      console.log(
-        `영상이 "${targetCategory.name}" 주제로 성공적으로 이동되었습니다.`
-      );
 
       // 부모에게 업데이트 알림
       if (onVideoUpdate) {
