@@ -1,7 +1,7 @@
-import { TiChevronRightOutline } from "react-icons/ti";
 import { HiFolder } from "react-icons/hi";
 import { FaTrash } from "react-icons/fa";
 import { VscNewFolder } from "react-icons/vsc";
+import { FiCornerDownRight } from "react-icons/fi";
 
 import Button from "../Button";
 
@@ -29,7 +29,7 @@ export default function SubjectNode({
 
   if (level > 0) {
     indent.push(
-      <TiChevronRightOutline
+      <FiCornerDownRight
         key={`indent-icon-${level}`}
         className="inline-block text-gray-400 mr-2"
       />

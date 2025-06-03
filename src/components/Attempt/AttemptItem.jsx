@@ -1,12 +1,51 @@
 // 퀴즈로 가져온 개별 문제 1개
 export default function AttemptItem({ quiz, index }) {
-  // darkMode prop 제거하고 항상 다크모드로 고정
-  let questionStyle = "text-xl font-bold mb-4 text-gray-800";
+  // 디버깅을 위한 콘솔 로그 추가
+  console.log("퀴즈 데이터:", quiz);
 
-  if (quiz.iscorrect === true) {
-    questionStyle += " text-green-600";
+  let questionStyle = "text-xl font-bold mb-4";
+
+  // 통일된 변수 사용
+  if (quiz.isCorrect) {
+    questionStyle += " text-blue-700";
   } else {
-    questionStyle += " text-red-600";
+    questionStyle += " text-red-500";
+  }
+
+  let quizContent = null;
+  if (quiz.selective) {
+    const userAnswerIdx = Number(quiz.userAnswer) - 1;
+    const AnswerIdx = Number(quiz.correctAnswer) - 1;
+
+    const selectiveDefault = `flex-1 p-2 rounded-md text-gray-700 bg-gray-200`;
+    const AnswerStyle = `flex-1 p-2 rounded-md text-gray-700 bg-blue-400`;
+    const userAnswerStyle = `flex-1 p-2 rounded-md text-gray-700 bg-red-200`;
+
+    quizContent = (
+      <div className="space-y-3 mb-5">
+        {quiz.options.map((option, idx) => (
+          <div key={idx} className="flex items-center">
+            <span
+              className={`${
+                idx === AnswerIdx
+                  ? AnswerStyle
+                  : idx === userAnswerIdx
+                  ? userAnswerStyle
+                  : selectiveDefault
+              }`}
+            >
+              {option}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  } else {
+    quizContent = (
+      <p className="rounded-md text-gray-700 bg-gray-300 p-2 mb-4">
+        {quiz.userAnswer ? quiz.userAnswer : "제출 안함"}
+      </p>
+    );
   }
 
   return (
@@ -14,11 +53,9 @@ export default function AttemptItem({ quiz, index }) {
       <h3 className={questionStyle}>
         Q{index + 1}. {quiz.question}
       </h3>
-      <p className="text-gray-600 mb-5">
-        사용자 답변 : {quiz.userAnswer ? quiz.userAnswer : "제출 안함"}
-      </p>
-      <p className="text-green-600 mb-2">정답 : {quiz.correctAnswer}</p>
-      <p className="text-gray-700">{quiz.comment}</p>
+      {quizContent}
+      <p className="text-green-800 mb-2">정답 : {quiz.correctAnswer}</p>
+      <p className="text-green-700">{quiz.comment}</p>
     </div>
   );
 }

@@ -15,6 +15,9 @@ export default function QuizItem({
     quizType = "MULTIPLE_CHOICE";
   }
 
+  // 디버깅용 로그 추가
+  console.log(`QuizItem ${quizId} - 선택된 답변:`, selectedAnswer);
+
   return (
     <div className="mb-8 p-6 bg-white rounded-lg shadow-md border border-gray-200">
       <h3 className="text-xl font-bold mb-4 text-gray-800">
@@ -30,15 +33,19 @@ export default function QuizItem({
                 type="radio"
                 id={`choice-${quizId}-${idx}`}
                 name={`quiz-${quizId}`}
-                value={option}
+                value={idx.toString()}
                 variant="MultipleChoiceComponent"
-                checked={selectedAnswer === option}
-                onChange={() => onAnswerSelect(quizId, option)}
+                // 선택된 답변과 현재 인덱스 비교
+                checked={selectedAnswer === idx.toString()}
+                onChange={() => {
+                  // 인덱스를 문자열로 전달 (QuizPage에서 +1 처리)
+                  onAnswerSelect(quizId, idx.toString());
+                }}
               />
               <label
                 htmlFor={`choice-${quizId}-${idx}`}
                 className={`flex-1 p-2 rounded-md ${
-                  selectedAnswer === option
+                  selectedAnswer === idx.toString()
                     ? "bg-blue-100 text-blue-800"
                     : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 } cursor-pointer transition-colors`}

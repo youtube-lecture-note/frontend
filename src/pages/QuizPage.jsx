@@ -67,45 +67,74 @@ export default function QuizPage() {
     setAnswers(tmpAnswers);
   }, [questions]);
 
-  // 정답 저장
+  // 정답 저장 - 객관식일 경우 인덱스에 1을 더해서 저장
   const handleAnswerSelect = (quizId, userAnswer) => {
+    // 객관식 답변인지 확인 (숫자 또는 숫자 문자열인 경우)
+    const isNumeric = !isNaN(userAnswer) && userAnswer !== "";
+
+    // 객관식인 경우 인덱스에 1을 더함 (0부터 시작하는 인덱스를 1부터 시작하도록)
+    const processedAnswer = isNumeric
+      ? String(Number(userAnswer) + 1)
+      : String(userAnswer).trim();
+
+    console.log(
+      `문제 ID: ${quizId}, 원본 답변: ${userAnswer}, 처리된 답변: ${processedAnswer}`
+    );
+
     setAnswers((prev) => ({
       ...prev,
       [quizId]: {
         quizId: Number(quizId),
-        userAnswer: String(userAnswer).trim(),
+        userAnswer: processedAnswer,
+        // UI 표시용 원본 답변 (객관식에서 필요)
+        originalAnswer: userAnswer,
       },
     }));
   };
 
-  // 퀴즈 제출
+  // 퀴즈 제출 - 인덱스 처리는 이미 handleAnswerSelect에서 했으므로 여기서는 추가 처리 없음
   async function handleSubmit(answers, quizSetId) {
-    console.log("answers : ", answers);
+    console.log("제출할 답변:", answers);
     let tmpAnswers = Object.values(answers);
-    console.log("tmpAnswers : ", tmpAnswers);
+    console.log("가공된 답변 배열:", tmpAnswers);
     setQuizResults({});
 
-    const tmpQuizResult = await quizSubmitApi(tmpAnswers, quizSetId);
-    // quizId 기준으로 결과 정렬
-    const sortedResults = [...tmpQuizResult.data].sort(
-      (a, b) => a.quizId - b.quizId
-    );
-    setQuizResults(sortedResults);
-    console.log("tmpQuizResult : ", tmpQuizResult);
-    setIsOpen(true);
+    try {
+      const tmpQuizResult = await quizSubmitApi(tmpAnswers, quizSetId);
+      // quizId 기준으로 결과 정렬
+      const sortedResults = [...tmpQuizResult.data].sort(
+        (a, b) => a.quizId - b.quizId
+      );
+      setQuizResults(sortedResults);
+      console.log("퀴즈 결과:", tmpQuizResult);
+      setIsOpen(true);
+    } catch (error) {
+      console.error("퀴즈 제출 오류:", error);
+      setError("퀴즈 제출 중 오류가 발생했습니다.");
+    }
   }
 
   // 퀴즈 아이템 렌더링 컴포넌트
   const renderQuizItems = () => {
-    return sortedQuestions.map((quiz, index) => (
-      <QuizItem
-        key={quiz.quizId}
-        {...quiz}
-        index={index}
-        onAnswerSelect={handleAnswerSelect}
-        selectedAnswer={answers[quiz.quizId]?.userAnswer || null}
-      />
-    ));
+    return sortedQuestions.map((quiz, index) => {
+      // 객관식인지 여부 확인
+      const isMultipleChoice = quiz.options && quiz.options.length > 0;
+
+      return (
+        <QuizItem
+          key={quiz.quizId}
+          {...quiz}
+          index={index}
+          onAnswerSelect={handleAnswerSelect}
+          // 객관식이면 원본 답변을, 아니면 userAnswer 그대로 전달
+          selectedAnswer={
+            isMultipleChoice
+              ? answers[quiz.quizId]?.originalAnswer || null
+              : answers[quiz.quizId]?.userAnswer || null
+          }
+        />
+      );
+    });
   };
 
   return (
