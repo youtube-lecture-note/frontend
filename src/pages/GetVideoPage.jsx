@@ -181,7 +181,6 @@ export default function GetVideoPage() {
 
           <SearchVideo inputURLRef={inputURLRef} variant={"SearchVideo"} />
           <div className="flex justify-center gap-4 mt-4">
-            <Button>노트</Button>
             <Button onClick={handleQuizClick}>문제풀기</Button>
           </div>
         </div>
@@ -208,7 +207,6 @@ export default function GetVideoPage() {
             </div>
             <div className="flex gap-2">
               <Button onClick={handleSaveNote}>저장</Button>
-              <Button onClick={handleSaveNote}>영상차단</Button>
             </div>
           </div>
         </div>

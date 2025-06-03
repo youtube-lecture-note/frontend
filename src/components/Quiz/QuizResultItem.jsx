@@ -1,25 +1,52 @@
-export default function QuizResultItem({ quizResult, index }) {
-  let resultStyle = "mb-2 font-bold ";
-  if (quizResult.iscorrect) {
-    resultStyle += "text-green-600";
+export default function QuizResultItem({
+  quizResult,
+  index,
+  originalIndex,
+  questionItem,
+}) {
+  let resultStyle = "text-lg font-bold mb-2 ";
+  if (quizResult.correct) {
+    resultStyle += "text-blue-600";
   } else {
     resultStyle += "text-red-600";
+  }
+  console.log("quizitem : ", questionItem, originalIndex);
+
+  let myAnswer = null;
+
+  if (questionItem.options.length > 0) {
+    // 객관식인 경우
+    myAnswer = (
+      <p className="mb-2">
+        {questionItem.options.map((option, idx) => (
+          <div
+            key={idx}
+            className={`m-2 p-2 border rounded-md ${
+              Number(quizResult.userAnswer) - 1 === idx
+                ? "bg-gray-400 border-gray-200 text-black" // Not selected (Gray)
+                : "bg-gray-100 border-gray-200 text-black" // Not selected (Gray)
+            }`}
+          >
+            {option}
+          </div>
+        ))}
+      </p>
+    );
+  } else {
+    // 주관식인 경우
+    myAnswer = (
+      <div className="mb-2 border border-gray-200 rounded-md p-2 bg-gray-100">
+        {quizResult.userAnswer ? quizResult.userAnswer : "제출 안함"}
+      </div>
+    );
   }
 
   return (
     <div className="mb-4 p-5 bg-white rounded-lg shadow-md border border-gray-200">
-      <h3 className="text-lg font-bold text-gray-800 mb-2">
+      <h3 className={resultStyle}>
         Q{index + 1}. {quizResult.questionText}
       </h3>
-      <p className={resultStyle}>
-        {quizResult.iscorrect ? "정답입니다!" : "틀렸습니다!"}
-      </p>
-      <div className="mb-2">
-        <span className="text-gray-700 font-medium">제출:</span>{" "}
-        <span className="text-gray-800">
-          {quizResult.userAnswer || "(제출 안함)"}
-        </span>
-      </div>
+      {myAnswer}
     </div>
   );
 }
