@@ -36,6 +36,9 @@ export default function SideMenuTopLogin() {
         <Button variant="SubjectDefault" onClick={() => navigate("/attempts")}>
           <span className="text-gray-800">퀴즈 기록</span>
         </Button>
+        <Button variant="SubjectDefault" onClick={() => navigate("/admin")}>
+          <span className="text-gray-800">관리자 페이지</span>
+        </Button>
       </div>
     </div>
   );
