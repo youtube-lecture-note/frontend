@@ -116,7 +116,7 @@ export const moveCategoryVideo = async (
     const errorText = await response.text();
     console.error(`[DEBUG] 비디오 이동 API 오류 (${response.status}):`, errorText);
     console.error(`[DEBUG] 요청 정보: URL: ${requestUrl}, Method: PUT, Body: ${JSON.stringify(requestBody)}`);
-    throw new Error("카테고리간 비디오 이동 실패");
+    throw new Error("비디오 이동 실패");
   }
 
   const text = await response.text();

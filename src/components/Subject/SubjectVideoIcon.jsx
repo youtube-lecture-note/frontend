@@ -7,7 +7,7 @@ import Button from "../Button";
 import TreeModal from "../TreeModal"; // TreeModal 임포트
 import useCategoryStore from "../../store/categoryStore";
 import { moveCategoryVideo, deleteCategoryVideo } from "../../api/category";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // useNavigate 추가
 
 export default function SubjectVideoIcon({
   name,
@@ -18,6 +18,7 @@ export default function SubjectVideoIcon({
 }) {
   // useParams를 올바르게 호출하여 URL 파라미터 가져오기
   const { subjectId } = useParams();
+  const navigate = useNavigate(); // useNavigate 훅 사용
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
@@ -25,7 +26,7 @@ export default function SubjectVideoIcon({
   const menuRef = useRef(null);
 
   // 카테고리 스토어에서 필요한 함수와 상태 가져오기
-  const { categories, fetchCategories } = useCategoryStore();
+  const { categories, fetchCategories, selectCategory } = useCategoryStore();
 
   // YouTube 썸네일 URL 생성
   const thumbnailUrl = videoId
@@ -98,8 +99,10 @@ export default function SubjectVideoIcon({
     }
 
     const currentCategoryId = parseInt(subjectId);
+    // targetCategoryId도 숫자로 변환하여 타입 일치시키기
+    const targetCategoryIdNum = parseInt(targetCategoryId);
 
-    if (currentCategoryId === targetCategoryId) {
+    if (currentCategoryId === targetCategoryIdNum) {
       setError("이미 해당 주제에 있는 영상입니다.");
       return;
     }
@@ -107,20 +110,34 @@ export default function SubjectVideoIcon({
     console.log("=== 비디오 이동 (TreeModal) 디버깅 정보 ===");
     console.log("현재 카테고리 ID:", currentCategoryId);
     console.log("비디오 ID:", videoId);
-    console.log("이동할 카테고리 ID:", targetCategoryId);
+    console.log("이동할 카테고리 ID:", targetCategoryIdNum);
 
     setError("");
 
     try {
-      await moveCategoryVideo(currentCategoryId, videoId, targetCategoryId);
-      console.log(`영상이 성공적으로 이동됨 (대상 ID: ${targetCategoryId})`);
+      await moveCategoryVideo(currentCategoryId, videoId, targetCategoryIdNum);
+      console.log(`영상이 성공적으로 이동됨 (대상 ID: ${targetCategoryIdNum})`);
 
-      // 카테고리 목록 새로고침 (SideMenu 등 관련 컴포넌트 업데이트 위해)
+      // 1. 카테고리 목록 새로고침 (SideMenu 등 관련 컴포넌트 업데이트 위해)
+      console.log("카테고리 목록 새로고침 시작");
       await fetchCategories();
-
+      console.log("카테고리 목록 새로고침 완료");
+      
+      // 2. 대상 카테고리 선택 상태 업데이트
+      selectCategory(targetCategoryIdNum);
+      console.log(`대상 카테고리(ID: ${targetCategoryIdNum})로 선택 상태 변경`);
+      
+      // 3. 대상 카테고리 페이지로 이동
+      navigate(`/subject/${targetCategoryIdNum}`);
+      console.log(`대상 카테고리(ID: ${targetCategoryIdNum}) 페이지로 이동`);
+      
+      // 4. 비디오 목록 새로고침은 이동 후 자동으로 이루어짐
       if (onVideoUpdate) {
-        onVideoUpdate(); // SubjectPage의 비디오 목록 등 업데이트
+        console.log("비디오 목록 새로고침 호출");
+        await onVideoUpdate(); 
       }
+      
+      console.log("비디오 이동 및 페이지 이동 완료");
     } catch (err) {
       console.error("비디오 이동 중 오류 발생:", err);
       setError(err.message || "비디오 이동에 실패했습니다. 다시 시도해주세요.");
