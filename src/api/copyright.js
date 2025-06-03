@@ -22,9 +22,8 @@ export const copyrightCheck = async (videoId) => {
 };
 
 // 차단 영상 추가
-export const addCopyrightVideo = async (videoId, owner) => {
+export const addCopyrightVideo = async (videoId, owner, callback) => {
   try {
-    // 차단할 영상 정보를 서버에 POST 요청으로 전송
     const token = localStorage.getItem("accessToken");
     const headers = {
       ...(API_CONFIG.headers || {}),
@@ -34,27 +33,33 @@ export const addCopyrightVideo = async (videoId, owner) => {
       headers["Authorization"] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${API_URL}/api/copyright/ban`, {
-      ...API_CONFIG,
-      method: "POST",
-      headers: headers,
-      body: JSON.stringify({ video_id: videoId, owner: owner }),
-    });
+    const response = await fetch(
+      `${API_URL}/api/copyright/ban?videoId=${videoId}&owner=${owner}`,
+      {
+        ...API_CONFIG,
+        method: "POST",
+        headers: headers,
+        // body는 제거 (데이터를 URL 파라미터로 전달)
+      }
+    );
 
     if (!response.ok) {
       // 서버에서 오류 응답 시 (예: 403, 400, 500 등)
-      const errorData = await response.json().catch(() => ({ message: response.statusText }));
-      throw new Error(
-        `차단 영상 추가 API 응답 오류: ${response.status} ${errorData.message || ""}`
-      );
+      console.log("response", response);
+      const errorData = await response
+        .json()
+        .catch(() => ({ message: response.statusText }));
+      console.log("errorData", errorData);
+      const errorMessage = `차단 영상 추가 API 응답 오류: ${response.status} ${
+        errorData.message || ""
+      }`;
+      if (callback) callback(new Error(errorMessage));
+      return;
     }
 
-    const data = await response.json();
-    return data;
+    if (callback) callback(null); // 성공
   } catch (error) {
     console.error("Failed to add copyright video:", error);
-    // UI에 표시할 수 있도록 에러 객체 또는 메시지를 반환하는 것을 고려할 수 있습니다.
-    // 예를 들어, return { error: error.message };
-    return null;
+    if (callback) callback(error); // try-catch 블록에서 잡힌 네트워크 오류 등
   }
 };

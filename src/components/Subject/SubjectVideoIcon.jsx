@@ -1,14 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { FaTrash } from "react-icons/fa";
-import {
-  MdPlaylistAdd,
-  MdOutlineArrowForward,
-  MdOutlineSync,
-} from "react-icons/md";
+import { MdPlaylistAdd, MdOutlineSync } from "react-icons/md";
 import Modal from "../Modal";
-import Input from "../Input";
 import Button from "../Button";
+import TreeModal from "../TreeModal"; // TreeModal 임포트
 import useCategoryStore from "../../store/categoryStore";
 import { moveCategoryVideo, deleteCategoryVideo } from "../../api/category";
 import { useParams } from "react-router-dom";
@@ -25,15 +21,11 @@ export default function SubjectVideoIcon({
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
-  const [categoryName, setCategoryName] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const menuRef = useRef(null);
-  const inputRef = useRef(null);
 
   // 카테고리 스토어에서 필요한 함수와 상태 가져오기
-  const { categories, fetchCategories, findCategoryByName } =
-    useCategoryStore();
+  const { categories, fetchCategories } = useCategoryStore();
 
   // YouTube 썸네일 URL 생성
   const thumbnailUrl = videoId
@@ -67,7 +59,7 @@ export default function SubjectVideoIcon({
 
     switch (action) {
       case "delete":
-        handleDeleteVideo();
+        handleDeleteVideo(subjectId, videoId);
         break;
       case "playlist":
         setIsMoveModalOpen(true);
@@ -79,78 +71,59 @@ export default function SubjectVideoIcon({
   };
 
   // 삭제 처리 함수 - 아직 API 없음
-  const handleDeleteVideo = () => {
-    console.log("영상 삭제 요청:", videoId);
+  const handleDeleteVideo = (subjectId, videoId) => {
+    console.log("영상 삭제 요청:", subjectId, videoId);
+    deleteCategoryVideo(subjectId, videoId);
+    fetchCategories();
+
+    if (onVideoUpdate) {
+      onVideoUpdate(); // SubjectPage의 비디오 목록 등 업데이트
+    }
   };
 
-  // 비디오 이동 처리 - URL에서 현재 카테고리 ID 직접 사용
-  const handleMoveVideo = async () => {
-    // 기본 검증
-    if (!categoryName) {
-      setError("이동할 주제 이름을 입력해주세요.");
-      return;
-    }
+  // TreeModal에서 카테고리 선택 시 호출될 함수
+  const handleSelectTargetCategoryAndMove = async (targetCategoryId) => {
+    setIsMoveModalOpen(false); // TreeModal을 먼저 닫습니다.
 
     if (!videoId) {
       setError("비디오 ID 정보가 없습니다.");
+      console.error("handleSelectTargetCategoryAndMove: videoId is missing");
       return;
     }
 
     if (!subjectId) {
       setError("현재 주제 ID를 찾을 수 없습니다.");
+      console.error("handleSelectTargetCategoryAndMove: subjectId is missing");
       return;
     }
 
-    // 이름으로 대상 카테고리 검색
-    const targetCategory = findCategoryByName(categoryName);
-
-    if (!targetCategory) {
-      setError("입력한 이름의 주제를 찾을 수 없습니다.");
-      return;
-    }
-
-    const targetCategoryId = targetCategory.id;
     const currentCategoryId = parseInt(subjectId);
 
-    // 같은 카테고리로 이동하려는 경우 체크
     if (currentCategoryId === targetCategoryId) {
       setError("이미 해당 주제에 있는 영상입니다.");
       return;
     }
 
-    // 디버깅 정보 출력
-    console.log("=== 비디오 이동 디버깅 정보 ===");
+    console.log("=== 비디오 이동 (TreeModal) 디버깅 정보 ===");
     console.log("현재 카테고리 ID:", currentCategoryId);
     console.log("비디오 ID:", videoId);
     console.log("이동할 카테고리 ID:", targetCategoryId);
-    console.log("이동할 카테고리명:", categoryName);
 
-    setIsLoading(true);
     setError("");
 
     try {
-      // API 호출 - 명확한 파라미터 이름으로 수정
       await moveCategoryVideo(currentCategoryId, videoId, targetCategoryId);
+      console.log(`영상이 성공적으로 이동됨 (대상 ID: ${targetCategoryId})`);
 
-      // 성공 메시지와 상태 업데이트
-      console.log(`영상이 "${targetCategory.name}" 주제로 성공적으로 이동됨`);
-
-      // 카테고리 목록 새로고침
+      // 카테고리 목록 새로고침 (SideMenu 등 관련 컴포넌트 업데이트 위해)
       await fetchCategories();
 
-      // 모달 닫기
-      setIsMoveModalOpen(false);
-      setCategoryName("");
-
-      // 부모에게 업데이트 알림
       if (onVideoUpdate) {
-        onVideoUpdate();
+        onVideoUpdate(); // SubjectPage의 비디오 목록 등 업데이트
       }
-    } catch (error) {
-      console.error("비디오 이동 중 오류 발생:", error);
-      setError("비디오 이동에 실패했습니다. 다시 시도해주세요.");
-    } finally {
-      setIsLoading(false);
+    } catch (err) {
+      console.error("비디오 이동 중 오류 발생:", err);
+      setError(err.message || "비디오 이동에 실패했습니다. 다시 시도해주세요.");
     }
   };
 
@@ -211,39 +184,24 @@ export default function SubjectVideoIcon({
         <h3 className="font-medium text-gray-800 line-clamp-2 h-12">{name}</h3>
       </div>
 
-      {/* 비디오 이동 모달은 Modal 컴포넌트에서 이미 다크모드로 변경됨 */}
-      <Modal
-        isOpen={isMoveModalOpen}
-        onClose={() => {
-          setIsMoveModalOpen(false);
-          setCategoryName("");
-          setError("");
-        }}
-        title="다른 주제로 이동"
-        variant="AddSubject"
-        inputRef={inputRef}
-      >
-        <div className="flex flex-col gap-2">
-          <div className="flex flex-row gap-2">
-            <Input
-              ref={inputRef}
-              variant="AddSubject"
-              placeholder="이동할 주제 이름 입력"
-              defaultValue={categoryName}
-              onChange={(e) => setCategoryName(e.target.value)}
-            />
-            <Button onClick={handleMoveVideo} disabled={isLoading}>
-              {isLoading ? (
-                <MdOutlineSync className="animate-spin text-lg" />
-              ) : (
-                <MdOutlineArrowForward className="text-lg" />
-              )}
-            </Button>
-          </div>
-          {/* 에러 메시지 표시 영역 */}
-          {error && <p className="text-red-400 text-sm mt-1">{error}</p>}
-        </div>
-      </Modal>
+      {/* 비디오 이동 모달 */}
+      {isMoveModalOpen && (
+        <TreeModal
+          isOpen={isMoveModalOpen}
+          onClose={() => {
+            setIsMoveModalOpen(false);
+            setError(""); // 모달 닫을 때 에러 메시지 초기화
+          }}
+          title="이동할 주제 선택"
+          onCategorySelect={(targetCategoryId) =>
+            handleSelectTargetCategoryAndMove(targetCategoryId)
+          } // 주제 선택 시 호출될 콜백
+        />
+      )}
+      {/* 비디오 이동 작업 관련 에러 메시지 표시 */}
+      {error && !isMoveModalOpen && (
+        <p className="text-red-400 text-sm mt-2">{error}</p>
+      )}
     </div>
   );
 }

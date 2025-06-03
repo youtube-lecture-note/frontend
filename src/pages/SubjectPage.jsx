@@ -68,7 +68,7 @@ export default function SubjectPage() {
             <p className="text-gray-500">로딩 중...</p>
           </div>
         ) : SubjectVideos.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {SubjectVideos.map((video) => (
               <SubjectVideoIcon
                 key={`${video.videoId}-${refreshKey}`}

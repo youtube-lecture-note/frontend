@@ -32,9 +32,7 @@ export default function SearchVideo({ inputURLRef, variant, onChange }) {
         copyrightResult === null ||
         (copyrightResult && copyrightResult.data === true)
       ) {
-        setErrorMessage(
-          "이 영상은 차단된 영상입니다.(API 오류 또는 차단 응답상태임 수정필요)"
-        );
+        setErrorMessage("이 영상은 차단된 영상입니다.");
       } else {
         // 영상이 차단되지 않았고, 저작권 확인 성공
         setErrorMessage(""); // 에러 메시지 없음 확인
@@ -65,7 +63,7 @@ export default function SearchVideo({ inputURLRef, variant, onChange }) {
         </div>
       </div>
       {errorMessage && (
-        <p className="text-red-500 text-sm mt-1 ml-2">{errorMessage}</p>
+        <p className="text-red-500 text-sm m-2 p-2">{errorMessage}</p>
       )}
     </div>
   );
