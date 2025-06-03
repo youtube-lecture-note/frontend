@@ -6,7 +6,7 @@ export default function Button({
   ...props
 }) {
   let className =
-    "px-4 py-2 text-xs md:text-base rounded-md bg-gray-200 text-gray-800 hover:bg-gray-300 hover:text-gray-900";
+    "px-4 py-2 text-xs md:text-base rounded-md bg-gray-500 text-white hover:bg-gray-600 hover:text-gray-900";
 
   if (variant === "SearchVideo") {
     className =

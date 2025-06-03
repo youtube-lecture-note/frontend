@@ -3,7 +3,7 @@ import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { FaFolderTree } from "react-icons/fa6";
 import { VscNewFolder } from "react-icons/vsc";
-import { TiChevronRightOutline } from "react-icons/ti";
+import { FiCornerDownRight } from "react-icons/fi";
 import { HiFolder } from "react-icons/hi";
 
 import Button from "../Button";
@@ -224,7 +224,7 @@ export default function SideMenuBottom() {
           {selectedCategory?.children &&
             selectedCategory.children.map((childSubject) => (
               <div key={childSubject.id} className="flex items-center">
-                <TiChevronRightOutline className="inline-block mr-1 text-gray-500" />
+                <FiCornerDownRight className="inline-block mr-1 text-gray-500" />
                 <Button
                   variant="SubjectDefault"
                   onClick={() => handleChildSubjectClick(childSubject.id)}
