@@ -131,3 +131,30 @@ export const moveCategoryVideo = async (
     return {};
   }
 };
+
+// category에 비디오 추가
+export const addVideoToCategory = async (categoryId, videoId, userVideoName = null) => {
+  try {
+    const params = new URLSearchParams();
+    if (userVideoName) {
+      params.append('userVideoName', userVideoName);
+    }
+    
+    const url = `${API_URL}/api/categories/${categoryId}/videos/${videoId}${params.toString() ? `?${params.toString()}` : ''}`;
+    
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`비디오 추가 실패: ${response.status}`);
+    }
+    return response;
+  } catch (error) {
+    console.error('비디오 카테고리 추가 오류:', error);
+    throw error;
+  }
+};
