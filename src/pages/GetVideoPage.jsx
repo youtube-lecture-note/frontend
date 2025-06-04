@@ -7,6 +7,8 @@ import Button from "../components/Button";
 import TopBar from "../components/TopBar/TopBar";
 import DisplaySummaryLine from "../components/Summary/DisplaySummaryLine";
 import SearchVideo from "../components/Search/SearchVideo";
+import Modal from "../components/Modal"
+import TeacherCreateQuizPage from "./multiquiz/TeacherCreateQuizPage";
 import { videoSummaryApi } from "../api/index.js";
 
 export default function GetVideoPage() {
@@ -14,6 +16,8 @@ export default function GetVideoPage() {
   const [summary, setSummary] = useState("");
   // 로딩, 에러
   const [loading, setLoading] = useState(false);
+  const [openQuizSetModal, setOpenQuizSetModal] = useState(false);
+
   const [error, setError] = useState("");
   const { videoId } = useParams();
   const navigate = useNavigate();
@@ -182,6 +186,7 @@ export default function GetVideoPage() {
           <SearchVideo inputURLRef={inputURLRef} variant={"SearchVideo"} />
           <div className="flex justify-center gap-4 mt-4">
             <Button onClick={handleQuizClick}>문제풀기</Button>
+            <Button onClick={() => setOpenQuizSetModal(true)}>퀴즈셋 생성</Button>
           </div>
         </div>
 
@@ -211,6 +216,13 @@ export default function GetVideoPage() {
           </div>
         </div>
       </div>
+      <Modal
+        isOpen={openQuizSetModal}
+        onClose={() => setOpenQuizSetModal(false)}
+        title="퀴즈 세트 생성"
+      >
+        <TeacherCreateQuizPage videoId={videoId} />
+      </Modal>
     </div>
   );
 }
