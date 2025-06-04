@@ -76,7 +76,7 @@ export default function SubjectNode({
 
           <Button
             onClick={() => handleDeleteSubject(subject.id)}
-            variant={level === 0 ? "SubjectNotUse" : "SubjectSmall"}
+            variant={subject.id === 1 ? "SubjectNotUse" : "SubjectSmall"}
             title="주제 삭제"
           >
             <FaTrash />

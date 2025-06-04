@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
-import { FcSettings } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
+import { checkAdminStatus } from "../../api/login";
 import Button from "../Button";
 import LoginForm from "../../Login/LoginForm";
+
 export default function SideMenuTopLogin() {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // 컴포넌트 마운트 시 로그인 상태 확인
   useEffect(() => {
@@ -19,7 +21,11 @@ export default function SideMenuTopLogin() {
       setIsLoggedIn(false);
       setUsername("");
     }
+
+    checkAdminStatus(setIsAdmin);
   }, []);
+
+  console.log(isAdmin);
 
   return (
     <div className="flex flex-col gap-4 mb-6">
@@ -36,6 +42,14 @@ export default function SideMenuTopLogin() {
         <Button variant="SubjectDefault" onClick={() => navigate("/attempts")}>
           <span className="text-gray-800">퀴즈 기록</span>
         </Button>
+        {isAdmin && (
+          <Button
+            variant="SubjectDefault"
+            onClick={() => navigate("/admin", { state: { isAdmin: true } })}
+          >
+            <span className="text-gray-800">관리자 페이지</span>
+          </Button>
+        )}
       </div>
     </div>
   );

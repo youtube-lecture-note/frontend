@@ -1,16 +1,6 @@
 import { API_CONFIG, API_URL } from "./config";
 
 // 카테고리 제작
-//parentID는 선택
-// const response = await fetch(`${API_URL}/api/categories`, {
-//   ...API_CONFIG,
-//   method: "POST",
-//   body: JSON.stringify(name),
-// });
-// if (!response.ok) {
-//   throw new Error("카테고리 제작 실패");
-// }
-// return response.json();
 export const addCategory = async (category) => {
   try {
     console.log("요청 데이터:", category);
@@ -60,17 +50,16 @@ export const deleteCategory = async (categoryID) => {
     throw new Error("카테고리 삭제 실패");
   }
 
-  // 응답 내용이 있는지 확인
   const text = await response.text();
   if (!text) {
-    return {}; // 빈 응답인 경우 빈 객체 반환
+    return {};
   }
 
   try {
-    return JSON.parse(text); // 텍스트를 JSON으로 파싱
+    return JSON.parse(text);
   } catch (error) {
     console.error("JSON 파싱 오류:", error);
-    return {}; // 파싱 실패 시 빈 객체 반환
+    return {};
   }
 };
 
@@ -87,17 +76,16 @@ export const deleteCategoryVideo = async (categoryID, videoID) => {
     throw new Error("카테고리 내 영상 삭제 실패");
   }
 
-  // 응답 내용이 있는지 확인
   const text = await response.text();
   if (!text) {
-    return {}; // 빈 응답인 경우 빈 객체 반환
+    return {};
   }
 
   try {
-    return JSON.parse(text); // 텍스트를 JSON으로 파싱
+    return JSON.parse(text);
   } catch (error) {
     console.error("JSON 파싱 오류:", error);
-    return {}; // 파싱 실패 시 빈 객체 반환
+    return {};
   }
 };
 
@@ -107,36 +95,39 @@ export const moveCategoryVideo = async (
   videoID,
   toCategoryId
 ) => {
+  const requestUrl = `${API_URL}/api/categories/${fromCategoryId}/videos/${videoID}/move/${toCategoryId}`;
+  const requestBody = { targetCategoryId: toCategoryId };
+  const requestOptions = {
+    ...API_CONFIG,
+    method: "PUT",
+    body: JSON.stringify(requestBody),
+  };
+
   console.log(
-    `API 호출: ${fromCategoryId}에서 ${toCategoryId}로 비디오 ${videoID} 이동`
+    `[DEBUG] moveCategoryVideo API 호출:
+    URL: ${requestUrl}
+    Method: ${requestOptions.method}
+    Body: ${JSON.stringify(requestBody)}
+    Config: ${JSON.stringify(API_CONFIG)}`
   );
 
-  const response = await fetch(
-    `${API_URL}/api/categories/${fromCategoryId}/videos/${videoID}/move/${toCategoryId}`,
-    {
-      ...API_CONFIG,
-      method: "PUT",
-      // 백엔드가 기대하는 형식에 맞게 body 수정
-      // 실제 API 스펙에 따라 필요한 경우 아래 형식 조정
-      body: JSON.stringify({ targetCategoryId: toCategoryId }),
-    }
-  );
+  const response = await fetch(requestUrl, requestOptions);
   if (!response.ok) {
     const errorText = await response.text();
-    console.error("비디오 이동 API 오류:", errorText);
-    throw new Error("카테고리간 비디오 이동 실패");
+    console.error(`[DEBUG] 비디오 이동 API 오류 (${response.status}):`, errorText);
+    console.error(`[DEBUG] 요청 정보: URL: ${requestUrl}, Method: PUT, Body: ${JSON.stringify(requestBody)}`);
+    throw new Error("비디오 이동 실패");
   }
 
-  // 응답 내용이 있는지 확인
   const text = await response.text();
   if (!text) {
-    return {}; // 빈 응답인 경우 빈 객체 반환
+    return {};
   }
 
   try {
-    return JSON.parse(text); // 텍스트를 JSON으로 파싱
+    return JSON.parse(text);
   } catch (error) {
     console.error("JSON 파싱 오류:", error);
-    return {}; // 파싱 실패 시 빈 객체 반환
+    return {};
   }
 };

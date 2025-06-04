@@ -6,11 +6,12 @@ import SideMenu from "./components/SideMenu/SideMenu";
 import SubjectPage from "./pages/SubjectPage";
 import AttemptsPage from "./pages/AttemptsPage";
 import QuizAttmptsByID from "./pages/QuizAttmptsByID";
+import AdminPage from "./pages/AdminPage";
 
 function App() {
   return (
     <Router>
-      <div className="flex h-screen p-2 bg-gray-200 overflow-hidden">
+      <div className="flex h-screen p-2 bg-gray-50 overflow-hidden">
         <main className="flex-1 p-2 pr-4 overflow-y-auto">
           <Routes>
             <Route path="/" element={<MainSearchPage />} />
@@ -19,6 +20,7 @@ function App() {
             <Route path="/subject/:subjectId" element={<SubjectPage />} />
             <Route path="/attempts" element={<AttemptsPage />} />
             <Route path="/attempts/:quizSetId" element={<QuizAttmptsByID />} />
+            <Route path="/admin" element={<AdminPage />} />
           </Routes>
         </main>
 

@@ -160,6 +160,7 @@ export default function QuizPage() {
                     originalIndex={sortedQuestions.findIndex(
                       (q) => q.quizId === quizResult.quizId
                     )}
+                    questionItem={sortedQuestions[index]}
                   />
                 </div>
               ))}

@@ -92,3 +92,31 @@ export const checkAuthStatus = async (setIsLogin) => {
 export const handleForceLogout = () => {
   localStorage.setItem("isLoggedIn", "false");
 };
+
+export const checkAdminStatus = async (setIsAdmin) => {
+  try {
+    const requestUrl = `${API_URL}/auth/check-admin`;
+    console.log("관리자 상태 확인 요청 URL:", requestUrl);
+    console.log("API_CONFIG:", API_CONFIG);
+
+    const response = await fetch(requestUrl, {
+      ...API_CONFIG,
+    });
+
+    console.log("관리자 상태 확인 응답:", response.status);
+
+    if (response.ok) {
+      setIsAdmin(true);
+      console.log("관리자: 관리자 상태");
+    } else if (response.status === 401) {
+      setIsAdmin(false);
+      console.log("관리자 아님: 로그아웃 상태 (401)");
+    } else {
+      setIsAdmin(false);
+      console.error(`관리자 확인 실패 (${response.status})`);
+    }
+  } catch (error) {
+    setIsAdmin(false);
+    console.error("관리자 확인 요청 오류:", error.message);
+  }
+};

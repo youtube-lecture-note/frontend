@@ -16,6 +16,7 @@ export default function TreeModal({
   children,
   subjects,
   setSubjects,
+  onCategorySelect, // 새로운 prop 추가
   ...props
 }) {
   const {
@@ -116,16 +117,25 @@ export default function TreeModal({
   const handleSubjectClick = (categoryId) => {
     console.log("TreeModal - 선택한 주제 ID:", categoryId);
 
-    selectCategory(categoryId);
-    onClose();
-
-    const selectedCat = findCategoryById(categoryId);
-    if (selectedCat) {
-      navigate(`/subject/${categoryId}`, {
-        state: { Subjectinfo: selectedCat },
-      });
+    if (onCategorySelect) {
+      // onCategorySelect prop이 제공되면 해당 콜백 실행
+      onCategorySelect(categoryId);
+      // onClose(); // SubjectVideoIcon에서 모달을 닫도록 변경 (선택 후 추가 작업이 있을 수 있으므로)
+      // 다만, TreeModal을 닫는 책임은 onCategorySelect를 호출하는 쪽으로 넘기거나, 여기서 onClose를 호출할지 결정 필요.
+      // 현재 SubjectVideoIcon에서 onCategorySelect 후 모달을 닫으므로 여기서는 중복 호출 방지.
     } else {
-      console.error("선택한 주제를 찾을 수 없습니다. ID:", categoryId);
+      // 기존 로직: 카테고리 선택 및 페이지 이동
+      selectCategory(categoryId);
+      onClose(); // 이 경우에는 TreeModal이 직접 닫도록 함
+
+      const selectedCat = findCategoryById(categoryId);
+      if (selectedCat) {
+        navigate(`/subject/${categoryId}`, {
+          state: { Subjectinfo: selectedCat },
+        });
+      } else {
+        console.error("선택한 주제를 찾을 수 없습니다. ID:", categoryId);
+      }
     }
   };
 
