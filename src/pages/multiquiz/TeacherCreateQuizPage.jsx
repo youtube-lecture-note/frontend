@@ -7,6 +7,7 @@ import {
 } from "../../api";
 
 import Button from "../../components/Button";
+import Title from "../../components/Title";
 
 export default function TeacherCreateQuizPage({ videoId }) {
   const navigate = useNavigate();
@@ -104,8 +105,8 @@ export default function TeacherCreateQuizPage({ videoId }) {
 
   return (
     <div className="p-8 max-w-lg mx-auto">
-      <h2 className="text-xl font-bold mb-4">퀴즈 세트 생성</h2>
-      <div className="mb-4">
+      <Title>퀴즈 세트 생성</Title>
+      <div className="mb-4 border rounded p-4">
         <div className="mb-2">
           난이도별 문제 수 선택 (최대값: 해당 영상의 문제 수)
         </div>

@@ -4,6 +4,8 @@ import {
   addCategory,
   deleteCategory,
   deleteCategoryVideo,
+  checkVideoInCategories,
+  addVideoToCategory,
 } from "../api/category";
 
 const useCategoryStore = create((set, get) => ({
@@ -80,6 +82,36 @@ const useCategoryStore = create((set, get) => ({
       await get().fetchCategories();
     } catch (error) {
       console.error("카테고리 비디오 삭제에 실패했습니다:", error);
+      set({ error: error.message, isLoading: false });
+      throw error;
+    }
+  },
+
+  // 비디오가 이미 카테고리에 저장되어 있는지 확인
+  checkVideoExists: async (videoId) => {
+    try {
+      const result = await checkVideoInCategories(videoId);
+      return result;
+    } catch (error) {
+      console.error("비디오 존재 확인 중 오류:", error);
+      return { exists: false };
+    }
+  },
+
+  // 비디오를 카테고리에 추가
+  addVideoToCategory: async (categoryId, videoId, videoTitle) => {
+    set({ isLoading: true, error: null });
+    try {
+      // categoryId를 문자열로 확실하게 변환
+      const strCategoryId = String(categoryId);
+      await addVideoToCategory(strCategoryId, videoId, videoTitle);
+
+      // 추가 후 카테고리 목록 새로고침
+      await get().fetchCategories();
+      set({ isLoading: false });
+      return true;
+    } catch (error) {
+      console.error("비디오 추가 중 오류:", error);
       set({ error: error.message, isLoading: false });
       throw error;
     }
