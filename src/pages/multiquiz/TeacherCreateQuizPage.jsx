@@ -1,10 +1,27 @@
 import { useState, useEffect, useRef } from "react";
-import { createQuizSetApi, getQuizCountByVideoId, createQuizSetByCountsApi } from "../../api";
+import { useNavigate } from "react-router-dom";
+import {
+  createQuizSetApi,
+  getQuizCountByVideoId,
+  createQuizSetByCountsApi,
+} from "../../api";
+
+import Button from "../../components/Button";
 
 export default function TeacherCreateQuizPage({ videoId }) {
+  const navigate = useNavigate();
   // 난이도별 문제 수 상태
-  const [levelCounts, setLevelCounts] = useState({ level1: 0, level2: 0, level3: 0 });
-  const [availableCounts, setAvailableCounts] = useState({ level1: 0, level2: 0, level3: 0, total: 0 });
+  const [levelCounts, setLevelCounts] = useState({
+    level1: 0,
+    level2: 0,
+    level3: 0,
+  });
+  const [availableCounts, setAvailableCounts] = useState({
+    level1: 0,
+    level2: 0,
+    level3: 0,
+    total: 0,
+  });
   const [quizKey, setQuizKey] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -34,7 +51,7 @@ export default function TeacherCreateQuizPage({ videoId }) {
     if (quizKey) {
       setSecondsLeft(600);
       timerRef.current = setInterval(() => {
-        setSecondsLeft(prev => {
+        setSecondsLeft((prev) => {
           if (prev <= 1) {
             clearInterval(timerRef.current);
             return 0;
@@ -55,7 +72,7 @@ export default function TeacherCreateQuizPage({ videoId }) {
 
   // 난이도별 문제 수 변경 핸들러
   const handleLevelCountChange = (level, value) => {
-    setLevelCounts(prev => ({
+    setLevelCounts((prev) => ({
       ...prev,
       [level]: Math.max(0, Math.min(value, availableCounts[level])),
     }));
@@ -67,7 +84,8 @@ export default function TeacherCreateQuizPage({ videoId }) {
     setError("");
     try {
       // 난이도별 문제 수 합계가 1 이상이어야 함
-      const total = levelCounts.level1 + levelCounts.level2 + levelCounts.level3;
+      const total =
+        levelCounts.level1 + levelCounts.level2 + levelCounts.level3;
       if (total < 1) {
         setError("최소 1문제 이상 선택해주세요.");
         setLoading(false);
@@ -88,7 +106,9 @@ export default function TeacherCreateQuizPage({ videoId }) {
     <div className="p-8 max-w-lg mx-auto">
       <h2 className="text-xl font-bold mb-4">퀴즈 세트 생성</h2>
       <div className="mb-4">
-        <div className="mb-2">난이도별 문제 수 선택 (최대값: 해당 영상의 문제 수)</div>
+        <div className="mb-2">
+          난이도별 문제 수 선택 (최대값: 해당 영상의 문제 수)
+        </div>
         <div className="space-y-2">
           <div>
             <label className="inline-block w-14">쉬움</label>
@@ -97,10 +117,14 @@ export default function TeacherCreateQuizPage({ videoId }) {
               min={0}
               max={availableCounts.level1}
               value={levelCounts.level1}
-              onChange={e => handleLevelCountChange("level1", Number(e.target.value))}
+              onChange={(e) =>
+                handleLevelCountChange("level1", Number(e.target.value))
+              }
               className="w-16"
             />
-            <span className="text-xs text-gray-500 ml-1">/ {availableCounts.level1}문제</span>
+            <span className="text-xs text-gray-500 ml-1">
+              / {availableCounts.level1}문제
+            </span>
           </div>
           <div>
             <label className="inline-block w-14"> 보통</label>
@@ -109,10 +133,14 @@ export default function TeacherCreateQuizPage({ videoId }) {
               min={0}
               max={availableCounts.level2}
               value={levelCounts.level2}
-              onChange={e => handleLevelCountChange("level2", Number(e.target.value))}
+              onChange={(e) =>
+                handleLevelCountChange("level2", Number(e.target.value))
+              }
               className="w-16"
             />
-            <span className="text-xs text-gray-500 ml-1">/ {availableCounts.level2}문제</span>
+            <span className="text-xs text-gray-500 ml-1">
+              / {availableCounts.level2}문제
+            </span>
           </div>
           <div>
             <label className="inline-block w-14">어려움</label>
@@ -121,28 +149,47 @@ export default function TeacherCreateQuizPage({ videoId }) {
               min={0}
               max={availableCounts.level3}
               value={levelCounts.level3}
-              onChange={e => handleLevelCountChange("level3", Number(e.target.value))}
+              onChange={(e) =>
+                handleLevelCountChange("level3", Number(e.target.value))
+              }
               className="w-16"
             />
-            <span className="text-xs text-gray-500 ml-1">/ {availableCounts.level3}문제</span>
+            <span className="text-xs text-gray-500 ml-1">
+              / {availableCounts.level3}문제
+            </span>
           </div>
         </div>
       </div>
-      <button onClick={handleCreateQuiz} disabled={loading} className="btn btn-primary">
+      <Button
+        onClick={handleCreateQuiz}
+        disabled={loading}
+        classNameAdd="btn btn-primary"
+      >
         {loading ? "생성 중..." : "퀴즈 생성"}
-      </button>
+      </Button>
       {error && <div className="text-red-500 mt-2">{error}</div>}
       {quizKey && (
         <div className="mt-6 p-4 border rounded bg-gray-50">
           <div className="font-bold flex items-center gap-2">
             학생들에게 이 키를 알려주세요!
             <span className="text-xs text-gray-500">
-              (남은 시간: <span className="font-mono">{formatTime(secondsLeft)}</span>)
+              (남은 시간:{" "}
+              <span className="font-mono">{formatTime(secondsLeft)}</span>)
             </span>
           </div>
           <div className="text-2xl text-blue-700">{quizKey}</div>
           {secondsLeft === 0 && (
-            <div className="text-red-600 mt-2">키의 유효 시간이 만료되었습니다.</div>
+            <div className="text-red-600 mt-2">
+              키의 유효 시간이 만료되었습니다.
+            </div>
+          )}
+          {secondsLeft > 0 && (
+            <Button
+              onClick={() => navigate(`/quiz/multi/${quizKey}`)}
+              classNameAdd="btn btn-secondary mt-4"
+            >
+              문제 풀기
+            </Button>
           )}
         </div>
       )}

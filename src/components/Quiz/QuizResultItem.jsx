@@ -17,7 +17,7 @@ export default function QuizResultItem({
   if (questionItem.options.length > 0) {
     // 객관식인 경우
     myAnswer = (
-      <p className="mb-2">
+      <div>
         {questionItem.options.map((option, idx) => (
           <div
             key={idx}
@@ -30,12 +30,12 @@ export default function QuizResultItem({
             {option}
           </div>
         ))}
-      </p>
+      </div>
     );
   } else {
     // 주관식인 경우
     myAnswer = (
-      <div className="mb-2 border border-gray-200 rounded-md p-2 bg-gray-100">
+      <div className="m-2 p-2 border border-gray-200 rounded-md p-2 bg-gray-100">
         {quizResult.userAnswer ? quizResult.userAnswer : "제출 안함"}
       </div>
     );

@@ -13,6 +13,25 @@
   }
 }
 
+@keyframes pulse {
+  0% {
+    background: var(--pulse-color);
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.4);
+  }
+  70% {
+    background: var(--pulse-color);
+    box-shadow: 0 0 0 var(--pulse-size) rgba(0, 0, 0, 0.1);
+  }
+  100% {
+    background: var(--pulse-color);
+    box-shadow: 0 0 0 var(--pulse-size) rgba(0, 0, 0, 0);
+  }
+}
+
+.pulse-animation {
+  animation: pulse 1s ease-in-out;
+}
+
 .App-header {
   background-color: #282c34;
   min-height: 100vh;

@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function StudentEnterKeyForm({onClose}) {
+import Button from "../../components/Button";
+
+export default function StudentEnterKeyForm({ onClose }) {
   const [key, setKey] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!key.trim()) {
       setError("키를 입력하세요.");
@@ -22,10 +24,10 @@ export default function StudentEnterKeyForm({onClose}) {
       <input
         className="border p-2 w-full mb-2"
         value={key}
-        onChange={e => setKey(e.target.value)}
+        onChange={(e) => setKey(e.target.value)}
         placeholder="키를 입력하세요 (여섯 자리 숫자)"
       />
-      <button className="btn btn-primary w-full">퀴즈 풀기</button>
+      <Button classNameAdd="btn btn-primary w-full">퀴즈 풀기</Button>
       {error && <div className="text-red-500 mt-2">{error}</div>}
     </form>
   );
