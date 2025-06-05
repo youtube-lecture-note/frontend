@@ -183,12 +183,14 @@ export default function TeacherCreateQuizPage({ videoId }) {
               키의 유효 시간이 만료되었습니다.
             </div>
           )}
-          <Button
-            onClick={() => navigate(`/quiz/multi/${quizKey}`)}
-            classNameAdd="btn btn-secondary mt-4"
-          >
-            문제 풀기
-          </Button>
+          {secondsLeft > 0 && (
+            <Button
+              onClick={() => navigate(`/quiz/multi/${quizKey}`)}
+              classNameAdd="btn btn-secondary mt-4"
+            >
+              문제 풀기
+            </Button>
+          )}
         </div>
       )}
     </div>
