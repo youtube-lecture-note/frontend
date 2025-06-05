@@ -7,6 +7,7 @@ import SubjectPage from "./pages/SubjectPage";
 import AttemptsPage from "./pages/AttemptsPage";
 import QuizAttmptsByID from "./pages/QuizAttmptsByID";
 import AdminPage from "./pages/AdminPage";
+import QuizMultiPage from "./pages/multiquiz/QuizMultiPage";
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
             <Route path="/attempts" element={<AttemptsPage />} />
             <Route path="/attempts/:quizSetId" element={<QuizAttmptsByID />} />
             <Route path="/admin" element={<AdminPage />} />
+            <Route path="/quiz/multi/:redisKey" element={<QuizMultiPage />} />
           </Routes>
         </main>
 

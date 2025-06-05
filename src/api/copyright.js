@@ -63,3 +63,22 @@ export const addCopyrightVideo = async (videoId, owner, callback) => {
     if (callback) callback(error); // try-catch 블록에서 잡힌 네트워크 오류 등
   }
 };
+
+export const fetchBanList = async () => {
+  try {
+    const response = await fetch(`${API_URL}/api/copyright`, {
+      ...API_CONFIG,
+      method: "GET",
+    });
+
+    if (!response.ok) {
+      throw new Error("밴 리스트 API 응답 오류");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Failed to fetch ban list:", error);
+    return null;
+  }
+};
