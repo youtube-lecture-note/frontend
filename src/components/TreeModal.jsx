@@ -119,6 +119,7 @@ export default function TreeModal({
 
     if (onCategorySelect) {
       // onCategorySelect prop이 제공되면 해당 콜백 실행
+      //console.log("000000");
       onCategorySelect(categoryId);
       // onClose(); // SubjectVideoIcon에서 모달을 닫도록 변경 (선택 후 추가 작업이 있을 수 있으므로)
       // 다만, TreeModal을 닫는 책임은 onCategorySelect를 호출하는 쪽으로 넘기거나, 여기서 onClose를 호출할지 결정 필요.

@@ -12,6 +12,7 @@ import {
 import SearchVideo from "../components/Search/SearchVideo.jsx";
 import TopBar from "../components/TopBar/TopBar.jsx";
 import Button from "../components/Button.jsx";
+import Title from "../components/Title.jsx";
 
 export default function AttemptsPage() {
   const inputURLRef = useRef(null);
@@ -97,8 +98,8 @@ export default function AttemptsPage() {
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       <TopBar />
+      <Title>퀴즈 기록</Title>
       <div className="flex justify-between items-center px-4 mb-4">
-        <h1 className="text-2xl font-bold mb-4 p-4 text-gray-800">퀴즈 기록</h1>
         {quizIdInput && (
           <Button
             variant="link"

@@ -2,13 +2,22 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
 
+import Title from "../components/Title";
 import YouTube from "react-youtube";
 import Button from "../components/Button";
 import TopBar from "../components/TopBar/TopBar";
 import DisplaySummaryLine from "../components/Summary/DisplaySummaryLine";
 import SearchVideo from "../components/Search/SearchVideo";
 import Modal from "../components/Modal";
+import TreeModal from "../components/TreeModal";
 import TeacherCreateQuizPage from "./multiquiz/TeacherCreateQuizPage";
+import {
+  videoSummaryApi,
+  addVideoToCategory,
+  fetchYoutubeVideoTitle,
+  checkVideoInCategories,
+  getCategoryById, // getCategoryById import 추가
+} from "../api/index.js";
 import { fetchYoutubeVideoTitle, videoSummaryApi } from "../api/index.js";
 
 export default function GetVideoPage() {
@@ -52,6 +61,12 @@ export default function GetVideoPage() {
     },
   };
 
+  const [videoTitle, setVideoTitle] = useState("");
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [videoSaved, setVideoSaved] = useState(false);
+  const [saveError, setSaveError] = useState("");
+  const [savedSubjects, setSavedSubjects] = useState([]);
+
   // 비디오 요약 가져오기
   useEffect(() => {
     async function fetchSummary() {
@@ -63,6 +78,25 @@ export default function GetVideoPage() {
       try {
         const data = await videoSummaryApi(videoId);
         setSummary(data.data || data);
+
+        // 영상 제목 가져오기
+        const title = await fetchYoutubeVideoTitle(videoId);
+        setVideoTitle(title);
+
+        // 영상이 이미 저장되어 있는지 확인
+        const videoStatus = await checkVideoInCategories(videoId);
+        setVideoSaved(videoStatus.exists);
+
+        // 저장된 주제 목록 저장
+        if (videoStatus.exists && videoStatus.categories) {
+          setSavedSubjects(videoStatus.categories);
+          console.log("[DEBUG] 저장된 주제 목록:", videoStatus.categories);
+        }
+
+        // 저장되어 있지 않으면 저장 모달 표시
+        if (!videoStatus.exists) {
+          setShowSaveModal(true);
+        }
       } catch (error) {
         setError(error.message);
       } finally {
@@ -74,6 +108,61 @@ export default function GetVideoPage() {
     });
     fetchSummary();
   }, [videoId]);
+
+  // 주제 선택 후 영상 저장 핸들러
+  const handleCategorySave = async (categoryId) => {
+    // 디버깅: 카테고리 ID 포맷팅 확인
+    const formattedCategoryId = Number(categoryId);
+    if (isNaN(formattedCategoryId)) {
+      console.error(
+        `[DEBUG] 카테고리 ID가 숫자로 변환될 수 없습니다: ${categoryId}`
+      );
+      setSaveError("유효하지 않은 카테고리 ID입니다.");
+      return;
+    }
+
+    // API 직접 호출 - videoTitle 매개변수 제거
+    console.log(
+      `[DEBUG] API 호출 직전... (${formattedCategoryId}, ${videoId})`
+    );
+    const response = await addVideoToCategory(formattedCategoryId, videoId);
+    console.log(`[DEBUG] API 호출 성공! 응답:`, response);
+
+    // 성공 처리
+    setVideoSaved(true);
+    setShowSaveModal(false);
+    setSaveError("");
+
+    // 카테고리 데이터 업데이트
+    try {
+      // 성공 후 카테고리 업데이트 - 백업 방법 구현
+      const updatedStatus = await checkVideoInCategories(videoId);
+      if (updatedStatus.exists && updatedStatus.categories) {
+        setSavedSubjects(updatedStatus.categories);
+        console.log("[DEBUG] 업데이트된 주제 목록:", updatedStatus.categories);
+      } else {
+        // API에서 새 정보를 가져올 수 없는 경우 기본 정보 사용
+        console.log(
+          "[DEBUG] API에서 업데이트 정보를 가져올 수 없어 기본값 사용"
+        );
+        setSavedSubjects((prev) => [
+          ...prev,
+          {
+            categoryId: formattedCategoryId,
+            categoryName: "저장됨", // API로부터 받지 못했으므로 기본값 사용
+          },
+        ]);
+      }
+    } catch (updateErr) {
+      console.error("[DEBUG] 카테고리 정보 업데이트 중 오류:", updateErr);
+      // 업데이트 실패해도 저장은 성공했으므로 오류 표시하지 않음
+    }
+  };
+
+  // 저장 모달 닫기 핸들러
+  const handleCloseModal = () => {
+    setShowSaveModal(false);
+  };
 
   // 데이터 파싱 함수
   function parseSummary(data) {
@@ -202,9 +291,39 @@ export default function GetVideoPage() {
               onReady={onReady}
             />
           </div>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold mb-2">{videoTitle}</h3>
-          </div>
+          {videoTitle && (
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <Title>{videoTitle}</Title>
+                {savedSubjects.length > 0 && (
+                  <div className="text-sm text-gray-600">
+                    주제:
+                    {savedSubjects.map((subject, index) => (
+                      <span key={subject.categoryId} className="ml-1">
+                        {index > 0 && ", "}
+                        <span
+                          className="text-blue-600 cursor-pointer hover:underline"
+                          onClick={() =>
+                            navigate(`/subject/${subject.categoryId}`)
+                          }
+                        >
+                          {subject.categoryName}
+                        </span>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              {!videoSaved && (
+                <Button
+                  onClick={() => setShowSaveModal(true)}
+                  variant="secondary"
+                >
+                  주제에 저장
+                </Button>
+              )}
+            </div>
+          )}
 
           <SearchVideo inputURLRef={inputURLRef} variant={"SearchVideo"} />
           <div className="flex justify-center gap-4 mt-4">
@@ -217,7 +336,7 @@ export default function GetVideoPage() {
 
         {/* 오른쪽 영역: 강의 노트 */}
         <div className={`w-2/5 p-4 overflow-y-auto`}>
-          <h2 className="text-xl font-bold mb-4 text-gray-800">강의 노트</h2>
+          <Title size="small">강의 노트</Title>
           {loading ? (
             <div className="flex items-center gap-2">
               <div className="animate-spin w-4 h-4 border-4 border-blue-500 border-t-transparent rounded-full"></div>
@@ -250,6 +369,8 @@ export default function GetVideoPage() {
           )}
         </div>
       </div>
+
+      {/* 퀴즈 생성 모달 */}
       <Modal
         isOpen={openQuizSetModal}
         onClose={() => setOpenQuizSetModal(false)}
@@ -257,6 +378,21 @@ export default function GetVideoPage() {
       >
         <TeacherCreateQuizPage videoId={videoId} />
       </Modal>
+
+      {/* 주제 선택 모달 */}
+      <TreeModal
+        isOpen={showSaveModal}
+        onClose={handleCloseModal}
+        title="영상을 저장할 주제 선택"
+        onCategorySelect={handleCategorySave}
+      />
+
+      {/* 저장 오류 메시지 */}
+      {saveError && (
+        <div className="fixed bottom-4 right-4 bg-red-100 border-red-400 border px-4 py-2 rounded text-red-700">
+          {saveError}
+        </div>
+      )}
     </div>
   );
 }

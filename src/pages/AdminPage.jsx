@@ -3,7 +3,12 @@ import Button from "../components/Button";
 import Input from "../components/Input";
 import TopBar from "../components/TopBar/TopBar";
 import { extractVideoId } from "../components/func.js";
-import { addCopyrightVideo, checkAdminStatus, fetchBanList } from "../api/index";
+import {
+  addCopyrightVideo,
+  checkAdminStatus,
+  fetchBanList,
+} from "../api/index";
+import Title from "../components/Title.jsx";
 
 export default function AdminPage() {
   const videoUrlRef = useRef(null);
@@ -58,15 +63,12 @@ export default function AdminPage() {
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       <TopBar />
-      <h1 className="text-2xl font-bold mb-4 p-4 text-gray-800">
-        관리자 페이지
-      </h1>
+      <Title>관리자 페이지</Title>
+
       <div className="flex flex-col items-start gap-2 p-4 border-2 border-gray-400 rounded-lg mx-4">
         <Input ref={videoUrlRef} placeholder="영상 URL" />
         <Input ref={ownerRef} placeholder="영상 소유자" />
-        <Button onClick={handleAddCopyrightVideo}>
-          영상 차단 등록하기
-        </Button>
+        <Button onClick={handleAddCopyrightVideo}>영상 차단 등록하기</Button>
         {iscopyrighterror && (
           <p className="text-red-500 text-sm mt-2">{iscopyrighterror}</p>
         )}
@@ -75,9 +77,7 @@ export default function AdminPage() {
       {/* 밴 리스트 영역 */}
       <div className="p-4 mx-4 mt-4 border-2 border-gray-300 rounded-lg bg-white">
         <h2 className="text-lg font-semibold mb-2">현재 밴 리스트</h2>
-        {banListError && (
-          <p className="text-red-500 text-sm">{banListError}</p>
-        )}
+        {banListError && <p className="text-red-500 text-sm">{banListError}</p>}
         {banList.length === 0 && !banListError ? (
           <p className="text-gray-500">등록된 차단 영상이 없습니다.</p>
         ) : (
