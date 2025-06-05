@@ -9,7 +9,7 @@ export const copyrightCheck = async (videoId) => {
       method: "GET",
     });
 
-    if (!response.ok) {
+    if (!response.ok&&response.status!==409) {
       throw new Error("저작권 확인 API 응답 오류");
     }
 
