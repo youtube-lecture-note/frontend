@@ -7,7 +7,7 @@ import Button from "../components/Button";
 import TopBar from "../components/TopBar/TopBar";
 import DisplaySummaryLine from "../components/Summary/DisplaySummaryLine";
 import SearchVideo from "../components/Search/SearchVideo";
-import Modal from "../components/Modal"
+import Modal from "../components/Modal";
 import TeacherCreateQuizPage from "./multiquiz/TeacherCreateQuizPage";
 import { videoSummaryApi } from "../api/index.js";
 
@@ -186,34 +186,45 @@ export default function GetVideoPage() {
           <SearchVideo inputURLRef={inputURLRef} variant={"SearchVideo"} />
           <div className="flex justify-center gap-4 mt-4">
             <Button onClick={handleQuizClick}>문제풀기</Button>
-            <Button onClick={() => setOpenQuizSetModal(true)}>퀴즈셋 생성</Button>
+            <Button onClick={() => setOpenQuizSetModal(true)}>
+              퀴즈셋 생성
+            </Button>
           </div>
         </div>
 
         {/* 오른쪽 영역: 강의 노트 */}
-        <div className="w-2/5 p-4 overflow-y-auto bg-white">
+        <div className={`w-2/5 p-4 overflow-y-auto`}>
           <h2 className="text-xl font-bold mb-4 text-gray-800">강의 노트</h2>
-          <div className="rounded-lg p-4">
-            <div className="flex flex-col gap-4 pb-4">
-              {error ? (
-                <p className="text-red-600">{error}</p>
-              ) : (
-                <div className="flex flex-col gap-4">
-                  {displaySummary.map((item) => (
-                    <DisplaySummaryLine
-                      key={item.time}
-                      time={item.time}
-                      text={item.text}
-                      onTimeClick={seekToTime}
-                    />
-                  ))}
-                </div>
-              )}
+          {loading ? (
+            <div className="flex items-center gap-2">
+              <div className="animate-spin w-4 h-4 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+              <span>강의 노트 제작중</span>
             </div>
-            <div className="flex gap-2">
-              <Button onClick={handleSaveNote}>저장</Button>
+          ) : (
+            <div className="rounded-lg p-4">
+              <div className="flex flex-col gap-4 pb-4">
+                {error ? (
+                  <p className="text-red-600">{error}</p>
+                ) : displaySummary.length === 0 ? (
+                  <p className="text-gray-500">데이터가 없습니다</p>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    {displaySummary.map((item) => (
+                      <DisplaySummaryLine
+                        key={item.time}
+                        time={item.time}
+                        text={item.text}
+                        onTimeClick={seekToTime}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={handleSaveNote}>저장</Button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
       <Modal
