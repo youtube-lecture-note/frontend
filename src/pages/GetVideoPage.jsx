@@ -18,10 +18,12 @@ import {
   checkVideoInCategories,
   getCategoryById, // getCategoryById import 추가
 } from "../api/index.js";
+import { fetchYoutubeVideoTitle, videoSummaryApi } from "../api/index.js";
 
 export default function GetVideoPage() {
   const inputURLRef = useRef(null);
   const [summary, setSummary] = useState("");
+  const [videoTitle, setVideoTitle] = useState("강의 노트");
   // 로딩, 에러
   const [loading, setLoading] = useState(false);
   const [openQuizSetModal, setOpenQuizSetModal] = useState(false);
@@ -101,7 +103,9 @@ export default function GetVideoPage() {
         setLoading(false);
       }
     }
-
+    fetchYoutubeVideoTitle(videoId).then((title) => {
+      setVideoTitle(title);
+    });
     fetchSummary();
   }, [videoId]);
 
@@ -245,9 +249,26 @@ export default function GetVideoPage() {
     const blob = new Blob([noteContent], { type: "text/plain;charset=utf-8" });
     const url = URL.createObjectURL(blob);
 
+    // 파일명 생성 로직 개선
+    let fileName = "";
+
+    if (videoTitle === "제목을 가져올 수 없음") {
+      fileName = `${videoId}_note.txt`;
+    } else {
+      // 파일명에 사용할 수 없는 특수문자 제거
+      let safeTitle = videoTitle.replace(/[\\/:*?"<>|]/g, "_");
+
+      // 파일명 길이 제한 (50자)
+      if (safeTitle.length > 50) {
+        safeTitle = safeTitle.substring(0, 47) + "...";
+      }
+
+      fileName = `${safeTitle}_note.txt`;
+    }
+
     const downloadLink = document.createElement("a");
     downloadLink.href = url;
-    downloadLink.download = `${videoId}.txt`;
+    downloadLink.download = fileName;
 
     document.body.appendChild(downloadLink);
     downloadLink.click();
