@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   createQuizSetApi,
   getQuizCountByVideoId,
@@ -8,6 +9,7 @@ import {
 import Button from "../../components/Button";
 
 export default function TeacherCreateQuizPage({ videoId }) {
+  const navigate = useNavigate();
   // 난이도별 문제 수 상태
   const [levelCounts, setLevelCounts] = useState({
     level1: 0,
@@ -181,6 +183,12 @@ export default function TeacherCreateQuizPage({ videoId }) {
               키의 유효 시간이 만료되었습니다.
             </div>
           )}
+          <Button
+            onClick={() => navigate(`/quiz/multi/${quizKey}`)}
+            classNameAdd="btn btn-secondary mt-4"
+          >
+            문제 풀기
+          </Button>
         </div>
       )}
     </div>
