@@ -16,14 +16,11 @@ import {
   addVideoToCategory,
   fetchYoutubeVideoTitle,
   checkVideoInCategories,
-  getCategoryById, // getCategoryById import 추가
 } from "../api/index.js";
-import { fetchYoutubeVideoTitle, videoSummaryApi } from "../api/index.js";
 
 export default function GetVideoPage() {
   const inputURLRef = useRef(null);
   const [summary, setSummary] = useState("");
-  const [videoTitle, setVideoTitle] = useState("강의 노트");
   // 로딩, 에러
   const [loading, setLoading] = useState(false);
   const [openQuizSetModal, setOpenQuizSetModal] = useState(false);
