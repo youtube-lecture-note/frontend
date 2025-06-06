@@ -28,7 +28,7 @@ export default function AdminPage() {
     try {
       setBanListError(null);
       const bans = await fetchBanList();
-      setBanList(bans);
+      setBanList(bans || []);
     } catch (e) {
       setBanListError(e.message);
       setBanList([]);
@@ -78,7 +78,7 @@ export default function AdminPage() {
       <div className="p-4 mx-4 mt-4 border-2 border-gray-300 rounded-lg bg-white">
         <h2 className="text-lg font-semibold mb-2">현재 밴 리스트</h2>
         {banListError && <p className="text-red-500 text-sm">{banListError}</p>}
-        {banList==null || banList.length === 0 && !banListError ? (
+        {Array.isArray(banList) && banList.length === 0 && !banListError ? (
           <p className="text-gray-500">등록된 차단 영상이 없습니다.</p>
         ) : (
           <table className="min-w-full text-sm">
@@ -90,26 +90,27 @@ export default function AdminPage() {
               </tr>
             </thead>
             <tbody>
-              {banList.map((ban) => (
-                <tr key={ban.youtubeId}>
-                  <td className="px-2 py-1 border">
-                    <a
-                      href={`https://www.youtube.com/watch?v=${ban.youtubeId}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 underline"
-                    >
-                      {`https://www.youtube.com/watch?v=${ban.youtubeId}`}
-                    </a>
-                  </td>
-                  <td className="px-2 py-1 border">{ban.owner}</td>
-                  <td className="px-2 py-1 border">
-                    {ban.processedDate
-                      ? new Date(ban.processedDate).toLocaleString("ko-KR")
-                      : "-"}
-                  </td>
-                </tr>
-              ))}
+              {Array.isArray(banList) &&
+                banList.map((ban) => (
+                  <tr key={ban.youtubeId}>
+                    <td className="px-2 py-1 border">
+                      <a
+                        href={`https://www.youtube.com/watch?v=${ban.youtubeId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline"
+                      >
+                        {`https://www.youtube.com/watch?v=${ban.youtubeId}`}
+                      </a>
+                    </td>
+                    <td className="px-2 py-1 border">{ban.owner}</td>
+                    <td className="px-2 py-1 border">
+                      {ban.processedDate
+                        ? new Date(ban.processedDate).toLocaleString("ko-KR")
+                        : "-"}
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         )}

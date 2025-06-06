@@ -3,7 +3,7 @@ import Button from "../Button";
 import { useNavigate } from "react-router-dom";
 import { FaChevronRight } from "react-icons/fa";
 
-export default function Attempts({ attempt }) {
+export default function Attempts({ attempt, currentVideoTitle }) {
   const navigate = useNavigate();
   const handleViewDetails = (quizSetId) => {
     navigate(`/attempts/${quizSetId}`);
@@ -27,7 +27,9 @@ export default function Attempts({ attempt }) {
       className="p-3 bg-white rounded-md shadow-md hover:shadow-lg transition-shadow border border-gray-200 flex justify-between items-center"
     >
       <div className="flex-grow">
-        <p className="font-semibold text-gray-800">{attempt.userVideoName}</p>
+        <p className="font-semibold text-gray-800">
+          {currentVideoTitle ? currentVideoTitle : attempt.userVideoName}
+        </p>
         <p className="text-sm text-gray-500">
           {new Date(attempt.date).toLocaleString()}
         </p>
