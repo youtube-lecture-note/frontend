@@ -359,42 +359,35 @@ export default function GetVideoPage() {
             </div>
           )}
 
+          {/* 퀴즈 에러 메시지 - 여기로 이동 */}
+          {quizError && (
+            <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+              <div className="flex items-center justify-between">
+                <span>{quizError}</span>
+                <button
+                  onClick={() => setQuizError("")}
+                  className="text-red-500 hover:text-red-700 ml-2"
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          )}
+
           <SearchVideo inputURLRef={inputURLRef} variant={"SearchVideo"} />
           <div className="flex justify-center gap-4 mt-4">
-            <Button onClick={handleQuizClick} disabled={quizLoading}>
+            <Button onClick={handleQuizClick} disabled={loading && quizLoading}>
               {quizLoading ? "퀴즈 준비 중..." : "문제풀기"}
             </Button>
             <Button
               onClick={() => setOpenQuizSetModal(true)}
-              disabled={quizLoading}
+              disabled={loading && quizLoading}
             >
               퀴즈셋 생성
             </Button>
           </div>
         </div>
-        {/* 퀴즈 에러 메시지 표시 */}
-        {quizError && (
-          <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
-            <div className="flex items-center justify-between">
-              <span>{quizError}</span>
-              <button
-                onClick={() => setQuizError("")}
-                className="text-red-500 hover:text-red-700 ml-2"
-              >
-                ✕
-              </button>
-            </div>
-            {quizError.includes("생성 중") && (
-              <button
-                onClick={handleQuizClick}
-                className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                disabled={quizLoading}
-              >
-                다시 시도
-              </button>
-            )}
-          </div>
-        )}
+
         {/* 오른쪽 영역: 강의 노트 */}
         <div className={`w-2/5 p-4 overflow-y-auto`}>
           <Title size="small">강의 노트</Title>
