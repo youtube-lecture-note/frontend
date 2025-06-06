@@ -26,15 +26,13 @@ export default function SearchVideo({ inputURLRef, variant, onChange }) {
     try {
       const copyrightResult = await copyrightCheck(vidID);
 
-      // copyrightResult가 null (API 오류 또는 409 등 차단 응답) 이거나
-      // copyrightResult.data가 true (API가 정상 응답했으나 차단된 영상으로 명시)인 경우
-      if (
-        copyrightResult === null ||
-        (copyrightResult && copyrightResult.data === true)
-      ) {
-        setErrorMessage("이 영상은 차단된 영상입니다.");
+      // copyrightResult가 null인 경우 오류로 판단.
+      // copyrightResult.data가 true (HTTPS 409)인 경우 Response의 Data에서 차단 사유 표시
+      if (copyrightResult.data !== null) {
+        const {owner,processedDate} = copyrightResult.data;
+        setErrorMessage(`해당 영상은 저작권자 ${owner}의 요청으로 ${processedDate} 이후 차단 처리 되었습니다.`)
       } else {
-        // 영상이 차단되지 않았고, 저작권 확인 성공
+        // HTTPS 200으로 판단.
         setErrorMessage(""); // 에러 메시지 없음 확인
         if (variant === "SearchVideo") {
           navigate(`/video/${vidID}`);
