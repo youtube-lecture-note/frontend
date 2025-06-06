@@ -78,7 +78,7 @@ export default function AdminPage() {
       <div className="p-4 mx-4 mt-4 border-2 border-gray-300 rounded-lg bg-white">
         <h2 className="text-lg font-semibold mb-2">현재 밴 리스트</h2>
         {banListError && <p className="text-red-500 text-sm">{banListError}</p>}
-        {banList.length === 0 && !banListError ? (
+        {banList==null || banList.length === 0 && !banListError ? (
           <p className="text-gray-500">등록된 차단 영상이 없습니다.</p>
         ) : (
           <table className="min-w-full text-sm">
