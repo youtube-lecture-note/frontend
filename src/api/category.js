@@ -150,7 +150,7 @@ export const addVideoToCategory = async (
       `${API_URL}/api/categories/${categoryId}/videos/${videoId}`
     );
     if (userVideoName) {
-      url.searchParams.append("userVideoName", userVideoName);
+      url.searchParams.append("userVideoName", userVideoName.toString());
     }
 
     const response = await fetch(url.toString(), {
