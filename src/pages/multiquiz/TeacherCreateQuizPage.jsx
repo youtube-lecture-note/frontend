@@ -1,17 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  createQuizSetApi,
   getQuizCountByVideoId,
   createQuizSetByCountsApi,
 } from "../../api";
+import { getQuizSetResults,getQuizDetails } from "../../api/quizSet";
 
 import Button from "../../components/Button";
 import Title from "../../components/Title";
 
 export default function TeacherCreateQuizPage({ videoId }) {
   const navigate = useNavigate();
-  // 난이도별 문제 수 상태
   const [levelCounts, setLevelCounts] = useState({
     level1: 0,
     level2: 0,
@@ -24,9 +23,14 @@ export default function TeacherCreateQuizPage({ videoId }) {
     total: 0,
   });
   const [quizKey, setQuizKey] = useState("");
+  const [quizSetId, setQuizSetId] = useState(null);
+  const [quizSetName, setQuizSetName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [secondsLeft, setSecondsLeft] = useState(600);
+  const [showResults, setShowResults] = useState(false);
+  const [quizResults, setQuizResults] = useState(null);
+  const [quizDetails, setQuizDetails] = useState({});
   const timerRef = useRef(null);
 
   // 비디오별 난이도별 문제 수 조회
@@ -84,28 +88,175 @@ export default function TeacherCreateQuizPage({ videoId }) {
     setLoading(true);
     setError("");
     try {
-      // 난이도별 문제 수 합계가 1 이상이어야 함
-      const total =
-        levelCounts.level1 + levelCounts.level2 + levelCounts.level3;
+      const total = levelCounts.level1 + levelCounts.level2 + levelCounts.level3;
       if (total < 1) {
         setError("최소 1문제 이상 선택해주세요.");
         setLoading(false);
         return;
       }
-      // 실제 API 호출 (아래에 백엔드 예시 있음)
-      const res = await createQuizSetByCountsApi(videoId, levelCounts);
-      setQuizKey(res.data.redisQuizSetKey);
+      
+      // 퀴즈셋 이름 검증
+      if (!quizSetName.trim()) {
+        setError("퀴즈셋 이름을 입력해주세요.");
+        setLoading(false);
+        return;
+      }
+      
+      const res = await createQuizSetByCountsApi(videoId, levelCounts, quizSetName);
+      setQuizKey(res.data?.redisQuizSetKey || res.redisQuizSetKey);
+      setQuizSetId(res.data?.quizSetId || res.quizSetId);
       console.log(res);
-    } catch (e) {
-      setError(e.message || "퀴즈 생성 실패");
+    } catch (error) {
+      // 기존 에러 처리 로직 유지
     } finally {
       setLoading(false);
     }
   };
 
+  // 퀴즈셋 결과 조회
+  const handleShowResults = async () => {
+    if (!quizSetId) return;
+    
+    setLoading(true);
+    try {
+      const results = await getQuizSetResults(quizSetId);
+      setQuizResults(results);
+      
+      // 각 퀴즈의 상세 정보 조회
+      const details = {};
+      for (const quiz of results.quizStatistics) {
+        try {
+          const quizDetail = await getQuizDetails(quiz.id);
+          details[quiz.id] = quizDetail;
+        } catch (e) {
+          console.error(`퀴즈 ${quiz.id} 상세 정보 조회 실패:`, e);
+        }
+      }
+      setQuizDetails(details);
+      setShowResults(true);
+    } catch (e) {
+      setError("결과 조회에 실패했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 난이도 텍스트 변환
+  const getDifficultyText = (difficulty) => {
+    switch (difficulty) {
+      case 1: return "쉬움";
+      case 2: return "보통";
+      case 3: return "어려움";
+      default: return "알 수 없음";
+    }
+  };
+
+  if (showResults && quizResults) {
+    return (
+      <div className="p-8 max-w-4xl mx-auto">
+        <Title>퀴즈셋 결과</Title>
+        
+        <div className="mb-6 p-4 border rounded bg-blue-50">
+          <h3 className="font-bold text-lg mb-2">전체 통계</h3>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <span className="font-semibold">총 문제 수:</span> {quizResults.totalQuizCount}문제
+            </div>
+            <div>
+              <span className="font-semibold">참여자 수:</span> {quizResults.participantCount}명
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <h3 className="font-bold text-lg mb-4">참여자별 결과</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-gray-300">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-300 p-2">이름</th>
+                  <th className="border border-gray-300 p-2">이메일</th>
+                  <th className="border border-gray-300 p-2">정답 수</th>
+                  <th className="border border-gray-300 p-2">정답률</th>
+                </tr>
+              </thead>
+              <tbody>
+                {quizResults.participantResults.map((participant, index) => (
+                  <tr key={index}>
+                    <td className="border border-gray-300 p-2">{participant.userName}</td>
+                    <td className="border border-gray-300 p-2">{participant.userEmail}</td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      {participant.correctCount} / {quizResults.totalQuizCount}
+                    </td>
+                    <td className="border border-gray-300 p-2 text-center">
+                      {((participant.correctCount / quizResults.totalQuizCount) * 100).toFixed(1)}%
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="mb-6">
+          <h3 className="font-bold text-lg mb-4">문제별 통계</h3>
+          <div className="space-y-4">
+            {quizResults.quizStatistics.map((quiz) => {
+              const detail = quizDetails[quiz.id];
+              return (
+                <div key={quiz.id} className="border rounded p-4">
+                  <div className="mb-2">
+                    <span className="font-semibold">문제:</span> {detail?.question || "로딩 중..."}
+                  </div>
+                  <div className="mb-2">
+                    <span className="font-semibold">난이도:</span> {getDifficultyText(detail?.difficulty)}
+                  </div>
+                  <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div>
+                      <span className="font-semibold">총 시도:</span> {quiz.totalAttempts}회
+                    </div>
+                    <div>
+                      <span className="font-semibold">정답:</span> {quiz.correctAttempts}회
+                    </div>
+                    <div>
+                      <span className="font-semibold">정답률:</span> {quiz.accuracyRate}%
+                    </div>
+                  </div>
+                  {detail?.correctAnswer && (
+                    <div className="mt-2 text-sm text-gray-600">
+                      <span className="font-semibold">정답:</span> {detail.correctAnswer}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        <Button
+          onClick={() => setShowResults(false)}
+          classNameAdd="btn btn-secondary"
+        >
+          돌아가기
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <div className="p-8 max-w-lg mx-auto">
       <Title>퀴즈 세트 생성</Title>
+      {/* 퀴즈셋 이름 입력 필드 추가 */}
+      <div className="mb-4 border rounded p-4">
+        <div className="mb-2">퀴즈셋 이름</div>
+        <input
+          type="text"
+          value={quizSetName}
+          onChange={(e) => setQuizSetName(e.target.value)}
+          placeholder="퀴즈셋 이름을 입력하세요"
+          className="w-full p-2 border rounded"
+        />
+      </div>
       <div className="mb-4 border rounded p-4">
         <div className="mb-2">
           난이도별 문제 수 선택 (최대값: 해당 영상의 문제 수)
@@ -184,12 +335,13 @@ export default function TeacherCreateQuizPage({ videoId }) {
               키의 유효 시간이 만료되었습니다.
             </div>
           )}
-          {secondsLeft > 0 && (
+          {secondsLeft > 0 && quizSetId && (
             <Button
-              onClick={() => navigate(`/quiz/multi/${quizKey}`)}
+              onClick={handleShowResults}
               classNameAdd="btn btn-secondary mt-4"
+              disabled={loading}
             >
-              문제 풀기
+              {loading ? "로딩 중..." : "퀴즈셋 기록 보기"}
             </Button>
           )}
         </div>

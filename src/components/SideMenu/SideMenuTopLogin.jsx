@@ -42,6 +42,9 @@ export default function SideMenuTopLogin() {
           <Button variant="SubjectDefault" onClick={() => navigate("/")}>
             <span className="text-gray-800">홈</span>
           </Button>
+          <Button variant="SubjectDefault" onClick={() => navigate("/quizsets")}>
+            <span className="text-gray-800">퀴즈셋 관리</span>
+          </Button>
           <Button variant="SubjectDefault" onClick={() => navigate("/attempts")}>
             <span className="text-gray-800">퀴즈 기록</span>
           </Button>
@@ -58,6 +61,7 @@ export default function SideMenuTopLogin() {
             onClick={() => setOpenQuizModal(true)}>
             <span className="text-gray-800">공동 퀴즈 풀기</span>
           </Button>
+
         </div>
       </div>
       
