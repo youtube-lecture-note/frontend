@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { getAllQuizSets } from "../api/quizSet";
 import Button from "../components/Button";
 import Title from "../components/Title";
+import TopBar from "../components/TopBar/TopBar";
 
 export default function QuizSetListPage() {
   const navigate = useNavigate();
@@ -28,29 +29,29 @@ export default function QuizSetListPage() {
     }
   };
 
-  const filteredQuizSets = quizSets.filter(quizSet => {
+  const filteredQuizSets = quizSets.filter((quizSet) => {
     // quizSet이 null/undefined인 경우 제외
     if (!quizSet) {
       return false;
     }
-    
+
     // name이 null인 경우 "이름 없음"으로 처리하여 검색 가능하게 함
     const quizSetName = quizSet.name || "이름 없음";
-    
+
     if (!searchTerm) {
       return true; // 검색어가 없으면 모든 퀴즈셋 표시
     }
-    
+
     return quizSetName.toLowerCase().includes(searchTerm.toLowerCase());
   });
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('ko-KR', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("ko-KR", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -66,7 +67,7 @@ export default function QuizSetListPage() {
   return (
     <div className="p-8 max-w-4xl mx-auto">
       <Title>퀴즈셋 목록</Title>
-      
+
       {error && (
         <div className="mb-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded">
           {error}
@@ -102,17 +103,22 @@ export default function QuizSetListPage() {
                   )}
                 </h3>
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600 mb-3">
                 <div>
-                  <span className="font-medium">생성일:</span> {formatDate(quizSet.createdAt)}
+                  <span className="font-medium">생성일:</span>{" "}
+                  {formatDate(quizSet.createdAt)}
                 </div>
                 <div>
-                  <span className="font-medium">상태:</span> 
-                  <span className={`ml-1 px-2 py-1 rounded text-xs ${
-                    quizSet.name ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {quizSet.name ? '설정 완료' : '이름 미설정'}
+                  <span className="font-medium">상태:</span>
+                  <span
+                    className={`ml-1 px-2 py-1 rounded text-xs ${
+                      quizSet.name
+                        ? "bg-green-100 text-green-800"
+                        : "bg-yellow-100 text-yellow-800"
+                    }`}
+                  >
+                    {quizSet.name ? "설정 완료" : "이름 미설정"}
                   </span>
                 </div>
               </div>
@@ -143,10 +149,7 @@ export default function QuizSetListPage() {
         >
           새 퀴즈셋 만들기
         </Button>
-        <Button
-          onClick={() => navigate(-1)}
-          classNameAdd="btn btn-secondary"
-        >
+        <Button onClick={() => navigate(-1)} classNameAdd="btn btn-secondary">
           돌아가기
         </Button>
       </div>
