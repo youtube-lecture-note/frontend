@@ -9,19 +9,34 @@ export const quizGetApi = async (videoId, difficulty, count) => {
     }
   );
 
+  // 응답 데이터 먼저 파싱
+  const responseData = await response.json().catch(() => ({}));
+
   if (response.status === 403) {
-    throw new Error("로그인이 만료되었습니다. 다시 로그인해주세요.");
+    const error = new Error("로그인이 만료되었습니다. 다시 로그인해주세요.");
+    error.status = 403;
+    throw error;
   }
   if (response.status === 404) {
-    throw new Error("영상을 찾을 수 없습니다.");
+    const error = new Error("영상을 찾을 수 없습니다.");
+    error.status = 404;
+    throw error;
   }
   if (response.status === 400) {
-    throw new Error("퀴즈를 가져오는데 실패했습니다.");
+    // 백엔드에서 보낸 실제 메시지 사용
+    const message = responseData.message || "퀴즈를 가져오는데 실패했습니다.";
+    const error = new Error(message);
+    error.status = 400;
+    error.data = responseData;
+    throw error;
   }
   if (!response.ok) {
-    throw new Error("퀴즈를 가져오는데 실패했습니다.");
+    const error = new Error("퀴즈를 가져오는데 실패했습니다.");
+    error.status = response.status;
+    throw error;
   }
-  return response.json();
+  
+  return responseData;
 };
 
 // 퀴즈 제출
