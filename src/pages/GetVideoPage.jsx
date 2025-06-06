@@ -125,9 +125,13 @@ export default function GetVideoPage() {
 
     // API 직접 호출 - videoTitle 매개변수 제거
     console.log(
-      `[DEBUG] API 호출 직전... (${formattedCategoryId}, ${videoId})`
+      `[DEBUG] API 호출 직전... (${formattedCategoryId}, ${videoId}, ${videoTitle})`
     );
-    const response = await addVideoToCategory(formattedCategoryId, videoId);
+    const response = await addVideoToCategory(
+      formattedCategoryId,
+      videoId,
+      videoTitle
+    );
     console.log(`[DEBUG] API 호출 성공! 응답:`, response);
 
     // 성공 처리
@@ -232,19 +236,19 @@ export default function GetVideoPage() {
     setQuizError("");
     let difficulty = "2";
     let numOfQuestions = 5;
-    
+
     try {
       const quizData = await quizGetApi(videoId, difficulty, numOfQuestions);
-      
-      navigate(`/video/${videoId}/quiz`, { 
-        state: { 
+
+      navigate(`/video/${videoId}/quiz`, {
+        state: {
           quizData: quizData.data || quizData,
-          preloaded: true 
-        } 
+          preloaded: true,
+        },
       });
     } catch (error) {
       console.error("퀴즈 로딩 오류:", error);
-      
+
       // status 속성으로 에러 구분
       if (error.status === 400) {
         // 백엔드에서 보낸 실제 메시지 사용
@@ -256,13 +260,14 @@ export default function GetVideoPage() {
       } else if (error.status === 404) {
         setQuizError(error.message);
       } else {
-        setQuizError("퀴즈를 불러올 수 없습니다. 네트워크 연결을 확인해주세요.");
+        setQuizError(
+          "퀴즈를 불러올 수 없습니다. 네트워크 연결을 확인해주세요."
+        );
       }
     } finally {
       setQuizLoading(false);
     }
   }
-
 
   // 노트 저장 함수
   function handleSaveNote() {
@@ -356,23 +361,15 @@ export default function GetVideoPage() {
 
           <SearchVideo inputURLRef={inputURLRef} variant={"SearchVideo"} />
           <div className="flex justify-center gap-4 mt-4">
-            <Button 
-              onClick={handleQuizClick}
-              disabled={quizLoading}
-            >
+            <Button onClick={handleQuizClick} disabled={quizLoading}>
               {quizLoading ? "퀴즈 준비 중..." : "문제풀기"}
             </Button>
-            <Button onClick={() => setOpenQuizSetModal(true)}>
+            <Button
+              onClick={() => setOpenQuizSetModal(true)}
+              disabled={quizLoading}
+            >
               퀴즈셋 생성
             </Button>
-            {!videoSaved && (
-              <Button
-                onClick={() => setShowSaveModal(true)}
-                variant="secondary"
-              >
-                주제에 저장
-              </Button>
-            )}
           </div>
         </div>
         {/* 퀴즈 에러 메시지 표시 */}
@@ -380,7 +377,7 @@ export default function GetVideoPage() {
           <div className="mt-4 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
             <div className="flex items-center justify-between">
               <span>{quizError}</span>
-              <button 
+              <button
                 onClick={() => setQuizError("")}
                 className="text-red-500 hover:text-red-700 ml-2"
               >
@@ -388,7 +385,7 @@ export default function GetVideoPage() {
               </button>
             </div>
             {quizError.includes("생성 중") && (
-              <button 
+              <button
                 onClick={handleQuizClick}
                 className="mt-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
                 disabled={quizLoading}

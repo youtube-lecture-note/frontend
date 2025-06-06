@@ -8,14 +8,9 @@ import TreeModal from "../TreeModal"; // TreeModal 임포트
 import useCategoryStore from "../../store/categoryStore";
 import { moveCategoryVideo, deleteCategoryVideo } from "../../api/category";
 import { useParams, useNavigate } from "react-router-dom"; // useNavigate 추가
-import { fetchYoutubeVideoTitle } from "../../api";
+//import { fetchYoutubeVideoTitle } from "../../api";
 
-export default function SubjectVideoIcon({
-  videoId,
-  onClick,
-  video,
-  onVideoUpdate,
-}) {
+export default function SubjectVideoIcon({ onClick, video, onVideoUpdate }) {
   // useParams를 올바르게 호출하여 URL 파라미터 가져오기
   const { subjectId } = useParams();
   const navigate = useNavigate(); // useNavigate 훅 사용
@@ -24,23 +19,24 @@ export default function SubjectVideoIcon({
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [error, setError] = useState("");
   const menuRef = useRef(null);
-  const [videoName, setVideoName] = useState("비디오 제목을 불러오는 중...");
+  //const [videoName, setVideoName] = useState("비디오 제목을 불러오는 중...");
 
   // 카테고리 스토어에서 필요한 함수와 상태 가져오기
   const { categories, fetchCategories, selectCategory } = useCategoryStore();
 
   // YouTube 썸네일 URL 생성
-  const thumbnailUrl = videoId
-    ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
+  const thumbnailUrl = video.videoId
+    ? `https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`
     : null;
 
-  useEffect(() => {
-    let name = fetchYoutubeVideoTitle(videoId);
-    if (!name) {
-      name = "비디오 제목을 불러오는 중...";
-    }
-    setVideoName(name);
-  }, [videoId]);
+  // useEffect(() => {
+  //   let name = fetchYoutubeVideoTitle(videoId);
+  //   if (!name) {
+  //     name = "비디오 제목을 불러오는 중...";
+  //   }
+  //   setVideoName(name);
+  // }, [videoId]);
+  console.log("비디오 이름:", video.videoName);
 
   // 외부 클릭시 드롭다운이 닫힘
   useEffect(() => {
@@ -69,7 +65,7 @@ export default function SubjectVideoIcon({
 
     switch (action) {
       case "delete":
-        handleDeleteVideo(subjectId, videoId);
+        handleDeleteVideo(subjectId, video.videoId);
         //삭제후 다시 fetch
 
         break;
@@ -105,7 +101,7 @@ export default function SubjectVideoIcon({
   const handleSelectTargetCategoryAndMove = async (targetCategoryId) => {
     setIsMoveModalOpen(false); // TreeModal을 먼저 닫습니다.
 
-    if (!videoId) {
+    if (!video.videoId) {
       setError("비디오 ID 정보가 없습니다.");
       console.error("handleSelectTargetCategoryAndMove: videoId is missing");
       return;
@@ -128,13 +124,17 @@ export default function SubjectVideoIcon({
 
     console.log("=== 비디오 이동 (TreeModal) 디버깅 정보 ===");
     console.log("현재 카테고리 ID:", currentCategoryId);
-    console.log("비디오 ID:", videoId);
+    console.log("비디오 ID:", video.videoId);
     console.log("이동할 카테고리 ID:", targetCategoryIdNum);
 
     setError("");
 
     try {
-      await moveCategoryVideo(currentCategoryId, videoId, targetCategoryIdNum);
+      await moveCategoryVideo(
+        currentCategoryId,
+        video.videoId,
+        targetCategoryIdNum
+      );
       console.log(`영상이 성공적으로 이동됨 (대상 ID: ${targetCategoryIdNum})`);
 
       // 1. 카테고리 목록 새로고침 (SideMenu 등 관련 컴포넌트 업데이트 위해)
@@ -169,7 +169,7 @@ export default function SubjectVideoIcon({
         {thumbnailUrl ? (
           <img
             src={thumbnailUrl}
-            alt={videoName}
+            alt={video.userVideoName}
             className="w-full h-40 object-cover"
           />
         ) : (
@@ -218,7 +218,7 @@ export default function SubjectVideoIcon({
 
       <div className="p-4" onClick={onClick}>
         <h3 className="font-medium text-gray-800 line-clamp-2 h-12">
-          {videoName}
+          {video.userVideoName || "제목 없음"}
         </h3>
       </div>
 
