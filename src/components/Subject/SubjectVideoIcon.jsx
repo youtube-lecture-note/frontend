@@ -61,6 +61,8 @@ export default function SubjectVideoIcon({
     switch (action) {
       case "delete":
         handleDeleteVideo(subjectId, videoId);
+        //삭제후 다시 fetch
+        
         break;
       case "playlist":
         setIsMoveModalOpen(true);
@@ -71,14 +73,22 @@ export default function SubjectVideoIcon({
     }
   };
 
-  // 삭제 처리 함수 - 아직 API 없음
-  const handleDeleteVideo = (subjectId, videoId) => {
+  // 삭제 처리 함수
+  const handleDeleteVideo = async (subjectId, videoId) => {
     console.log("영상 삭제 요청:", subjectId, videoId);
-    deleteCategoryVideo(subjectId, videoId);
-    fetchCategories();
-
-    if (onVideoUpdate) {
-      onVideoUpdate(); // SubjectPage의 비디오 목록 등 업데이트
+    try {
+      await deleteCategoryVideo(subjectId, videoId);
+      // 전체 카테고리 목록 갱신 (사이드바 등 다른 컴포넌트 업데이트)
+      await fetchCategories();
+      
+      // onVideoUpdate가 제공되었다면 호출하여 현재 페이지의 비디오 목록 갱신
+      if (onVideoUpdate) {
+        console.log("비디오 삭제 후 목록 새로고침 호출");
+        await onVideoUpdate();
+      }
+    } catch (error) {
+      console.error("비디오 삭제 중 오류 발생:", error);
+      setError(error.message || "비디오 삭제에 실패했습니다.");
     }
   };
 
@@ -122,21 +132,21 @@ export default function SubjectVideoIcon({
       console.log("카테고리 목록 새로고침 시작");
       await fetchCategories();
       console.log("카테고리 목록 새로고침 완료");
-      
+
       // 2. 대상 카테고리 선택 상태 업데이트
       selectCategory(targetCategoryIdNum);
       console.log(`대상 카테고리(ID: ${targetCategoryIdNum})로 선택 상태 변경`);
-      
+
       // 3. 대상 카테고리 페이지로 이동
       navigate(`/subject/${targetCategoryIdNum}`);
       console.log(`대상 카테고리(ID: ${targetCategoryIdNum}) 페이지로 이동`);
-      
+
       // 4. 비디오 목록 새로고침은 이동 후 자동으로 이루어짐
       if (onVideoUpdate) {
         console.log("비디오 목록 새로고침 호출");
-        await onVideoUpdate(); 
+        await onVideoUpdate();
       }
-      
+
       console.log("비디오 이동 및 페이지 이동 완료");
     } catch (err) {
       console.error("비디오 이동 중 오류 발생:", err);
