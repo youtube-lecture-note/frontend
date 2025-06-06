@@ -8,6 +8,8 @@ import AttemptsPage from "./pages/AttemptsPage";
 import QuizAttmptsByID from "./pages/QuizAttmptsByID";
 import AdminPage from "./pages/AdminPage";
 import QuizMultiPage from "./pages/multiquiz/QuizMultiPage";
+import QuizSetListPage from "./pages/QuizSetListPage";
+import QuizSetDetailPage from "./pages/QuizSetDetailPage";
 
 function App() {
   return (
@@ -23,6 +25,8 @@ function App() {
             <Route path="/attempts/:quizSetId" element={<QuizAttmptsByID />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/quiz/multi/:redisKey" element={<QuizMultiPage />} />
+            <Route path="/quizsets" element={<QuizSetListPage />} />
+            <Route path="/quizsets/:id" element={<QuizSetDetailPage />} />
           </Routes>
         </main>
 
