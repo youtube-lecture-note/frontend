@@ -20,7 +20,6 @@ export default function AttemptsPage() {
   const [quizAttempts, setQuizAttempts] = useState([]);
   const [quizIdInput, setQuizIdInput] = useState(false);
   const [currentVideoId, setCurrentVideoId] = useState(null);
-  const [currentVideoTitle, setCurrentVideoTitle] = useState("");
 
   // YouTube 플레이어 참조 추가
   const [player, setPlayer] = useState(null);
@@ -79,6 +78,12 @@ export default function AttemptsPage() {
             console.error("잘못된 형식의 퀴즈 기록 데이터:", data);
             setQuizAttempts([]);
           }
+
+          let tmpQuizAttempts = data;
+          for (let i = 0; i < tmpQuizAttempts.length; i++) {
+            tmpQuizAttempts[i].youtubeId = vidID;
+          }
+          setQuizAttempts(tmpQuizAttempts);
         })
         .catch((error) => {
           console.error(
@@ -86,16 +91,6 @@ export default function AttemptsPage() {
             error
           );
           setQuizAttempts([]);
-        });
-
-      // 현재 비디오 제목을 가져오는 API 호출
-      fetchYoutubeVideoTitle(vidID)
-        .then((title) => {
-          setCurrentVideoTitle(title);
-        })
-        .catch((error) => {
-          console.error("비디오 제목을 가져오는 데 실패했습니다:", error);
-          setCurrentVideoTitle("");
         });
     } else {
       // vidID가 유효하지 않으면, 현재 비디오 ID도 초기화 할 수 있습니다.
@@ -105,7 +100,7 @@ export default function AttemptsPage() {
     }
   };
 
-  console.log("퀴즈 기록:", quizAttempts, currentVideoTitle);
+  console.log("퀴즈 기록:", quizAttempts, "현재 비디오 ID:", currentVideoId);
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
@@ -164,7 +159,6 @@ export default function AttemptsPage() {
           quizAttemptsByVideoIdApi={quizAttemptsByVideoIdApi}
           quizAttemptsByQuizSetIdApi={quizAttemptsByQuizSetIdApi}
           quizIdInput={quizIdInput}
-          currentVideoTitle={currentVideoTitle}
         />
       </div>
     </div>

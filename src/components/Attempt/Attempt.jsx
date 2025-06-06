@@ -3,7 +3,7 @@ import Button from "../Button";
 import { useNavigate } from "react-router-dom";
 import { FaChevronRight } from "react-icons/fa";
 
-export default function Attempts({ attempt, currentVideoTitle }) {
+export default function Attempts({ attempt }) {
   const navigate = useNavigate();
   const handleViewDetails = (quizSetId) => {
     navigate(`/attempts/${quizSetId}`);
@@ -28,7 +28,7 @@ export default function Attempts({ attempt, currentVideoTitle }) {
     >
       <div className="flex-grow">
         <p className="font-semibold text-gray-800">
-          {currentVideoTitle ? currentVideoTitle : attempt.userVideoName}
+          {attempt.userVideoName || "제목 없음"}
         </p>
         <p className="text-sm text-gray-500">
           {new Date(attempt.date).toLocaleString()}
