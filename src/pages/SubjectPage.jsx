@@ -110,7 +110,6 @@ export default function SubjectPage() {
               <SubjectVideoIcon
                 key={`${video.videoId}-${refreshKey}`}
                 video={video}
-                name={video.userVideoName || "제목 없음"}
                 videoId={video.videoId}
                 onClick={() => handleVideoClick(video.videoId)}
                 onVideoUpdate={refreshVideos} // 새로고침 함수 전달

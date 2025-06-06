@@ -8,9 +8,9 @@ import TreeModal from "../TreeModal"; // TreeModal 임포트
 import useCategoryStore from "../../store/categoryStore";
 import { moveCategoryVideo, deleteCategoryVideo } from "../../api/category";
 import { useParams, useNavigate } from "react-router-dom"; // useNavigate 추가
+import { fetchYoutubeVideoTitle } from "../../api";
 
 export default function SubjectVideoIcon({
-  name,
   videoId,
   onClick,
   video,
@@ -24,6 +24,7 @@ export default function SubjectVideoIcon({
   const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
   const [error, setError] = useState("");
   const menuRef = useRef(null);
+  const [videoName, setVideoName] = useState("비디오 제목을 불러오는 중...");
 
   // 카테고리 스토어에서 필요한 함수와 상태 가져오기
   const { categories, fetchCategories, selectCategory } = useCategoryStore();
@@ -32,6 +33,14 @@ export default function SubjectVideoIcon({
   const thumbnailUrl = videoId
     ? `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
     : null;
+
+  useEffect(() => {
+    let name = fetchYoutubeVideoTitle(videoId);
+    if (!name) {
+      name = "비디오 제목을 불러오는 중...";
+    }
+    setVideoName(name);
+  }, [videoId]);
 
   // 외부 클릭시 드롭다운이 닫힘
   useEffect(() => {
@@ -62,7 +71,7 @@ export default function SubjectVideoIcon({
       case "delete":
         handleDeleteVideo(subjectId, videoId);
         //삭제후 다시 fetch
-        
+
         break;
       case "playlist":
         setIsMoveModalOpen(true);
@@ -80,7 +89,7 @@ export default function SubjectVideoIcon({
       await deleteCategoryVideo(subjectId, videoId);
       // 전체 카테고리 목록 갱신 (사이드바 등 다른 컴포넌트 업데이트)
       await fetchCategories();
-      
+
       // onVideoUpdate가 제공되었다면 호출하여 현재 페이지의 비디오 목록 갱신
       if (onVideoUpdate) {
         console.log("비디오 삭제 후 목록 새로고침 호출");
@@ -160,7 +169,7 @@ export default function SubjectVideoIcon({
         {thumbnailUrl ? (
           <img
             src={thumbnailUrl}
-            alt={name}
+            alt={videoName}
             className="w-full h-40 object-cover"
           />
         ) : (
@@ -208,7 +217,9 @@ export default function SubjectVideoIcon({
       </div>
 
       <div className="p-4" onClick={onClick}>
-        <h3 className="font-medium text-gray-800 line-clamp-2 h-12">{name}</h3>
+        <h3 className="font-medium text-gray-800 line-clamp-2 h-12">
+          {videoName}
+        </h3>
       </div>
 
       {/* 비디오 이동 모달 */}
