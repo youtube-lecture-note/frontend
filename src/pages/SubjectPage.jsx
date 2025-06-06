@@ -1,6 +1,6 @@
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import TopBar from "../components/TopBar/TopBar";
 import SubjectVideoIcon from "../components/Subject/SubjectVideoIcon";
@@ -15,9 +15,46 @@ export default function SubjectPage() {
   const { findCategoryById, fetchCategories } = useCategoryStore();
   const [isLoading, setIsLoading] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [subjectData, setSubjectData] = useState(null);
 
+  // 새로 추가: 비디오 목록 새로고침 함수
+  const refreshVideos = async () => {
+    setIsLoading(true);
+    try {
+      await fetchCategories();
+      // 새로고침 트리거를 위한 refreshKey 업데이트
+      setRefreshKey((prev) => prev + 1);
+      // 현재 주제 정보 다시 가져오기
+      const updatedSubject = findCategoryById(parseInt(subjectId));
+      setSubjectData(updatedSubject);
+    } catch (error) {
+      console.error("비디오 목록 새로고침 실패:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 컴포넌트 마운트 시 또는 subjectId 변경 시 데이터 로드
+  useEffect(() => {
+    const loadSubjectData = async () => {
+      setIsLoading(true);
+      try {
+        await fetchCategories();
+        const currentSubject = findCategoryById(parseInt(subjectId));
+        setSubjectData(currentSubject);
+      } catch (error) {
+        console.error("주제 데이터 로드 실패:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSubjectData();
+  }, [subjectId, fetchCategories, findCategoryById]);
+
+  // 주제 정보 결정 로직
   const Subjectinfo =
-    location.state?.Subjectinfo || findCategoryById(parseInt(subjectId));
+    location.state?.Subjectinfo || subjectData || findCategoryById(parseInt(subjectId));
   const SubjectVideos = Subjectinfo?.videos || [];
 
   const handleVideoClick = (videoId) => {
@@ -76,6 +113,7 @@ export default function SubjectPage() {
                 name={video.userVideoName || "제목 없음"}
                 videoId={video.videoId}
                 onClick={() => handleVideoClick(video.videoId)}
+                onVideoUpdate={refreshVideos} // 새로고침 함수 전달
               />
             ))}
           </div>
@@ -84,9 +122,7 @@ export default function SubjectPage() {
             <h3 className="text-xl font-semibold text-gray-800 mb-2">
               저장된 동영상이 없습니다
             </h3>
-            <p className="text-gray-600 mb-6">
-              이 주제에 동영상을 추가해보세요.
-            </p>
+            <p className="text-gray-600 mb-6">이 주제에 동영상을 추가해보세요.</p>
             <Button onClick={() => navigate("/")}>동영상 검색하기</Button>
           </div>
         )}

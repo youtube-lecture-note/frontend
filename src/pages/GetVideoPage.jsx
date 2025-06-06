@@ -304,21 +304,15 @@ export default function GetVideoPage() {
                             navigate(`/subject/${subject.categoryId}`)
                           }
                         >
-                          {subject.categoryName}
+                          {videoSaved
+                            ? subject.categoryName
+                            : "저장된 주제가 없습니다."}
                         </span>
                       </span>
                     ))}
                   </div>
                 )}
               </div>
-              {!videoSaved && (
-                <Button
-                  onClick={() => setShowSaveModal(true)}
-                  variant="secondary"
-                >
-                  주제에 저장
-                </Button>
-              )}
             </div>
           )}
 
@@ -328,6 +322,14 @@ export default function GetVideoPage() {
             <Button onClick={() => setOpenQuizSetModal(true)}>
               퀴즈셋 생성
             </Button>
+            {!videoSaved && (
+              <Button
+                onClick={() => setShowSaveModal(true)}
+                variant="secondary"
+              >
+                주제에 저장
+              </Button>
+            )}
           </div>
         </div>
 
@@ -367,7 +369,7 @@ export default function GetVideoPage() {
         </div>
       </div>
 
-      {/* 퀴즈 생성 모달 */}
+      {/* 공동 퀴즈 생성 모달 */}
       <Modal
         isOpen={openQuizSetModal}
         onClose={() => setOpenQuizSetModal(false)}

@@ -5,6 +5,7 @@ export default function QuizAttemptHistory({
   quizAttemptsByVideoIdApi,
   quizAttemptsByQuizSetIdApi,
   quizIdInput,
+  currentVideoTitle,
 }) {
   return (
     <div className="p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
@@ -15,7 +16,11 @@ export default function QuizAttemptHistory({
       ) : (
         <ul className="space-y-2">
           {quizAttempts.map((attempt) => (
-            <Attempt key={attempt.quizSetId} attempt={attempt} />
+            <Attempt
+              key={attempt.quizSetId}
+              attempt={attempt}
+              currentVideoTitle={currentVideoTitle}
+            />
           ))}
         </ul>
       )}

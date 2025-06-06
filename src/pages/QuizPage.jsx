@@ -140,6 +140,12 @@ export default function QuizPage() {
   return (
     <div className="flex flex-col h-screen relative bg-gray-50">
       <TopBar />
+      {loading && (
+        <div className="flex items-center gap-2">
+          <div className="animate-spin w-4 h-4 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+          <span>퀴즈 제작중</span>
+        </div>
+      )}
       <div className="flex-1 p-8 overflow-y-auto">{renderQuizItems()}</div>
       <div className="fixed bottom-12 right-12 h-1/5 w-350px bg-white border border-gray-200 rounded-lg shadow-md p-4 z-50">
         <AnswerStatus
