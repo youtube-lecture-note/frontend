@@ -8,6 +8,7 @@ import {
   quizAttemptsApi,
   quizAttemptsByVideoIdApi,
   quizAttemptsByQuizSetIdApi,
+  fetchYoutubeVideoTitle,
 } from "../api/index.js";
 import SearchVideo from "../components/Search/SearchVideo.jsx";
 import TopBar from "../components/TopBar/TopBar.jsx";
@@ -19,6 +20,7 @@ export default function AttemptsPage() {
   const [quizAttempts, setQuizAttempts] = useState([]);
   const [quizIdInput, setQuizIdInput] = useState(false);
   const [currentVideoId, setCurrentVideoId] = useState(null);
+  const [currentVideoTitle, setCurrentVideoTitle] = useState("");
 
   // YouTube 플레이어 참조 추가
   const [player, setPlayer] = useState(null);
@@ -85,6 +87,16 @@ export default function AttemptsPage() {
           );
           setQuizAttempts([]);
         });
+
+      // 현재 비디오 제목을 가져오는 API 호출
+      fetchYoutubeVideoTitle(vidID)
+        .then((title) => {
+          setCurrentVideoTitle(title);
+        })
+        .catch((error) => {
+          console.error("비디오 제목을 가져오는 데 실패했습니다:", error);
+          setCurrentVideoTitle("");
+        });
     } else {
       // vidID가 유효하지 않으면, 현재 비디오 ID도 초기화 할 수 있습니다.
       // setCurrentVideoId(null);
@@ -93,12 +105,32 @@ export default function AttemptsPage() {
     }
   };
 
-  console.log("퀴즈 기록:", quizAttempts);
+  console.log("퀴즈 기록:", quizAttempts, currentVideoTitle);
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
       <TopBar />
       <Title>퀴즈 기록</Title>
+
+      <div className="px-4 mb-4">
+        <SearchVideo
+          inputURLRef={inputURLRef}
+          variant="SearchQuiz"
+          onChange={handleQuizIdInputChange}
+        />
+      </div>
+      {quizIdInput && currentVideoId && (
+        <div className="border-r border-gray-200 p-4 flex flex-col justify-between bg-white shadow-sm rounded-lg mb-4">
+          <div className="w-full">
+            <YouTube
+              videoId={currentVideoId}
+              opts={opts}
+              className="w-full"
+              onReady={onReady}
+            />
+          </div>
+        </div>
+      )}
       <div className="flex justify-between items-center px-4 mb-4">
         {quizIdInput && (
           <Button
@@ -126,31 +158,13 @@ export default function AttemptsPage() {
           </Button>
         )}
       </div>
-      <div className="px-4 mb-4">
-        <SearchVideo
-          inputURLRef={inputURLRef}
-          variant="SearchQuiz"
-          onChange={handleQuizIdInputChange}
-        />
-      </div>
-      {quizIdInput && currentVideoId && (
-        <div className="border-r border-gray-200 p-4 flex flex-col justify-between bg-white shadow-sm rounded-lg mb-4">
-          <div className="w-full">
-            <YouTube
-              videoId={currentVideoId}
-              opts={opts}
-              className="w-full"
-              onReady={onReady}
-            />
-          </div>
-        </div>
-      )}
       <div className="flex-1 overflow-y-auto">
         <QuizAttemptHistory
           quizAttempts={quizAttempts}
           quizAttemptsByVideoIdApi={quizAttemptsByVideoIdApi}
           quizAttemptsByQuizSetIdApi={quizAttemptsByQuizSetIdApi}
           quizIdInput={quizIdInput}
+          currentVideoTitle={currentVideoTitle}
         />
       </div>
     </div>

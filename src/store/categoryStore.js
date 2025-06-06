@@ -80,6 +80,8 @@ const useCategoryStore = create((set, get) => ({
       await deleteCategoryVideo(categoryId, videoId);
       // 비디오 삭제 후 전체 목록 다시 불러오기
       await get().fetchCategories();
+      set({ isLoading: false });
+      return true; // 성공 반환 추가
     } catch (error) {
       console.error("카테고리 비디오 삭제에 실패했습니다:", error);
       set({ error: error.message, isLoading: false });
