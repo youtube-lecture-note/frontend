@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { checkAdminStatus } from "../../api/login";
+import { useAuth } from "../../contexts/AuthContext"; // AuthContext 추가
 import Button from "../Button";
 import LoginForm from "../../Login/LoginForm";
 import Modal from "../Modal";
@@ -8,27 +8,21 @@ import StudentEnterKeyForm from "../../pages/multiquiz/StudentEnterKeyForm"
 
 export default function SideMenuTopLogin() {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState("");
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [openQuizModal, setOpenQuizModal] = useState(false);  //키 입력으로 퀴즈풀기
+  const { isAuthenticated, isLoading, isAdmin } = useAuth(); // AuthContext 사용
+  const [openQuizModal, setOpenQuizModal] = useState(false);
 
-  // 컴포넌트 마운트 시 로그인 상태 확인
+  // 로그인 상태 확인 및 리다이렉트
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const storedUsername = localStorage.getItem("username");
-    if (token) {
-      setIsLoggedIn(true);
-      setUsername(storedUsername || "사용자");
-    } else {
-      setIsLoggedIn(false);
-      setUsername("");
+    // 로딩이 완료되고 로그인되지 않은 상태라면 /login으로 리다이렉트
+    if (!isLoading && !isAuthenticated) {
+      navigate("/login");
     }
+  }, [isAuthenticated, isLoading, navigate]);
 
-    checkAdminStatus(setIsAdmin);
-  }, []);
-
-  console.log(isAdmin);
+  // 로딩 중이거나 인증되지 않은 경우 렌더링하지 않음
+  if (isLoading || !isAuthenticated) {
+    return null; // 또는 로딩 스피너
+  }
 
   return (
     <>
@@ -61,7 +55,6 @@ export default function SideMenuTopLogin() {
             onClick={() => setOpenQuizModal(true)}>
             <span className="text-gray-800">공동 퀴즈 풀기</span>
           </Button>
-
         </div>
       </div>
       
