@@ -14,7 +14,13 @@ export const videoSummaryApi = async (videoId) => {
     );
   }
   if (!response.ok) {
-    throw new Error("비디오 요약 가져오기 실패");
+    if (response.status === 400) {
+      const errorData = await response.json();
+      const errorMessage = errorData?.message || "요청이 잘못되었습니다.";
+      throw new Error(errorMessage);
+    } else {
+      throw new Error("비디오 요약 가져오기 실패");
+    }
   }
   return response.json();
 };
