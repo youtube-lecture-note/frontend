@@ -1,5 +1,6 @@
 // 퀴즈 기록 페이지
 import { useEffect, useState, useRef } from "react";
+import { useParams } from 'react-router-dom';
 
 import YouTube from "react-youtube";
 import QuizAttemptHistory from "../components/Attempt/QuizAttemptHistory.jsx";
@@ -16,7 +17,9 @@ import Button from "../components/Button.jsx";
 import Title from "../components/Title.jsx";
 
 export default function AttemptsPage() {
+
   const inputURLRef = useRef(null);
+  const { youtubeId } = useParams();
   const [quizAttempts, setQuizAttempts] = useState([]);
   const [quizIdInput, setQuizIdInput] = useState(false);
   const [currentVideoId, setCurrentVideoId] = useState(null);
@@ -27,7 +30,7 @@ export default function AttemptsPage() {
   useEffect(() => {
     const fetchQuizAttempts = async () => {
       try {
-        const response = await quizAttemptsApi();
+        const response = await quizAttemptsApi(youtubeId);
         if (response && Array.isArray(response)) {
           setQuizAttempts(response);
         } else {

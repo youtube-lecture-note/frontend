@@ -59,6 +59,11 @@ function AppContent() {
               <QuizAttmptsByID />
             </ProtectedRoute>
           } />
+          <Route path="/attempts/youtube/:youtubeId" element={
+            <ProtectedRoute>
+              <AttemptsPage />
+            </ProtectedRoute>
+          } />
           <Route path="/admin" element={
             <ProtectedRoute>
               <AdminPage />

@@ -55,14 +55,22 @@ export const quizSubmitApi = async (answers, quizSetId) => {
   return response.json();
 };
 
-// 퀴즈 풀이기록 전체 조회
-export const quizAttemptsApi = async () => {
-  const response = await fetch(`${API_URL}/api/quizzes/attempts/summaries`, {
+// 퀴즈 풀이기록 전체 조회(또는 youtubeId로 필터링)
+export const quizAttemptsApi = async (youtubeId = null) => {
+  let url = `${API_URL}/api/quizzes/attempts/summaries`;
+  
+  // youtubeId가 있으면 쿼리 파라미터로 추가
+  if (youtubeId) {
+    url += `?youtubeId=${encodeURIComponent(youtubeId)}`;
+  }
+  
+  const response = await fetch(url, {
     ...API_CONFIG,
     method: "GET",
   });
+  
   if (!response.ok) {
-    throw new Error("퀴즈 풀이기록 전체 조회 실패");
+    throw new Error("퀴즈 풀이기록 조회 실패");
   }
   return response.json();
 };

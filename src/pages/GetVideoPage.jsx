@@ -355,12 +355,19 @@ export default function GetVideoPage() {
           )}
 
           <SearchVideo inputURLRef={inputURLRef} variant={"SearchVideo"} />
-          <div className="flex justify-center gap-4 mt-4">
+          <div className="flex justify-center gap-4 mt-4 mb-4">
             <Button
               onClick={() => setShowPersonalQuizModal(true)}
               disabled={quizLoading}
+              className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
             >
-              문제 풀기
+              {quizLoading ? "로딩중..." : "문제 풀기"}
+            </Button>
+            <Button
+              onClick={() => navigate(`/attempts/youtube/${videoId}`)}
+              className="px-6 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+            >
+              풀이 기록
             </Button>
           </div>
         </div>
