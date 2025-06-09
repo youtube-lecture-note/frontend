@@ -1,6 +1,6 @@
 // 퀴즈 진행 화면
 import { useState, useEffect, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate,useLocation } from "react-router-dom";
 
 import TopBar from "../components/TopBar/TopBar";
 import QuizItem from "../components/Quiz/QuizItem";
@@ -16,29 +16,40 @@ export default function QuizPage() {
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
   const [quizResults, setQuizResults] = useState([]);
-  // 로딩, 에러
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  // 결과 창 컨트롤
   const [isOpen, setIsOpen] = useState(false);
 
   const { videoId } = useParams();
   const navigate = useNavigate();
-
-  // 퀴즈 요청 이전 설정
-  const difficulty = "2";
-  const numOfQuestions = 5;
+  const location = useLocation();
 
   // 퀴즈 가져오기
   useEffect(() => {
     async function fetchQuiz() {
+      // location.state에서 preloaded된 퀴즈 데이터 확인
+      if (location.state?.preloaded && location.state?.quizData) {
+        console.log("사전 로드된 퀴즈 데이터 사용:", location.state.quizData);
+        const quizData = location.state.quizData;
+        
+        setQuizSetId(quizData.data.quizSetId);
+        const sortedQuestions = [...quizData.data.questions].sort(
+          (a, b) => a.quizId - b.quizId
+        );
+        setQuestions(sortedQuestions);
+        return;
+      }
+
+      // 기존 API 호출 로직 (fallback)
+      const difficulty = "2";
+      const numOfQuestions = 5;
+      
       try {
+        setLoading(true);
         const quizData = await quizGetApi(videoId, difficulty, numOfQuestions);
-        console.log("quizData : ", quizData);
+        console.log("API로부터 퀴즈 데이터:", quizData);
         setQuizSetId(quizData.data.quizSetId);
 
-        // 받아온 문제를 quizId 기준으로 정렬하여 저장
         const sortedQuestions = [...quizData.data.questions].sort(
           (a, b) => a.quizId - b.quizId
         );
@@ -49,8 +60,9 @@ export default function QuizPage() {
         setLoading(false);
       }
     }
+    
     fetchQuiz();
-  }, [videoId, difficulty, numOfQuestions]);
+  }, [videoId, location.state]);
 
   // useMemo를 사용하여 정렬된 문제 배열 생성 (추가 정렬 로직이 필요할 경우)
   const sortedQuestions = useMemo(() => {

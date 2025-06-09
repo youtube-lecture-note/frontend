@@ -102,7 +102,7 @@ export default function TeacherCreateQuizPage({ videoId }) {
         return;
       }
       
-      const res = await createQuizSetByCountsApi(videoId, levelCounts, quizSetName);
+      const res = await createQuizSetByCountsApi(videoId, levelCounts, quizSetName, true);
       setQuizKey(res.data?.redisQuizSetKey || res.redisQuizSetKey);
       setQuizSetId(res.data?.quizSetId || res.quizSetId);
       console.log(res);

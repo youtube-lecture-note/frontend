@@ -10,7 +10,8 @@ import DisplaySummaryLine from "../components/Summary/DisplaySummaryLine";
 import SearchVideo from "../components/Search/SearchVideo";
 import Modal from "../components/Modal";
 import TreeModal from "../components/TreeModal";
-import TeacherCreateQuizPage from "./multiquiz/TeacherCreateQuizPage";
+import PersonalQuizModal from "../components/Quiz/PersonalQuizModal.js";
+
 import {
   videoSummaryApi,
   quizGetApi,
@@ -68,6 +69,24 @@ export default function GetVideoPage() {
   // 퀴즈 로딩 상태
   const [quizLoading, setQuizLoading] = useState(false);
   const [quizError, setQuizError] = useState("");
+
+  const [showPersonalQuizModal, setShowPersonalQuizModal] = useState(false);
+
+  // 개인 퀴즈 시작 핸들러 수정
+  async function handleQuizClick() {
+    setShowPersonalQuizModal(true);
+  }
+
+  // 개인 퀴즈 모달에서 퀴즈 생성 후 퀴즈 페이지로 이동하는 핸들러
+  const handlePersonalQuizStart = (quizData) => {
+    setShowPersonalQuizModal(false);
+    navigate(`/video/${videoId}/quiz`, {
+      state: {
+        quizData: quizData,
+        preloaded: true,
+      },
+    });
+  };
 
   // 비디오 요약 가져오기
   useEffect(() => {
@@ -230,45 +249,6 @@ export default function GetVideoPage() {
     parse_summary.length === 0 ? parseSummary(noData) : parse_summary
   ).sort((a, b) => timeToSeconds(a.time) - timeToSeconds(b.time));
 
-  // 문제풀이 버튼
-  async function handleQuizClick() {
-    setQuizLoading(true);
-    setQuizError("");
-    let difficulty = "2";
-    let numOfQuestions = 5;
-
-    try {
-      const quizData = await quizGetApi(videoId, difficulty, numOfQuestions);
-
-      navigate(`/video/${videoId}/quiz`, {
-        state: {
-          quizData: quizData.data || quizData,
-          preloaded: true,
-        },
-      });
-    } catch (error) {
-      console.error("퀴즈 로딩 오류:", error);
-
-      // status 속성으로 에러 구분
-      if (error.status === 400) {
-        // 백엔드에서 보낸 실제 메시지 사용
-        setQuizError(`${error.message} 잠시 후 다시 시도해주세요.`);
-      } else if (error.status === 500) {
-        setQuizError("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
-      } else if (error.status === 403) {
-        setQuizError(error.message);
-      } else if (error.status === 404) {
-        setQuizError(error.message);
-      } else {
-        setQuizError(
-          "퀴즈를 불러올 수 없습니다. 네트워크 연결을 확인해주세요."
-        );
-      }
-    } finally {
-      setQuizLoading(false);
-    }
-  }
-
   // 노트 저장 함수
   function handleSaveNote() {
     // 페이지에서 모든 timestamp-container 클래스, textarea 요소 찾기
@@ -376,14 +356,11 @@ export default function GetVideoPage() {
 
           <SearchVideo inputURLRef={inputURLRef} variant={"SearchVideo"} />
           <div className="flex justify-center gap-4 mt-4">
-            <Button onClick={handleQuizClick} disabled={quizLoading}>
-              {quizLoading ? "퀴즈 준비 중..." : "문제풀기"}
-            </Button>
             <Button
-              onClick={() => setOpenQuizSetModal(true)}
+              onClick={() => setShowPersonalQuizModal(true)}
               disabled={quizLoading}
             >
-              퀴즈셋 생성
+              문제 풀기
             </Button>
           </div>
         </div>
@@ -424,13 +401,17 @@ export default function GetVideoPage() {
         </div>
       </div>
 
-      {/* 공동 퀴즈 생성 모달 */}
+      {/* 개인 퀴즈 생성 모달 */}
       <Modal
-        isOpen={openQuizSetModal}
-        onClose={() => setOpenQuizSetModal(false)}
-        title="퀴즈 세트 생성"
+        isOpen={showPersonalQuizModal}
+        onClose={() => setShowPersonalQuizModal(false)}
+        title="개인 퀴즈 생성"
       >
-        <TeacherCreateQuizPage videoId={videoId} />
+        <PersonalQuizModal 
+          videoId={videoId} 
+          onQuizStart={handlePersonalQuizStart}
+          onClose={() => setShowPersonalQuizModal(false)}
+        />
       </Modal>
 
       {/* 주제 선택 모달 */}

@@ -140,15 +140,16 @@ export const getQuizCountByVideoId = async (videoId) => {
 };
 
 //난이도 다르게 여러 문제 만들기
-export const createQuizSetByCountsApi = async (videoId, levelCounts, quizSetName) => {
+export const createQuizSetByCountsApi = async (videoId, levelCounts, quizSetName,isMulti) => {
   const params = new URLSearchParams({
     videoId,
     level1Count: levelCounts.level1,
     level2Count: levelCounts.level2,
     level3Count: levelCounts.level3,
     quizSetName,
+    isMulti: isMulti ? "true" : "false"
   });
-  const url = `${API_URL}/api/quizzes/multi-create?${params.toString()}`;
+  const url = `${API_URL}/api/quizzes?${params.toString()}`;
   const response = await fetch(url, {
     ...API_CONFIG,
     method: "GET",
