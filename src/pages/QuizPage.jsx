@@ -9,12 +9,13 @@ import { quizGetApi, quizSubmitApi } from "../api/index.js";
 import Modal from "../components/Modal";
 import QuizResultItem from "../components/Quiz/QuizResultItem";
 import Button from "../components/Button";
+import ResultBadge from "../components/ResultBadge.jsx";
 
 export default function QuizPage() {
   const [quizSetId, setQuizSetId] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [answers, setAnswers] = useState({});
-  const [quizResults, setQuizResults] = useState({});
+  const [quizResults, setQuizResults] = useState([]);
   // 로딩, 에러
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -97,7 +98,7 @@ export default function QuizPage() {
     console.log("제출할 답변:", answers);
     let tmpAnswers = Object.values(answers);
     console.log("가공된 답변 배열:", tmpAnswers);
-    setQuizResults({});
+    setQuizResults([]);
 
     try {
       const tmpQuizResult = await quizSubmitApi(tmpAnswers, quizSetId);
@@ -157,6 +158,12 @@ export default function QuizPage() {
       <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="결과">
         <div className="flex flex-col">
           <div className="space-y-4 mb-6">
+            <ResultBadge
+              totalQuiznum={quizResults.length}
+              wrongCount={
+                quizResults.filter((result) => !result.correct).length
+              }
+            />
             {quizResults.length > 0 &&
               quizResults.map((quizResult, index) => (
                 <div key={quizResult.attemptId || quizResult.quizId}>

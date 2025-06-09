@@ -376,12 +376,12 @@ export default function GetVideoPage() {
 
           <SearchVideo inputURLRef={inputURLRef} variant={"SearchVideo"} />
           <div className="flex justify-center gap-4 mt-4">
-            <Button onClick={handleQuizClick} disabled={loading && quizLoading}>
+            <Button onClick={handleQuizClick} disabled={quizLoading}>
               {quizLoading ? "퀴즈 준비 중..." : "문제풀기"}
             </Button>
             <Button
               onClick={() => setOpenQuizSetModal(true)}
-              disabled={loading && quizLoading}
+              disabled={quizLoading}
             >
               퀴즈셋 생성
             </Button>

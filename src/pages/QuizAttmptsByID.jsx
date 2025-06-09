@@ -7,6 +7,7 @@ import { fetchYoutubeVideoTitle } from "../api/index.js";
 import AttemptItem from "../components/Attempt/AttemptItem";
 import TopBar from "../components/TopBar/TopBar";
 import Button from "../components/Button.jsx";
+import ResultBadge from "../components/ResultBadge.jsx";
 
 // quizsetid로 접근한 개별 퀴즈 기록
 export default function QuizAttmptsByID() {
@@ -85,6 +86,16 @@ export default function QuizAttmptsByID() {
                   {videoTitle}
                 </h1>
                 <p className="text-sm text-gray-500">퀴즈 ID: {quizSetId}</p>
+              </div>
+              <div className="ml-4">
+                <ResultBadge
+                  totalQuiznum={quizAttempts.length}
+                  wrongCount={
+                    quizAttempts.filter(
+                      (attempt) => attempt.isCorrect === false
+                    ).length
+                  }
+                />
               </div>
             </div>
           </div>
