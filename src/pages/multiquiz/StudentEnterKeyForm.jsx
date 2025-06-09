@@ -29,7 +29,7 @@ export default function StudentEnterKeyForm({ onClose }) {
           onChange={(e) => setKey(e.target.value)}
           placeholder="키를 입력하세요 (여섯 자리 숫자)"
         />
-        <Button classNameAdd="btn btn-primary w-1/4">퀴즈 풀기</Button>
+        <Button classNameAdd="btn btn-primary w-1/4">퀴즈풀기</Button>
       </div>
       {error && <div className="text-red-500 mt-2">{error}</div>}
     </form>

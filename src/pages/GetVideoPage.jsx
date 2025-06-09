@@ -11,7 +11,7 @@ import SearchVideo from "../components/Search/SearchVideo";
 import Modal from "../components/Modal";
 import TreeModal from "../components/TreeModal";
 import PersonalQuizModal from "../components/Quiz/PersonalQuizModal.js";
-
+import TeacherCreateQuizPage from "./multiquiz/TeacherCreateQuizPage";
 import {
   videoSummaryApi,
   quizGetApi,
@@ -357,6 +357,14 @@ export default function GetVideoPage() {
           <SearchVideo inputURLRef={inputURLRef} variant={"SearchVideo"} />
           <div className="flex justify-center gap-4 mt-4 mb-4">
             <Button
+              onClick={() => setOpenQuizSetModal(true)}
+              disabled={quizLoading}
+              className="px-6 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 disabled:bg-gray-400"
+            
+            >
+              공동 퀴즈 생성
+            </Button>
+            <Button
               onClick={() => setShowPersonalQuizModal(true)}
               disabled={quizLoading}
               className="px-6 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400"
@@ -419,6 +427,14 @@ export default function GetVideoPage() {
           onQuizStart={handlePersonalQuizStart}
           onClose={() => setShowPersonalQuizModal(false)}
         />
+      </Modal>
+      {/* 공동 퀴즈 생성 모달 */}
+      <Modal
+        isOpen={openQuizSetModal}
+        onClose={() => setOpenQuizSetModal(false)}
+        title="퀴즈 세트 생성"
+      >
+        <TeacherCreateQuizPage videoId={videoId} />
       </Modal>
 
       {/* 주제 선택 모달 */}

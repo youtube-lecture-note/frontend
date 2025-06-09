@@ -92,6 +92,14 @@ export default function SideMenuTopLogin() {
             <span className="text-gray-800">공동 퀴즈 풀기</span>
           </Button>
         </div>
+        {/* 퀴즈 풀이 Modal */}
+        <Modal 
+          isOpen={openQuizModal} 
+          onClose={() => setOpenQuizModal(false)}
+          title="퀴즈 키 입력"
+        >
+          <StudentEnterKeyForm onClose={() => setOpenQuizModal(false)} />
+        </Modal>
         {/* 통계 모달 - 간단해짐! */}
         <StatsModal 
           isOpen={openStatsModal}
