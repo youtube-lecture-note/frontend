@@ -23,20 +23,24 @@ export default function SideMenuTopLogin() {
       navigate("/login");
     }
   }, [isAuthenticated, isLoading, navigate]);
+  
   // 통계 모달 상태
-   const handleShowStats = async () => {
+  const handleShowStats = async () => {
     setStatsLoading(true);
     try {
       const data = await getMyStatistics();
-      setStatsData(data);
+      setStatsData(data); // null일 수도 있음
       setOpenStatsModal(true);
     } catch (error) {
       console.error("통계 조회 실패:", error);
-      // 에러 처리 (토스트 메시지 등)
+      // 에러 발생 시에도 모달을 열어서 사용자에게 피드백
+      setStatsData(null);
+      setOpenStatsModal(true);
     } finally {
       setStatsLoading(false);
     }
   };
+
 
   // 로딩 중이거나 인증되지 않은 경우 렌더링하지 않음
   if (isLoading || !isAuthenticated) {
