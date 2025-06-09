@@ -1,7 +1,10 @@
+import { use, useEffect } from "react";
+import AttemptItemStatistics from "./AttemptItemStatistics";
+
 // 퀴즈로 가져온 개별 문제 1개
 export default function AttemptItem({ quiz, index }) {
   // 디버깅을 위한 콘솔 로그 추가
-  console.log("퀴즈 데이터:", quiz);
+  //console.log("퀴즈 데이터:", quiz);
 
   let questionStyle = "text-xl font-bold mb-4";
 
@@ -53,6 +56,7 @@ export default function AttemptItem({ quiz, index }) {
       <h3 className={questionStyle}>
         Q{index + 1}. {quiz.question}
       </h3>
+      <AttemptItemStatistics quizId={quiz.quizId} />
       {quizContent}
       <p className="text-green-800 mb-2">정답 : {quiz.correctAnswer}</p>
       <p className="text-green-700">{quiz.comment}</p>
