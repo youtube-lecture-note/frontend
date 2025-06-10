@@ -1,6 +1,7 @@
 // 영상 링크 입력시 가져오는 화면
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
+import { YoutubeTranscript } from 'youtube-transcript';
 
 import Title from "../components/Title";
 import YouTube from "react-youtube";
@@ -14,6 +15,7 @@ import PersonalQuizModal from "../components/Quiz/PersonalQuizModal.js";
 import TeacherCreateQuizPage from "./multiquiz/TeacherCreateQuizPage";
 import {
   videoSummaryApi,
+  videoSummaryApiPostSubtitle,
   quizGetApi,
   addVideoToCategory,
   fetchYoutubeVideoTitle,
@@ -92,7 +94,12 @@ export default function GetVideoPage() {
       setError("");
 
       try {
-        const data = await videoSummaryApi(videoId);
+        // 1. YouTube 자막 추출
+        const response = await fetch(`http://localhost:4000/api/transcript/${videoId}`);
+        const subtitle = await response.json();
+        
+        // 3. 자막과 함께 요약 API 호출
+        const data = await videoSummaryApiPostSubtitle(videoId, subtitle);
         setSummary(data.data || data);
 
         // 영상 제목 가져오기
@@ -114,14 +121,18 @@ export default function GetVideoPage() {
           setShowSaveModal(true);
         }
       } catch (error) {
-        setError(error.message);
+        console.error("요약 가져오기 실패:", error);
+        setError(error.message || "요약을 가져오는 중 오류가 발생했습니다.");
       } finally {
         setLoading(false);
       }
     }
+
+    // 영상 제목 먼저 가져오기 (독립적으로 실행)
     fetchYoutubeVideoTitle(videoId).then((title) => {
       setVideoTitle(title);
     });
+
     fetchSummary();
   }, [videoId]);
 
