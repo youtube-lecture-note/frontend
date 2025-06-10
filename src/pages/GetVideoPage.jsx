@@ -72,11 +72,6 @@ export default function GetVideoPage() {
 
   const [showPersonalQuizModal, setShowPersonalQuizModal] = useState(false);
 
-  // 개인 퀴즈 시작 핸들러 수정
-  async function handleQuizClick() {
-    setShowPersonalQuizModal(true);
-  }
-
   // 개인 퀴즈 모달에서 퀴즈 생성 후 퀴즈 페이지로 이동하는 핸들러
   const handlePersonalQuizStart = (quizData) => {
     setShowPersonalQuizModal(false);
@@ -360,7 +355,6 @@ export default function GetVideoPage() {
               onClick={() => setOpenQuizSetModal(true)}
               disabled={quizLoading}
               className="px-6 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 disabled:bg-gray-400"
-            
             >
               공동 퀴즈 생성
             </Button>
@@ -422,8 +416,8 @@ export default function GetVideoPage() {
         onClose={() => setShowPersonalQuizModal(false)}
         title="개인 퀴즈 생성"
       >
-        <PersonalQuizModal 
-          videoId={videoId} 
+        <PersonalQuizModal
+          videoId={videoId}
           onQuizStart={handlePersonalQuizStart}
           onClose={() => setShowPersonalQuizModal(false)}
         />

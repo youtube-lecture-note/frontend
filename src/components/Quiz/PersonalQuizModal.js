@@ -48,9 +48,10 @@ export default function PersonalQuizModal({ videoId, onQuizStart, onClose }) {
   const handleCreateAndStartQuiz = async () => {
     setLoading(true);
     setError("");
-    
+
     try {
-      const total = levelCounts.level1 + levelCounts.level2 + levelCounts.level3;
+      const total =
+        levelCounts.level1 + levelCounts.level2 + levelCounts.level3;
       if (total < 1) {
         setError("최소 1문제 이상 선택해주세요.");
         setLoading(false);
@@ -59,11 +60,16 @@ export default function PersonalQuizModal({ videoId, onQuizStart, onClose }) {
 
       // createQuizSetByCountsApi 사용
       const quizSetName = null;
-      const res = await createQuizSetByCountsApi(videoId, levelCounts, quizSetName, false);
-      
+      const res = await createQuizSetByCountsApi(
+        videoId,
+        levelCounts,
+        quizSetName,
+        false
+      );
+
       // 부모 컴포넌트로 퀴즈 데이터 전달
       onQuizStart(res);
-      
+      console.log("퀴즈 생성 성공:", res);
     } catch (error) {
       console.error("퀴즈 생성 오류:", error);
       if (error.status === 400) {
@@ -135,9 +141,9 @@ export default function PersonalQuizModal({ videoId, onQuizStart, onClose }) {
           </div>
         </div>
       </div>
-      
+
       {error && <div className="text-red-500 mb-4">{error}</div>}
-      
+
       <div className="flex gap-2 justify-end">
         <Button onClick={onClose} variant="secondary">
           취소
