@@ -4,10 +4,10 @@ import { quizAttemptsByQuizSetIdApi } from "../api/quiz";
 import { FaArrowLeft, FaClipboardList } from "react-icons/fa";
 import { fetchYoutubeVideoTitle } from "../api/index.js";
 
-import AttemptItem from "../components/Attempt/AttemptItem";
 import TopBar from "../components/TopBar/TopBar";
 import Button from "../components/Button.jsx";
 import ResultBadge from "../components/ResultBadge.jsx";
+import QuizResultDetailItem from "../components/Quiz/QuizResultDetailItem.jsx";
 
 // quizsetid로 접근한 개별 퀴즈 기록
 export default function QuizAttmptsByID() {
@@ -116,13 +116,14 @@ export default function QuizAttmptsByID() {
           <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6 mb-8">
             <div className="grid gap-6">
               {sortedAttempts.map((quiz, index) => (
-                <div key={quiz.id || quiz.quizId || index}>
-                  <AttemptItem
-                    quiz={quiz}
-                    index={index}
-                    originalIndex={index} // 원본 인덱스를 전달 (필요한 경우)
-                  />
-                </div>
+                <QuizResultDetailItem
+                  key={quiz.id || quiz.quizId || index}
+                  quiz={quiz}
+                  index={index}
+                  userAnswer={true}
+                  idAttribute="quizId"
+                  showStatistics={true}
+                />
               ))}
             </div>
           </div>
