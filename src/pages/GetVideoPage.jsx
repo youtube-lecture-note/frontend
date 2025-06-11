@@ -95,11 +95,12 @@ export default function GetVideoPage() {
 
       try {
         // 1. YouTube 자막 추출
-        const response = await fetch(`http://localhost:4000/api/transcript/${videoId}`);
-        const subtitle = await response.json();
+        // const response = await fetch(`http://cpyt.sytes.net:4000/api/transcript/${videoId}`);
+        // const subtitle = await response.json();
         
-        // 3. 자막과 함께 요약 API 호출
-        const data = await videoSummaryApiPostSubtitle(videoId, subtitle);
+        // // 3. 자막과 함께 요약 API 호출
+        // const data = await videoSummaryApiPostSubtitle(videoId, subtitle);
+        const data = await videoSummaryApi(videoId);
         setSummary(data.data || data);
 
         // 영상 제목 가져오기
