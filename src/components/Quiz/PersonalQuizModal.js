@@ -6,7 +6,7 @@ import Button from "../Button";
 export default function PersonalQuizModal({ videoId, onQuizStart, onClose }) {
   const [levelCounts, setLevelCounts] = useState({
     level1: 0,
-    level2: 5,
+    level2: 0,
     level3: 0,
   });
   const [availableCounts, setAvailableCounts] = useState({
@@ -15,6 +15,7 @@ export default function PersonalQuizModal({ videoId, onQuizStart, onClose }) {
     level3: 0,
     total: 0,
   });
+  const [isRemaining, setIsRemaining] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -22,7 +23,7 @@ export default function PersonalQuizModal({ videoId, onQuizStart, onClose }) {
   useEffect(() => {
     async function fetchCounts() {
       try {
-        const counts = await getQuizCountByVideoId(videoId);
+        const counts = await getQuizCountByVideoId(videoId, isRemaining);
         setAvailableCounts({
           level1: counts.level1Count,
           level2: counts.level2Count,
@@ -34,7 +35,12 @@ export default function PersonalQuizModal({ videoId, onQuizStart, onClose }) {
       }
     }
     fetchCounts();
-  }, [videoId]);
+  }, [videoId, isRemaining]);
+
+  // 체크박스 변경 핸들러
+  const handleCheckboxChange = (e) => {
+    setIsRemaining(e.target.checked);
+  };
 
   // 난이도별 문제 수 변경 핸들러
   const handleLevelCountChange = (level, value) => {
@@ -64,7 +70,8 @@ export default function PersonalQuizModal({ videoId, onQuizStart, onClose }) {
         videoId,
         levelCounts,
         quizSetName,
-        false
+        false,
+        isRemaining
       );
 
       // 부모 컴포넌트로 퀴즈 데이터 전달
@@ -86,6 +93,19 @@ export default function PersonalQuizModal({ videoId, onQuizStart, onClose }) {
 
   return (
     <div className="p-6 max-w-lg mx-auto">
+      {/* 체크박스 추가 */}
+      <div className="mb-4">
+        <label className="flex items-center">
+          <input
+            type="checkbox"
+            checked={isRemaining}
+            onChange={handleCheckboxChange}
+            className="mr-2"
+          />
+          풀지 않은 문제만 풀기
+        </label>
+      </div>
+
       <div className="mb-4 border rounded p-4">
         <div className="mb-2">
           난이도별 문제 수 선택 (최대값: 해당 영상의 문제 수)

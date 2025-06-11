@@ -16,7 +16,6 @@ import TeacherCreateQuizPage from "./multiquiz/TeacherCreateQuizPage";
 import {
   videoSummaryApi,
   videoSummaryApiPostSubtitle,
-  quizGetApi,
   addVideoToCategory,
   fetchYoutubeVideoTitle,
   checkVideoInCategories,

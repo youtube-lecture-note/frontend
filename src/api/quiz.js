@@ -1,44 +1,5 @@
 import { API_CONFIG, API_URL } from "./config";
 
-// 퀴즈 가져오기
-export const quizGetApi = async (videoId, difficulty, count) => {
-  const response = await fetch(
-    `${API_URL}/api/quizzes?videoId=${videoId}&difficulty=${difficulty}&count=${count}`,
-    {
-      ...API_CONFIG,
-    }
-  );
-
-  // 응답 데이터 먼저 파싱
-  const responseData = await response.json().catch(() => ({}));
-
-  if (response.status === 403) {
-    const error = new Error("로그인이 만료되었습니다. 다시 로그인해주세요.");
-    error.status = 403;
-    throw error;
-  }
-  if (response.status === 404) {
-    const error = new Error("영상을 찾을 수 없습니다.");
-    error.status = 404;
-    throw error;
-  }
-  if (response.status === 400) {
-    // 백엔드에서 보낸 실제 메시지 사용
-    const message = responseData.message || "퀴즈를 가져오는데 실패했습니다.";
-    const error = new Error(message);
-    error.status = 400;
-    error.data = responseData;
-    throw error;
-  }
-  if (!response.ok) {
-    const error = new Error("퀴즈를 가져오는데 실패했습니다.");
-    error.status = response.status;
-    throw error;
-  }
-  
-  return responseData;
-};
-
 // 퀴즈 제출
 export const quizSubmitApi = async (answers, quizSetId) => {
   const response = await fetch(
@@ -135,8 +96,8 @@ export const getQuizSetByKeyApi = async (redisKey) => {
 };
 
 // 난이도별 문제 개수 조회
-export const getQuizCountByVideoId = async (videoId) => {
-  const url = `${API_URL}/api/quizzes/count?videoId=${encodeURIComponent(videoId)}`;
+export const getQuizCountByVideoId = async (videoId,isRemaining=false) => {
+  const url = `${API_URL}/api/quizzes/count?videoId=${encodeURIComponent(videoId)}&isRemaining=${isRemaining}`;
   const response = await fetch(url, {
     ...API_CONFIG,
     method: "GET",
@@ -148,14 +109,15 @@ export const getQuizCountByVideoId = async (videoId) => {
 };
 
 //난이도 다르게 여러 문제 만들기
-export const createQuizSetByCountsApi = async (videoId, levelCounts, quizSetName,isMulti) => {
+export const createQuizSetByCountsApi = async (videoId, levelCounts, quizSetName, isMulti, isRemaining=false) => {
   const params = new URLSearchParams({
     videoId,
     level1Count: levelCounts.level1,
     level2Count: levelCounts.level2,
     level3Count: levelCounts.level3,
     quizSetName,
-    isMulti: isMulti ? "true" : "false"
+    isMulti: isMulti ? "true" : "false",
+    isRemaining: isRemaining ? "true" : "false",
   });
   const url = `${API_URL}/api/quizzes?${params.toString()}`;
   const response = await fetch(url, {

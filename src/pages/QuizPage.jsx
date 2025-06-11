@@ -5,7 +5,7 @@ import { useParams, useNavigate,useLocation } from "react-router-dom";
 import TopBar from "../components/TopBar/TopBar";
 import QuizItem from "../components/Quiz/QuizItem";
 import AnswerStatus from "../components/Quiz/AnswerStatus";
-import { quizGetApi, quizSubmitApi } from "../api/index.js";
+import { quizSubmitApi } from "../api/index.js";
 import Modal from "../components/Modal";
 import QuizResultItem from "../components/Quiz/QuizResultItem";
 import Button from "../components/Button";
@@ -39,28 +39,8 @@ export default function QuizPage() {
         setQuestions(sortedQuestions);
         return;
       }
-
-      // 기존 API 호출 로직 (fallback)
-      const difficulty = "2";
-      const numOfQuestions = 5;
-      
-      try {
-        setLoading(true);
-        const quizData = await quizGetApi(videoId, difficulty, numOfQuestions);
-        console.log("API로부터 퀴즈 데이터:", quizData);
-        setQuizSetId(quizData.data.quizSetId);
-
-        const sortedQuestions = [...quizData.data.questions].sort(
-          (a, b) => a.quizId - b.quizId
-        );
-        setQuestions(sortedQuestions);
-      } catch (error) {
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
+      setError("퀴즈 데이터를 불러올 수 없습니다.");
     }
-    
     fetchQuiz();
   }, [videoId, location.state]);
 
