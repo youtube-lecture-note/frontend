@@ -20,7 +20,9 @@ export default function QuizSetListPage() {
     setLoading(true);
     try {
       const data = await getAllQuizSets();
-      setQuizSets(data);
+      // quizSetId를 기준으로 내림차순 정렬
+      const sortedData = data.sort((a, b) => b.quizSetId - a.quizSetId);
+      setQuizSets(sortedData);
     } catch (e) {
       setError(e.message);
     } finally {
