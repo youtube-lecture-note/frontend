@@ -171,56 +171,6 @@ export const addVideoToCategory = async (
   }
 };
 
-// 카테고리간 비디오 이동
-// export const add2VideoToCategory = async (
-//   fromCategoryId,
-//   videoID,
-//   toCategoryId
-// ) => {
-//   const requestUrl = `${API_URL}/api/categories/${fromCategoryId}/videos/${videoID}/move/${toCategoryId}`;
-//   const requestBody = { targetCategoryId: toCategoryId };
-//   const requestOptions = {
-//     ...API_CONFIG,
-//     method: "PUT",
-//     body: JSON.stringify(requestBody),
-//   };
-
-//   console.log(
-//     `[DEBUG] moveCategoryVideo API 호출:
-//     URL: ${requestUrl}
-//     Method: ${requestOptions.method}
-//     Body: ${JSON.stringify(requestBody)}
-//     Config: ${JSON.stringify(API_CONFIG)}`
-//   );
-
-//   const response = await fetch(requestUrl, requestOptions);
-//   if (!response.ok) {
-//     const errorText = await response.text();
-//     console.error(
-//       `[DEBUG] 비디오 이동 API 오류 (${response.status}):`,
-//       errorText
-//     );
-//     console.error(
-//       `[DEBUG] 요청 정보: URL: ${requestUrl}, Method: PUT, Body: ${JSON.stringify(
-//         requestBody
-//       )}`
-//     );
-//     throw new Error("비디오 이동 실패");
-//   }
-
-//   const text = await response.text();
-//   if (!text) {
-//     return {};
-//   }
-
-//   try {
-//     return JSON.parse(text);
-//   } catch (error) {
-//     console.error("JSON 파싱 오류:", error);
-//     return {};
-//   }
-// };
-
 // 카테고리 ID로 카테고리 정보 가져오기
 export const getCategoryById = async (categoryId) => {
   try {
@@ -257,36 +207,23 @@ export const checkVideoInCategories = async (videoId) => {
 
     // 재귀적으로 모든 카테고리와 하위 카테고리를 검색하는 함수
     const searchVideoInCategory = (category) => {
-      console.log(
-        `[DEBUG] 카테고리 검색 중: id=${category.id}, name=${category.name}`
-      );
-
       // 현재 카테고리의 비디오 확인
       if (category.videos && category.videos.length > 0) {
-        console.log(
-          `[DEBUG] 카테고리(${category.name})에서 비디오 ${category.videos.length}개 확인 중`
-        );
-
-        const videoExists = category.videos.some(
+        const foundVideo = category.videos.find(
           (video) => video.videoId === videoId
         );
 
-        if (videoExists) {
-          console.log(
-            `[DEBUG] 비디오 발견! 카테고리: id=${category.id}, name=${category.name}`
-          );
+        if (foundVideo) {
           savedCategories.push({
             categoryId: category.id,
             categoryName: category.name,
+            userVideoName: foundVideo.userVideoName,
           });
         }
       }
 
       // 하위 카테고리 검색
       if (category.children && category.children.length > 0) {
-        console.log(
-          `[DEBUG] 카테고리(${category.name})의 하위 카테고리 ${category.children.length}개 검색 시작`
-        );
         category.children.forEach((child) => searchVideoInCategory(child));
       }
     };

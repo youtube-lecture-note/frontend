@@ -45,3 +45,36 @@ export const videoSummaryApiPostSubtitle = async (videoId,subtitle) => {
   }
   return response.json();
 };
+
+
+export const updateVideoTitleApi = async (videoId, newTitle) => {
+  const url = `${API_URL}/api/videos/${videoId}/title`;
+
+  try {
+    const response = await fetch(url, {
+      method: "PUT", 
+      ...API_CONFIG, 
+      body: JSON.stringify({ title: newTitle }),
+    });
+
+    if (response.status === 403) {
+      handleForceLogout();
+      throw new Error("로그인이 필요하거나 권한이 없습니다. 다시 로그인해주세요.");
+    }
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage =
+        errorData?.message ||
+        (response.status === 400
+          ? "요청이 잘못되었습니다."
+          : "영상 제목 수정에 실패했습니다.");
+      throw new Error(errorMessage);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("API Error - updateVideoTitleApi:", error);
+    throw error;
+  }
+};

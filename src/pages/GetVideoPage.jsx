@@ -1,6 +1,7 @@
 // 영상 링크 입력시 가져오는 화면
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
+import { FaPencilAlt } from "react-icons/fa";
 
 import Title from "../components/Title";
 import YouTube from "react-youtube";
@@ -17,6 +18,7 @@ import {
   addVideoToCategory,
   fetchYoutubeVideoTitle,
   checkVideoInCategories,
+  updateVideoTitleApi
 } from "../api/index.js";
 
 export default function GetVideoPage() {
@@ -71,6 +73,10 @@ export default function GetVideoPage() {
 
   const [showPersonalQuizModal, setShowPersonalQuizModal] = useState(false);
 
+  // 영상 제목 편집
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [editedTitle, setEditedTitle] = useState("");
+
   // 개인 퀴즈 모달에서 퀴즈 생성 후 퀴즈 페이지로 이동하는 핸들러
   const handlePersonalQuizStart = (quizData) => {
     setShowPersonalQuizModal(false);
@@ -82,60 +88,50 @@ export default function GetVideoPage() {
     });
   };
 
-  // 비디오 요약 가져오기
+  // 비디오 요약 및 제목 가져오기
   useEffect(() => {
-    async function fetchSummary() {
+    async function fetchVideoData() {
       if (!videoId) return;
 
       setLoading(true);
       setError("");
 
       try {
-        // 1. YouTube 자막 추출
-        // const response = await fetch(`http://cpyt.sytes.net:4000/api/transcript/${videoId}`);
-        // const subtitle = await response.json();
+        // 1. YouTube 원본 제목을 우선 가져옵니다.
+        const youtubeTitle = await fetchYoutubeVideoTitle(videoId);
+        setVideoTitle(youtubeTitle); // 기본 제목으로 설정
 
-        // // 3. 자막과 함께 요약 API 호출
-        // const data = await videoSummaryApiPostSubtitle(videoId, subtitle);
-        const data = await videoSummaryApi(videoId);
-        setSummary(data.data || data);
-
-        // 영상 제목 가져오기
-        const title = await fetchYoutubeVideoTitle(videoId);
-        setVideoTitle(title);
-
-        // 영상이 이미 저장되어 있는지 확인
+        // 2. 영상이 저장되어 있는지 확인하고, 저장된 정보를 가져옵니다.
         const videoStatus = await checkVideoInCategories(videoId);
         setVideoSaved(videoStatus.exists);
 
-        // 저장된 주제 목록 저장
-        if (videoStatus.exists && videoStatus.categories) {
+        if (videoStatus.exists) {
+          // 3. 영상이 존재하면, 저장된 제목으로 상태를 업데이트하고 저장된 주제 목록을 설정합니다.
+          setVideoTitle(videoStatus.categories[0].userVideoName); // 첫 번째 카테고리의 제목 사용
           setSavedSubjects(videoStatus.categories);
-          console.log("[DEBUG] 저장된 주제 목록:", videoStatus.categories);
-        }
-
-        // 저장되어 있지 않으면 저장 모달 표시
-        if (!videoStatus.exists) {
+        } else {
+          // 4. 영상이 존재하지 않으면, 저장 모달을 띄웁니다.
+          // 이 때 videoTitle 상태는 이미 YouTube 원본 제목으로 설정되어 있습니다.
           setShowSaveModal(true);
         }
+
+        // 5. 비디오 요약 정보를 가져옵니다.
+        const summaryData = await videoSummaryApi(videoId);
+        setSummary(summaryData.data || summaryData);
+
       } catch (error) {
-        console.error("요약 가져오기 실패:", error);
-        setError(error.message || "요약을 가져오는 중 오류가 발생했습니다.");
+        console.error("데이터 로딩 실패:", error);
+        setError(error.message || "데이터를 가져오는 중 오류가 발생했습니다.");
       } finally {
         setLoading(false);
       }
     }
 
-    // 영상 제목 먼저 가져오기 (독립적으로 실행)
-    fetchYoutubeVideoTitle(videoId).then((title) => {
-      setVideoTitle(title);
-    });
-
-    fetchSummary();
+    fetchVideoData();
   }, [videoId]);
 
   // 주제 선택 후 영상 저장 핸들러
-  const handleCategorySave = async (categoryId) => {
+  const handleCategorySave = async ({categoryId,title}) => {
     // 디버깅: 카테고리 ID 포맷팅 확인
     const formattedCategoryId = Number(categoryId);
     if (isNaN(formattedCategoryId)) {
@@ -145,20 +141,16 @@ export default function GetVideoPage() {
       setSaveError("유효하지 않은 카테고리 ID입니다.");
       return;
     }
-
-    // API 직접 호출 - videoTitle 매개변수 제거
-    console.log(
-      `[DEBUG] API 호출 직전... (${formattedCategoryId}, ${videoId}, ${videoTitle})`
-    );
     const response = await addVideoToCategory(
       formattedCategoryId,
       videoId,
-      videoTitle
+      title 
     );
     console.log(`[DEBUG] API 호출 성공! 응답:`, response);
 
     // 성공 처리
     setVideoSaved(true);
+    setVideoTitle(title);
     setShowSaveModal(false);
     setSaveError("");
 
@@ -192,6 +184,26 @@ export default function GetVideoPage() {
   const handleCloseModal = () => {
     setShowSaveModal(false);
   };
+  // 3. 제목 수정 완료 후 API 전송을 위한 핸들러
+  const handleTitleUpdate = async () => {
+    if (!editedTitle.trim()) {
+      alert("제목은 비워둘 수 없습니다.");
+      return;
+    }
+
+    try {
+      // 서버에 제목 업데이트 요청
+      await updateVideoTitleApi(videoId, editedTitle);
+
+      // 성공 시 로컬 상태 업데이트
+      setVideoTitle(editedTitle);
+      setIsEditingTitle(false); // 편집 모드 종료
+    } catch (error) {
+      console.error("제목 업데이트 실패:", error);
+      alert("제목을 업데이트하는 중 오류가 발생했습니다.");
+    }
+  };
+
 
   // 데이터 파싱 함수
   function parseSummary(data) {
@@ -318,7 +330,35 @@ export default function GetVideoPage() {
           {videoTitle && (
             <div className="flex items-center justify-between mb-4">
               <div>
-                <Title>{videoTitle}</Title>
+                {isEditingTitle ? (
+                  // 편집 모드일 때
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={editedTitle}
+                      onChange={(e) => setEditedTitle(e.target.value)}
+                      className="text-2xl font-bold p-1 border rounded-md"
+                      autoFocus
+                      onKeyDown={(e) => e.key === 'Enter' && handleTitleUpdate()} // Enter 키로 저장
+                    />
+                    <Button onClick={handleTitleUpdate}>저장</Button>
+                    <Button onClick={() => setIsEditingTitle(false)} variant="secondary">취소</Button>
+                  </div>
+                ) : (
+                  // 일반 모드일 때
+                  <div className="flex items-center gap-2">
+                    <Title>{videoTitle}</Title>
+                    {videoSaved && ( // 영상이 저장된 경우에만 연필 아이콘 표시
+                      <FaPencilAlt
+                        className="cursor-pointer text-gray-500 hover:text-gray-800 ml-2"
+                        onClick={() => {
+                          setEditedTitle(videoTitle); // 현재 제목으로 편집 시작
+                          setIsEditingTitle(true);
+                        }}
+                      />
+                    )}
+                  </div>
+                )}
                 {savedSubjects.length > 0 && (
                   <div className="text-sm text-gray-600">
                     주제:
@@ -446,6 +486,7 @@ export default function GetVideoPage() {
         onClose={handleCloseModal}
         title="영상을 저장할 주제 선택"
         onCategorySelect={handleCategorySave}
+        initialTitle={videoTitle}
       />
 
       {/* 저장 오류 메시지 */}

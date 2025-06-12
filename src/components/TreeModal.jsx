@@ -16,7 +16,8 @@ export default function TreeModal({
   children,
   subjects,
   setSubjects,
-  onCategorySelect, // 새로운 prop 추가
+  onCategorySelect,
+  initialTitle,
   ...props
 }) {
   const {
@@ -37,11 +38,19 @@ export default function TreeModal({
   const [errorMessage, setErrorMessage] = useState(""); // 에러 메시지 상태 추가
   const [deleteErrorMessage, setDeleteErrorMessage] = useState(""); // 삭제 에러 메시지 추가
   const inputRef = useRef(null);
+  const [editableTitle, setEditableTitle] = useState(initialTitle || "");
 
   useEffect(() => {
     // 컴포넌트 마운트 시 카테고리 데이터 로드
     fetchCategories();
   }, [fetchCategories]);
+
+  // initialTitle이 변경될 때마다 editableTitle 업데이트
+  useEffect(() => {
+    if (initialTitle) {
+      setEditableTitle(initialTitle);
+    }
+  }, [initialTitle]);
 
   // 주제 삭제 핸들러
   const handleDeleteSubject = async (subjectId) => {
@@ -118,14 +127,9 @@ export default function TreeModal({
     console.log("TreeModal - 선택한 주제 ID:", categoryId);
 
     if (onCategorySelect) {
-      // onCategorySelect prop이 제공되면 해당 콜백 실행
-      //console.log("000000");
-      onCategorySelect(categoryId);
-      // onClose(); // SubjectVideoIcon에서 모달을 닫도록 변경 (선택 후 추가 작업이 있을 수 있으므로)
-      // 다만, TreeModal을 닫는 책임은 onCategorySelect를 호출하는 쪽으로 넘기거나, 여기서 onClose를 호출할지 결정 필요.
-      // 현재 SubjectVideoIcon에서 onCategorySelect 후 모달을 닫으므로 여기서는 중복 호출 방지.
+      onCategorySelect({ categoryId, title: editableTitle });
     } else {
-      // 기존 로직: 카테고리 선택 및 페이지 이동
+      //카테고리 선택, 
       selectCategory(categoryId);
       onClose(); // 이 경우에는 TreeModal이 직접 닫도록 함
 
@@ -202,12 +206,36 @@ export default function TreeModal({
                 <AiOutlineCloseCircle className="text-gray-600 hover:text-gray-800" />
               </Button>
             </div>
+            <div className="mb-4">
+              <label htmlFor="videoTitle" className="block text-sm font-medium text-gray-700 mb-1">
+                영상 제목
+              </label>
+              <input
+                type="text"
+                id="videoTitle"
+                value={editableTitle}
+                onChange={(e) => setEditableTitle(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                placeholder="영상 제목을 입력하세요"
+              />
+            </div>
+
             <div className="overflow-y-auto flex-grow w-full border border-gray-300 rounded-lg p-4 bg-gray-50 text-gray-800">
               {deleteErrorMessage && (
                 <div className="bg-red-100 border border-red-300 text-red-800 px-4 py-3 rounded mb-4">
                   <p className="font-semibold">{deleteErrorMessage}</p>
                 </div>
               )}
+               <div className="flex flex-row justify-between items-center mb-2">
+                <span className="font-semibold text-base">카테고리 목록</span>
+                <Button
+                  onClick={() => handleAddButtonClick(null)}
+                  variant="SubjectOther"
+                  title="새 메인 카테고리"
+                >
+                  <VscNewFolder className="text-blue-600 hover:text-blue-800" />
+                </Button>
+              </div>
 
               {!isLoading && !error && categories.length === 0 ? (
                 <p className="text-gray-500">저장된 주제가 없습니다.</p>
@@ -219,12 +247,13 @@ export default function TreeModal({
                       subject={subject}
                       level={0}
                       handleDeleteSubject={handleDeleteSubject}
-                      handleSubjectClick={handleSubjectClick}
+                      handleSubjectClick={handleSubjectClick} // 수정된 핸들러 전달
                       handleAddButtonClick={handleAddButtonClick}
                     />
                   ))}
                 </div>
               )}
+
             </div>
           </div>
         </div>

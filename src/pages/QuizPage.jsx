@@ -147,7 +147,7 @@ export default function QuizPage() {
           onSubmit={() => handleSubmit(answers, quizSetId)}
         />
       </div>
-      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="결과">
+      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="결과" showCloseButton={false}>
         <div className="flex flex-col">
           <div className="space-y-4 mb-6">
             <ResultBadge

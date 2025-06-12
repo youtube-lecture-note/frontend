@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate,useLocation  } from "react-router-dom";
 import { quizAttemptsByQuizSetIdApi } from "../api/quiz";
 import { FaArrowLeft, FaClipboardList } from "react-icons/fa";
 import { fetchYoutubeVideoTitle } from "../api/index.js";
@@ -11,6 +11,8 @@ import QuizResultDetailItem from "../components/Quiz/QuizResultDetailItem.jsx";
 
 // quizsetid로 접근한 개별 퀴즈 기록
 export default function QuizAttmptsByID() {
+  const location = useLocation();
+  const showBackButton = location.state?.showBackButton !== false;
   const { quizSetId } = useParams();
   const navigate = useNavigate();
 
@@ -69,12 +71,13 @@ export default function QuizAttmptsByID() {
       <div className="container mx-auto px-4 py-6">
         {/* 헤더 영역 */}
         <div className="mb-8">
+          {showBackButton && (
           <button
             onClick={handleGoBack}
             className="flex items-center text-blue-600 mb-4 hover:text-blue-700 transition-colors"
           >
             <FaArrowLeft className="mr-2" /> 뒤로 가기
-          </button>
+          </button>)}
 
           <div className="flex items-center justify-between">
             <div className="flex items-center">

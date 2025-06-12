@@ -109,7 +109,8 @@ export const getQuizCountByVideoId = async (videoId,isRemaining=false) => {
 };
 
 //난이도 다르게 여러 문제 만들기
-export const createQuizSetByCountsApi = async (videoId, levelCounts, quizSetName, isMulti, isRemaining=false) => {
+export const createQuizSetByCountsApi = async (
+  videoId, levelCounts, quizSetName, isMulti, isRemaining=false,ttlSeconds) => {
   const params = new URLSearchParams({
     videoId,
     level1Count: levelCounts.level1,
@@ -118,6 +119,7 @@ export const createQuizSetByCountsApi = async (videoId, levelCounts, quizSetName
     quizSetName,
     isMulti: isMulti ? "true" : "false",
     isRemaining: isRemaining ? "true" : "false",
+    ttlSeconds: ttlSeconds || 600, // 기본값 600초(10분)
   });
   const url = `${API_URL}/api/quizzes?${params.toString()}`;
   const response = await fetch(url, {

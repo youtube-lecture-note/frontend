@@ -1,78 +1,88 @@
-import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react"; // useState 추가
 
 import TopBar from "../components/TopBar/TopBar";
 import SubjectVideoIcon from "../components/Subject/SubjectVideoIcon";
 import Button from "../components/Button";
 import useCategoryStore from "../store/categoryStore";
+import TreeModal from "../components/TreeModal"; // TreeModal import 추가
+import { moveCategoryVideo } from "../api/category"; // 비디오 이동 API import 추가
 
-// 주제별 분류 화면
 export default function SubjectPage() {
   const { subjectId } = useParams();
-  const location = useLocation();
   const navigate = useNavigate();
-  const { findCategoryById, fetchCategories } = useCategoryStore();
-  const [isLoading, setIsLoading] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [subjectData, setSubjectData] = useState(null);
 
-  // 새로 추가: 비디오 목록 새로고침 함수
-  const refreshVideos = async () => {
-    setIsLoading(true);
-    try {
-      await fetchCategories();
-      // 새로고침 트리거를 위한 refreshKey 업데이트
-      setRefreshKey((prev) => prev + 1);
-      // 현재 주제 정보 다시 가져오기
-      const updatedSubject = findCategoryById(parseInt(subjectId));
-      setSubjectData(updatedSubject);
-    } catch (error) {
-      console.error("비디오 목록 새로고침 실패:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const findCategoryById = useCategoryStore((state) => state.findCategoryById);
+  const fetchCategories = useCategoryStore((state) => state.fetchCategories);
+  const isLoading = useCategoryStore((state) => state.isLoading);
+  const categories = useCategoryStore((state) => state.categories);
+  const selectCategory = useCategoryStore((state) => state.selectCategory); // selectCategory 추가
 
-  // 컴포넌트 마운트 시 또는 subjectId 변경 시 데이터 로드
+  // TreeModal 상태 관리
+  const [moveModal, setMoveModal] = useState({
+    isOpen: false,
+    videoToMove: null,
+  });
+
   useEffect(() => {
-    const loadSubjectData = async () => {
-      setIsLoading(true);
-      try {
-        await fetchCategories();
-        const currentSubject = findCategoryById(parseInt(subjectId));
-        setSubjectData(currentSubject);
-      } catch (error) {
-        console.error("주제 데이터 로드 실패:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+    if (categories.length === 0) {
+      fetchCategories();
+    }
+  }, [categories.length, fetchCategories]);
 
-    loadSubjectData();
-  }, [subjectId, fetchCategories, findCategoryById]);
+  const subjectInfo = findCategoryById(parseInt(subjectId));
+  const subjectVideos = subjectInfo?.videos || [];
 
-  // 주제 정보 결정 로직
-  const Subjectinfo =
-    location.state?.Subjectinfo || subjectData || findCategoryById(parseInt(subjectId));
-  const SubjectVideos = Subjectinfo?.videos || [];
+  const handleVideoUpdate = useCallback(async () => {
+    await fetchCategories();
+  }, [fetchCategories]);
 
   const handleVideoClick = (videoId) => {
     navigate(`/video/${videoId}`);
   };
 
   const handleBackToParent = () => {
-    if (Subjectinfo?.parentId) {
-      const parentCategory = findCategoryById(Subjectinfo.parentId);
+    if (subjectInfo?.parentId) {
+      const parentCategory = findCategoryById(subjectInfo.parentId);
       if (parentCategory) {
-        navigate(`/subject/${Subjectinfo.parentId}`, {
-          state: { Subjectinfo: parentCategory },
-        });
+        navigate(`/subject/${subjectInfo.parentId}`);
       } else {
-        navigate("/"); // 부모를 찾을 수 없으면 홈으로
+        navigate("/");
       }
     } else {
-      navigate("/"); // 부모 ID가 없으면 홈으로
+      navigate("/");
+    }
+  };
+
+  // 비디오 이동 모달을 여는 함수
+  const handleOpenMoveModal = (video) => {
+    setMoveModal({ isOpen: true, videoToMove: video });
+  };
+
+  // 비디오를 다른 주제로 이동시키는 함수
+  const handleMoveVideo = async (targetCategoryId) => {
+    console.log("target category id: ",targetCategoryId);
+    if (!moveModal.videoToMove || !subjectId) return;
+
+    const currentCategoryId = parseInt(subjectId, 10);
+    const videoId = moveModal.videoToMove.videoId;
+    const targetId = parseInt(targetCategoryId, 10);
+
+    if (currentCategoryId === targetId) {
+      setMoveModal({ isOpen: false, videoToMove: null });
+      return;
+    }
+
+    try {
+      await moveCategoryVideo(currentCategoryId, videoId, targetId);
+      await fetchCategories();
+      selectCategory(targetId);
+      navigate(`/subject/${targetId}`);
+    } catch (error) {
+      console.error("비디오 이동 실패:", error);
+    } finally {
+      setMoveModal({ isOpen: false, videoToMove: null });
     }
   };
 
@@ -90,11 +100,11 @@ export default function SubjectPage() {
           </Button>
           <div>
             <h1 className="text-3xl font-bold text-gray-800">
-              {Subjectinfo?.name || "주제 없음"}
+              {subjectInfo?.name || "주제 없음"}
             </h1>
             <p className="text-gray-500 mt-1">
-              {SubjectVideos.length > 0
-                ? `${SubjectVideos.length}개의 동영상`
+              {subjectVideos.length > 0
+                ? `${subjectVideos.length}개의 동영상`
                 : "저장된 동영상이 없습니다"}
             </p>
           </div>
@@ -104,15 +114,15 @@ export default function SubjectPage() {
           <div className="flex justify-center items-center h-64">
             <p className="text-gray-500">로딩 중...</p>
           </div>
-        ) : SubjectVideos.length > 0 ? (
+        ) : subjectVideos.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {SubjectVideos.map((video) => (
+            {subjectVideos.map((video) => (
               <SubjectVideoIcon
-                key={`${video.videoId}-${refreshKey}`}
+                key={video.videoId}
                 video={video}
-                videoId={video.videoId}
                 onClick={() => handleVideoClick(video.videoId)}
-                onVideoUpdate={refreshVideos} // 새로고침 함수 전달
+                onVideoUpdate={handleVideoUpdate}
+                onOpenMoveModal={() => handleOpenMoveModal(video)} // 모달 열기 함수 전달
               />
             ))}
           </div>
@@ -126,6 +136,16 @@ export default function SubjectPage() {
           </div>
         )}
       </div>
+
+      {/* TreeModal을 SubjectPage에서 직접 렌더링 */}
+      {moveModal.isOpen && (
+        <TreeModal
+          isOpen={moveModal.isOpen}
+          onClose={() => setMoveModal({ isOpen: false, videoToMove: null })}
+          title="이동할 주제 선택"
+          onCategorySelect={({ categoryId }) => handleMoveVideo(categoryId)}
+        />
+      )}
     </div>
   );
 }

@@ -9,6 +9,7 @@ export default function QuizResultDetailItem({
   idAttribute = null,
   showStatistics = false,
   showPercent = true,
+  statisticsData = null,
 }) {
   // user 선택이 없는경우 별도 표시하지 않음
 
@@ -86,7 +87,28 @@ export default function QuizResultDetailItem({
           <p className="text-gray-600 text-sm mt-1">{quiz.comment}</p>
         </div>
       )}
-      {showStatistics && (
+      {/* 통계 정보 표시 */}
+      {showStatistics && statisticsData && (
+        <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+          <h4 className="font-semibold text-gray-700 mb-2">문제 통계</h4>
+          <div className="grid grid-cols-3 gap-4 text-sm">
+            <div>
+              <span className="font-semibold">총 시도:</span>{" "}
+              {statisticsData.totalAttempts}회
+            </div>
+            <div>
+              <span className="font-semibold">정답:</span>{" "}
+              {statisticsData.correctAttempts}회
+            </div>
+            <div>
+              <span className="font-semibold">정답률:</span>{" "}
+              {statisticsData.accuracyRate.toFixed(1)}%
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {showStatistics && !statisticsData && (
         <AttemptItemStatistics quizId={quizId} showPercent={showPercent} />
       )}
     </div>

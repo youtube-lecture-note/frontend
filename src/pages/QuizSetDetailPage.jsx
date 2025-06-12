@@ -193,12 +193,6 @@ export default function QuizSetDetailPage() {
                     key={quiz.id}
                     className="border border-gray-200 rounded-lg p-4"
                   >
-                    <div className="mb-3">
-                      <span className="font-semibold text-gray-700">
-                        문제 ID:
-                      </span>
-                      <span className="ml-2 text-gray-900">{quiz.id}</span>
-                    </div>
                     {detail && (
                       <div className="mb-3">
                         <span className="font-semibold text-gray-700">
@@ -241,15 +235,23 @@ export default function QuizSetDetailPage() {
           <div className="bg-white border border-gray-200 rounded-lg p-6">
             <h3 className="font-bold text-lg mb-4">문제 목록</h3>
             <div className="space-y-4">
-              {quizDetails.map((quiz, index) => (
-                <QuizResultDetailItem
-                  key={quiz.id}
-                  quiz={quiz}
-                  index={index}
-                  showStatistics={true}
-                  showPercent={false}
-                />
-              ))}
+              {quizDetails.map((quiz, index) => {
+                // 해당 퀴즈의 통계 데이터 찾기
+                const statisticsData = quizResults?.quizStatistics?.find(
+                  stat => stat.id === quiz.id
+                );
+                
+                return (
+                  <QuizResultDetailItem
+                    key={quiz.id}
+                    quiz={quiz}
+                    index={index}
+                    showStatistics={true}
+                    showPercent={false}
+                    statisticsData={statisticsData} // 통계 데이터 전달
+                  />
+                );
+              })}
             </div>
           </div>
         </div>

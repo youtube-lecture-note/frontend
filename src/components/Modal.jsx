@@ -7,6 +7,7 @@ export default function Modal({
   title,
   variant,
   children,
+  showCloseButton = true,
   ...props
 }) {
   return (
@@ -17,9 +18,11 @@ export default function Modal({
             <h2 className="text-xl font-bold bg-blue-100 text-blue-800 px-4 py-2 rounded-full">
               {title}
             </h2>
-            <Button onClick={onClose} variant="Close">
-              <AiOutlineCloseCircle className="text-gray-600" />
-            </Button>
+            {showCloseButton && (
+              <Button onClick={onClose} variant="Close">
+                <AiOutlineCloseCircle className="text-gray-600" />
+              </Button>
+            )}
           </div>
 
           <div className="overflow-y-auto p-6 flex-1">{children}</div>

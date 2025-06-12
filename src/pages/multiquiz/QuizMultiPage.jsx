@@ -158,10 +158,10 @@ export default function QuizMultiPage() {
         <div className="text-red-500 text-center">
           <p>{error}</p>
           <button 
-            onClick={() => window.location.reload()} 
+            onClick={() => window.location.href = '/'} 
             className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
           >
-            다시 시도
+            홈으로 돌아가기
           </button>
         </div>
       </div>
@@ -192,7 +192,7 @@ export default function QuizMultiPage() {
         />
       </div>
       
-      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="결과">
+      <Modal isOpen={isOpen} onClose={() => setIsOpen(false)} title="결과" showCloseButton={false}>
         <div className="flex flex-col">
           <div className="space-y-4 mb-6">
             {quizResults.length > 0 &&
@@ -214,7 +214,9 @@ export default function QuizMultiPage() {
               variant="primary"
               onClick={() => {
                 setIsOpen(false);
-                navigate(`/attempts/${quizSetId}`);
+                navigate(`/attempts/${quizSetId}`, { 
+                  state: { showBackButton: false } 
+                });
               }}
             >
               풀이 보기
