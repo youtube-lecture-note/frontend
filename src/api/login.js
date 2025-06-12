@@ -106,8 +106,11 @@ export const checkAdminStatus = async (setIsAdmin) => {
     console.log("관리자 상태 확인 응답:", response.status);
 
     if (response.ok) {
-      setIsAdmin(true);
-      console.log("관리자: 관리자 상태");
+      const data = await response.json();
+      if (data.isAdmin === true) {
+        setIsAdmin(true);
+        console.log("관리자: 관리자 상태");
+      }
     } else if (response.status === 401) {
       setIsAdmin(false);
       console.log("관리자 아님: 로그아웃 상태 (401)");
