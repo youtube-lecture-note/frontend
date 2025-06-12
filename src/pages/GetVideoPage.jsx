@@ -36,6 +36,9 @@ export default function GetVideoPage() {
   // YouTube 플레이어 참조 추가
   const [player, setPlayer] = useState(null);
 
+  const categories = useCategoryStore((state) => state.categories);
+  const fetchCategories = useCategoryStore((state) => state.fetchCategories);
+
   // YouTube 플레이어 준비 완료 핸들러
   const onReady = (event) => {
     // 플레이어 참조 저장
@@ -98,28 +101,27 @@ export default function GetVideoPage() {
       setError("");
 
       try {
-        // 1. YouTube 원본 제목을 우선 가져옵니다.
-        const youtubeTitle = await fetchYoutubeVideoTitle(videoId);
-        setVideoTitle(youtubeTitle); // 기본 제목으로 설정
+        // Promise.all을 사용하여 제목, 저장 상태, 요약 정보를 병렬로 가져옵니다.
+        const [youtubeTitle, videoStatus, summaryData] = await Promise.all([
+          fetchYoutubeVideoTitle(videoId),
+          checkVideoInCategories(videoId),
+          videoSummaryApi(videoId),
+        ]);
 
-        // 2. 영상이 저장되어 있는지 확인하고, 저장된 정보를 가져옵니다.
-        const videoStatus = await checkVideoInCategories(videoId);
-        setVideoSaved(videoStatus.exists);
-
-        if (videoStatus.exists) {
-          // 3. 영상이 존재하면, 저장된 제목으로 상태를 업데이트하고 저장된 주제 목록을 설정합니다.
-          setVideoTitle(videoStatus.categories[0].userVideoName); // 첫 번째 카테고리의 제목 사용
-          setSavedSubjects(videoStatus.categories);
-        } else {
-          // 4. 영상이 존재하지 않으면, 저장 모달을 띄웁니다.
-          // 이 때 videoTitle 상태는 이미 YouTube 원본 제목으로 설정되어 있습니다.
-          setShowSaveModal(true);
-        }
-
-        // 5. 비디오 요약 정보를 가져옵니다.
-        const summaryData = await videoSummaryApi(videoId);
+        // 1. 요약 데이터 상태를 먼저 설정합니다.
         setSummary(summaryData.data || summaryData);
 
+        // 2. 영상 저장 상태를 확인하고 처리합니다.
+        if (videoStatus.exists) {
+          setVideoTitle(videoStatus.categories[0].userVideoName);
+          setSavedSubjects(videoStatus.categories);
+          setVideoSaved(true);
+        } else {
+          // 3. 영상이 저장되지 않은 경우, 모든 데이터 로드가 완료된 후 저장 모달을 띄웁니다.
+          setVideoTitle(youtubeTitle);
+          setVideoSaved(false);
+          setShowSaveModal(true); // 요약(summary) API가 완료된 후에 호출됩니다.
+        }
       } catch (error) {
         console.error("데이터 로딩 실패:", error);
         setError(error.message || "데이터를 가져오는 중 오류가 발생했습니다.");
@@ -132,52 +134,18 @@ export default function GetVideoPage() {
   }, [videoId]);
 
   // 주제 선택 후 영상 저장 핸들러
-  const handleCategorySave = async ({categoryId,title}) => {
-    // 디버깅: 카테고리 ID 포맷팅 확인
-    const formattedCategoryId = Number(categoryId);
-    if (isNaN(formattedCategoryId)) {
-      console.error(
-        `[DEBUG] 카테고리 ID가 숫자로 변환될 수 없습니다: ${categoryId}`
-      );
-      setSaveError("유효하지 않은 카테고리 ID입니다.");
-      return;
-    }
-    const response = await addVideoToCategory(
-      formattedCategoryId,
-      videoId,
-      title 
-    );
-    console.log(`[DEBUG] API 호출 성공! 응답:`, response);
-
-    // 성공 처리
-    setVideoSaved(true);
-    setVideoTitle(title);
-    setShowSaveModal(false);
-    setSaveError("");
-
-    // 카테고리 데이터 업데이트
+  const handleCategorySave = async ({ categoryId, title }) => {
     try {
-      // 성공 후 카테고리 업데이트 - 백업 방법 구현
-      const updatedStatus = await checkVideoInCategories(videoId);
-      if (updatedStatus.exists && updatedStatus.categories) {
-        setSavedSubjects(updatedStatus.categories);
-        console.log("[DEBUG] 업데이트된 주제 목록:", updatedStatus.categories);
-      } else {
-        // API에서 새 정보를 가져올 수 없는 경우 기본 정보 사용
-        console.log(
-          "[DEBUG] API에서 업데이트 정보를 가져올 수 없어 기본값 사용"
-        );
-        setSavedSubjects((prev) => [
-          ...prev,
-          {
-            categoryId: formattedCategoryId,
-            categoryName: "저장됨", // API로부터 받지 못했으므로 기본값 사용
-          },
-        ]);
+      if(!loading){
+        await useCategoryStore.getState().addVideoToCategory(categoryId, videoId, title);
+        await fetchCategories(); // 상태 강제 갱신
+        setVideoSaved(true);
+        setVideoTitle(title);
+        setShowSaveModal(false);
+        setSaveError("");
       }
-    } catch (updateErr) {
-      console.error("[DEBUG] 카테고리 정보 업데이트 중 오류:", updateErr);
-      // 업데이트 실패해도 저장은 성공했으므로 오류 표시하지 않음
+    } catch (error) {
+      setSaveError(error.message || "저장 중 오류가 발생했습니다.");
     }
   };
 

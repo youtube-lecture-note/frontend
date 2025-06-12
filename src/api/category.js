@@ -140,7 +140,7 @@ export const moveCategoryVideo = async (
 };
 
 // category에 비디오 추가 - 토큰 문제 해결을 위한 수정
-export const addVideoToCategory = async (
+export const addVideoToCategoryApi = async (
   categoryId,
   videoId,
   userVideoName = null

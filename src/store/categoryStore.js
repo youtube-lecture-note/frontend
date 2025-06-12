@@ -5,7 +5,7 @@ import {
   deleteCategory,
   deleteCategoryVideo,
   checkVideoInCategories,
-  addVideoToCategory,
+  addVideoToCategoryApi,
 } from "../api/category";
 
 const useCategoryStore = create((set, get) => ({
@@ -106,7 +106,7 @@ const useCategoryStore = create((set, get) => ({
     try {
       // categoryId를 문자열로 확실하게 변환
       const strCategoryId = String(categoryId);
-      await addVideoToCategory(strCategoryId, videoId, videoTitle);
+      await addVideoToCategoryApi(strCategoryId, videoId, videoTitle);
 
       // 추가 후 카테고리 목록 새로고침
       await get().fetchCategories();
