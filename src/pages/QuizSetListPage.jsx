@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { getAllQuizSets } from "../api/quizSet";
 import Button from "../components/Button";
 import Title from "../components/Title";
-import TopBar from "../components/TopBar/TopBar";
 
 export default function QuizSetListPage() {
   const navigate = useNavigate();
@@ -30,7 +29,6 @@ export default function QuizSetListPage() {
   };
 
   const filteredQuizSets = quizSets.filter((quizSet) => {
-    // quizSet이 null/undefined인 경우 제외
     if (!quizSet) {
       return false;
     }
@@ -39,7 +37,7 @@ export default function QuizSetListPage() {
     const quizSetName = quizSet.name || "이름 없음";
 
     if (!searchTerm) {
-      return true; // 검색어가 없으면 모든 퀴즈셋 표시
+      return true;
     }
 
     return quizSetName.toLowerCase().includes(searchTerm.toLowerCase());

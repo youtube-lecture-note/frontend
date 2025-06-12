@@ -1,7 +1,6 @@
 // 영상 링크 입력시 가져오는 화면
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
-import { YoutubeTranscript } from 'youtube-transcript-api';
 
 import Title from "../components/Title";
 import YouTube from "react-youtube";
@@ -15,7 +14,6 @@ import PersonalQuizModal from "../components/Quiz/PersonalQuizModal.js";
 import TeacherCreateQuizPage from "./multiquiz/TeacherCreateQuizPage";
 import {
   videoSummaryApi,
-  videoSummaryApiPostSubtitle,
   addVideoToCategory,
   fetchYoutubeVideoTitle,
   checkVideoInCategories,
@@ -96,7 +94,7 @@ export default function GetVideoPage() {
         // 1. YouTube 자막 추출
         // const response = await fetch(`http://cpyt.sytes.net:4000/api/transcript/${videoId}`);
         // const subtitle = await response.json();
-        
+
         // // 3. 자막과 함께 요약 API 호출
         // const data = await videoSummaryApiPostSubtitle(videoId, subtitle);
         const data = await videoSummaryApi(videoId);
