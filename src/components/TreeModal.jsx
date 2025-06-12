@@ -18,6 +18,7 @@ export default function TreeModal({
   setSubjects,
   onCategorySelect,
   initialTitle,
+  showVideoTitleInput=false, 
   ...props
 }) {
   const {
@@ -206,6 +207,7 @@ export default function TreeModal({
                 <AiOutlineCloseCircle className="text-gray-600 hover:text-gray-800" />
               </Button>
             </div>
+            {showVideoTitleInput && (
             <div className="mb-4">
               <label htmlFor="videoTitle" className="block text-sm font-medium text-gray-700 mb-1">
                 영상 제목
@@ -219,6 +221,7 @@ export default function TreeModal({
                 placeholder="영상 제목을 입력하세요"
               />
             </div>
+          )}
 
             <div className="overflow-y-auto flex-grow w-full border border-gray-300 rounded-lg p-4 bg-gray-50 text-gray-800">
               {deleteErrorMessage && (

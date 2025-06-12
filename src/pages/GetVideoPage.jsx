@@ -20,6 +20,7 @@ import {
   checkVideoInCategories,
   updateVideoTitleApi
 } from "../api/index.js";
+import useCategoryStore from "../store/categoryStore";
 
 export default function GetVideoPage() {
   const inputURLRef = useRef(null);
@@ -487,6 +488,7 @@ export default function GetVideoPage() {
         title="영상을 저장할 주제 선택"
         onCategorySelect={handleCategorySave}
         initialTitle={videoTitle}
+        showVideoTitleInput={true}
       />
 
       {/* 저장 오류 메시지 */}
