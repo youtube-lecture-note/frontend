@@ -10,7 +10,7 @@ const Input = forwardRef(
     if (variant === "ShortAnswer") {
       // 단답형 퀴즈 입력
       className =
-        "border-2 border-gray-300 bg-white text-gray-800 rounded-md p-2";
+        "border-2 border-gray-300 bg-white text-gray-800 rounded-md p-2 w-full";
       value = value || "";
     } else if (variant === "MultipleChoiceComponent") {
       // 객관식 퀴즈 입력 (라디오 버튼)

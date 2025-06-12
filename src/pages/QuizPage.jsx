@@ -1,6 +1,6 @@
 // 퀴즈 진행 화면
 import { useState, useEffect, useMemo } from "react";
-import { useParams, useNavigate,useLocation } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 
 import TopBar from "../components/TopBar/TopBar";
 import QuizItem from "../components/Quiz/QuizItem";
@@ -31,7 +31,7 @@ export default function QuizPage() {
       if (location.state?.preloaded && location.state?.quizData) {
         console.log("사전 로드된 퀴즈 데이터 사용:", location.state.quizData);
         const quizData = location.state.quizData;
-        
+
         setQuizSetId(quizData.data.quizSetId);
         const sortedQuestions = [...quizData.data.questions].sort(
           (a, b) => a.quizId - b.quizId
@@ -68,7 +68,7 @@ export default function QuizPage() {
     // 객관식인 경우 인덱스에 1을 더함 (0부터 시작하는 인덱스를 1부터 시작하도록)
     const processedAnswer = isNumeric
       ? String(Number(userAnswer) + 1)
-      : String(userAnswer).trim();
+      : String(userAnswer);
 
     console.log(
       `문제 ID: ${quizId}, 원본 답변: ${userAnswer}, 처리된 답변: ${processedAnswer}`
@@ -140,7 +140,7 @@ export default function QuizPage() {
         </div>
       )}
       <div className="flex-1 p-8 overflow-y-auto">{renderQuizItems()}</div>
-      <div className="fixed bottom-12 right-12 h-1/5 w-350px bg-white border border-gray-200 rounded-lg shadow-md p-4 z-50">
+      <div className="fixed bottom-12 right-12 h-1/3 w-350px bg-white border border-gray-200 rounded-lg shadow-md p-4 z-50">
         <AnswerStatus
           questions={sortedQuestions}
           answers={answers}

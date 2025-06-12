@@ -1,7 +1,7 @@
 // 영상 링크 입력시 가져오는 화면
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState, useRef } from "react";
-import { YoutubeTranscript } from 'youtube-transcript';
+import { YoutubeTranscript } from 'youtube-transcript-api';
 
 import Title from "../components/Title";
 import YouTube from "react-youtube";
