@@ -4,13 +4,13 @@ import {
   getQuizCountByVideoId,
   createQuizSetByCountsApi,
 } from "../../api";
-import { getQuizSetResults,getQuizDetails } from "../../api/quizSet";
+// getQuizSetResults, getQuizDetails는 더 이상 필요 없으므로 삭제합니다.
 
 import Button from "../../components/Button";
 import Title from "../../components/Title";
 
 export default function TeacherCreateQuizPage({ videoId }) {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // useNavigate 훅 초기화
   const [levelCounts, setLevelCounts] = useState({
     level1: 0,
     level2: 0,
@@ -28,12 +28,9 @@ export default function TeacherCreateQuizPage({ videoId }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [secondsLeft, setSecondsLeft] = useState(600);
-  const [showResults, setShowResults] = useState(false);
-  const [quizResults, setQuizResults] = useState(null);
-  const [quizDetails, setQuizDetails] = useState({});
   const timerRef = useRef(null);
 
-  // 비디오별 난이도별 문제 수 조회
+  // 비디오별 난이도별 문제 수 조회 (기존과 동일)
   useEffect(() => {
     async function fetchCounts() {
       try {
@@ -51,7 +48,7 @@ export default function TeacherCreateQuizPage({ videoId }) {
     fetchCounts();
   }, [videoId]);
 
-  // 타이머 관리
+  // 타이머 관리 (기존과 동일)
   useEffect(() => {
     if (quizKey) {
       setSecondsLeft(600);
@@ -68,14 +65,14 @@ export default function TeacherCreateQuizPage({ videoId }) {
     return () => clearInterval(timerRef.current);
   }, [quizKey]);
 
-  // 시간 포맷
+  // 시간 포맷 (기존과 동일)
   const formatTime = (secs) => {
     const m = Math.floor(secs / 60);
     const s = secs % 60;
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
-  // 난이도별 문제 수 변경 핸들러
+  // 난이도별 문제 수 변경 핸들러 (기존과 동일)
   const handleLevelCountChange = (level, value) => {
     setLevelCounts((prev) => ({
       ...prev,
@@ -83,7 +80,7 @@ export default function TeacherCreateQuizPage({ videoId }) {
     }));
   };
 
-  // 퀴즈 세트 생성
+  // 퀴즈 세트 생성 (기존과 동일)
   const handleCreateQuiz = async () => {
     setLoading(true);
     setError("");
@@ -95,7 +92,6 @@ export default function TeacherCreateQuizPage({ videoId }) {
         return;
       }
       
-      // 퀴즈셋 이름 검증
       if (!quizSetName.trim()) {
         setError("퀴즈셋 이름을 입력해주세요.");
         setLoading(false);
@@ -105,148 +101,25 @@ export default function TeacherCreateQuizPage({ videoId }) {
       const res = await createQuizSetByCountsApi(videoId, levelCounts, quizSetName, true);
       setQuizKey(res.data?.redisQuizSetKey || res.redisQuizSetKey);
       setQuizSetId(res.data?.quizSetId || res.quizSetId);
-      console.log(res);
     } catch (error) {
-      // 기존 에러 처리 로직 유지
+      setError("퀴즈 세트 생성에 실패했습니다.");
     } finally {
       setLoading(false);
     }
   };
 
-  // 퀴즈셋 결과 조회
-  const handleShowResults = async () => {
+  // [수정됨] 퀴즈셋 결과 페이지로 이동하는 함수
+  const handleShowResults = () => {
     if (!quizSetId) return;
-    
-    setLoading(true);
-    try {
-      const results = await getQuizSetResults(quizSetId);
-      setQuizResults(results);
-      
-      // 각 퀴즈의 상세 정보 조회
-      const details = {};
-      for (const quiz of results.quizStatistics) {
-        try {
-          const quizDetail = await getQuizDetails(quiz.id);
-          details[quiz.id] = quizDetail;
-        } catch (e) {
-          console.error(`퀴즈 ${quiz.id} 상세 정보 조회 실패:`, e);
-        }
-      }
-      setQuizDetails(details);
-      setShowResults(true);
-    } catch (e) {
-      setError("결과 조회에 실패했습니다.");
-    } finally {
-      setLoading(false);
-    }
+    navigate(`/quizsets/${quizSetId}`);
   };
-
-  // 난이도 텍스트 변환
-  const getDifficultyText = (difficulty) => {
-    switch (difficulty) {
-      case 1: return "쉬움";
-      case 2: return "보통";
-      case 3: return "어려움";
-      default: return "알 수 없음";
-    }
-  };
-
-  if (showResults && quizResults) {
-    return (
-      <div className="p-8 max-w-4xl mx-auto">
-        <Title>퀴즈셋 결과</Title>
-        
-        <div className="mb-6 p-4 border rounded bg-blue-50">
-          <h3 className="font-bold text-lg mb-2">전체 통계</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <span className="font-semibold">총 문제 수:</span> {quizResults.totalQuizCount}문제
-            </div>
-            <div>
-              <span className="font-semibold">참여자 수:</span> {quizResults.participantCount}명
-            </div>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <h3 className="font-bold text-lg mb-4">참여자별 결과</h3>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-300">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="border border-gray-300 p-2">이름</th>
-                  <th className="border border-gray-300 p-2">이메일</th>
-                  <th className="border border-gray-300 p-2">정답 수</th>
-                  <th className="border border-gray-300 p-2">정답률</th>
-                </tr>
-              </thead>
-              <tbody>
-                {quizResults.participantResults.map((participant, index) => (
-                  <tr key={index}>
-                    <td className="border border-gray-300 p-2">{participant.userName}</td>
-                    <td className="border border-gray-300 p-2">{participant.userEmail}</td>
-                    <td className="border border-gray-300 p-2 text-center">
-                      {participant.correctCount} / {quizResults.totalQuizCount}
-                    </td>
-                    <td className="border border-gray-300 p-2 text-center">
-                      {((participant.correctCount / quizResults.totalQuizCount) * 100).toFixed(1)}%
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <div className="mb-6">
-          <h3 className="font-bold text-lg mb-4">문제별 통계</h3>
-          <div className="space-y-4">
-            {quizResults.quizStatistics.map((quiz) => {
-              const detail = quizDetails[quiz.id];
-              return (
-                <div key={quiz.id} className="border rounded p-4">
-                  <div className="mb-2">
-                    <span className="font-semibold">문제:</span> {detail?.question || "로딩 중..."}
-                  </div>
-                  <div className="mb-2">
-                    <span className="font-semibold">난이도:</span> {getDifficultyText(detail?.difficulty)}
-                  </div>
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <span className="font-semibold">총 시도:</span> {quiz.totalAttempts}회
-                    </div>
-                    <div>
-                      <span className="font-semibold">정답:</span> {quiz.correctAttempts}회
-                    </div>
-                    <div>
-                      <span className="font-semibold">정답률:</span> {quiz.accuracyRate}%
-                    </div>
-                  </div>
-                  {detail?.correctAnswer && (
-                    <div className="mt-2 text-sm text-gray-600">
-                      <span className="font-semibold">정답:</span> {detail.correctAnswer}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <Button
-          onClick={() => setShowResults(false)}
-          classNameAdd="btn btn-secondary"
-        >
-          돌아가기
-        </Button>
-      </div>
-    );
-  }
+  
+  // [삭제됨] 결과 표시를 위한 조건부 렌더링 블록은 모두 제거되었습니다.
 
   return (
     <div className="p-8 max-w-lg mx-auto">
       <Title>퀴즈 세트 생성</Title>
-      {/* 퀴즈셋 이름 입력 필드 추가 */}
+      
       <div className="mb-4 border rounded p-4">
         <div className="mb-2">퀴즈셋 이름</div>
         <input
@@ -257,11 +130,13 @@ export default function TeacherCreateQuizPage({ videoId }) {
           className="w-full p-2 border rounded"
         />
       </div>
+      
       <div className="mb-4 border rounded p-4">
         <div className="mb-2">
           난이도별 문제 수 선택 (최대값: 해당 영상의 문제 수)
         </div>
         <div className="space-y-2">
+          {/* 난이도별 문제 수 입력 필드 (기존과 동일) */}
           <div>
             <label className="inline-block w-14">쉬움</label>
             <input
@@ -312,6 +187,7 @@ export default function TeacherCreateQuizPage({ videoId }) {
           </div>
         </div>
       </div>
+      
       <Button
         onClick={handleCreateQuiz}
         disabled={loading}
@@ -320,6 +196,7 @@ export default function TeacherCreateQuizPage({ videoId }) {
         {loading ? "생성 중..." : "퀴즈 생성"}
       </Button>
       {error && <div className="text-red-500 mt-2">{error}</div>}
+      
       {quizKey && (
         <div className="mt-6 p-4 border rounded bg-gray-50">
           <div className="font-bold flex items-center gap-2">
@@ -337,7 +214,7 @@ export default function TeacherCreateQuizPage({ videoId }) {
           )}
           {secondsLeft > 0 && quizSetId && (
             <Button
-              onClick={handleShowResults}
+              onClick={handleShowResults} // [수정됨] 페이지 이동 함수 연결
               classNameAdd="btn btn-secondary mt-4"
               disabled={loading}
             >
