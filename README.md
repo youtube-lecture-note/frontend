@@ -7,6 +7,22 @@
   <img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS"/>
 </p>
 
+## 개발 환경
+
+- Node.js v22.12.0 (npm v11.4.1)
+- React (^19.0.0)
+- Routing: react-router-dom (^7.4.1)  
+- Tailwind CSS (^3.4.17)  
+- Zustand (^5.0.5)
+
+## 로컬 실행
+
+```bash
+npm install
+npm start
+npm run build
+```
+
 ---
 
 ![image](https://github.com/user-attachments/assets/5c81d572-48b1-46cf-b00d-1c38a26bd950)
