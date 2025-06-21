@@ -10,3 +10,7 @@
   <img src="https://img.shields.io/badge/Zustand-00B67A?style=for-the-badge&logo=zustand&logoColor=white" alt="Zustand"/>
   <img src="https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS"/>
 </p>
+
+---
+
+![image](https://github.com/user-attachments/assets/5c81d572-48b1-46cf-b00d-1c38a26bd950)
